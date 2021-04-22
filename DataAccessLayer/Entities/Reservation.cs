@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccessLayer.Entities
 {
-    class Reservation
+    public class Reservation
     {
         [Key]
         [Required]

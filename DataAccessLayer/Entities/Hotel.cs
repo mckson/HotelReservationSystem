@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DataAccessLayer.Entities
 {
-    class Hotel
+    public class Hotel
     {
         [Key]
         public int Id { get; set; }

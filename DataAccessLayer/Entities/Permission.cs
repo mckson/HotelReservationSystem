@@ -2,7 +2,7 @@
 
 namespace DataAccessLayer.Entities
 {
-    class Permission
+    public class Permission
     {
         [Key]
         public int Id { get; set; }

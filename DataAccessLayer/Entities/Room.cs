@@ -4,13 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccessLayer.Entities
 {
-    class Room
+    public class Room
     {
-        [Key]
-        [Required]
         public int Id { get; set; }
-
-        [ForeignKey(nameof(Hotel))]
+        
         public int HotelId { get; set; }
         //Connected entity - when deleted Hotel there all related users will be deleted too
         public Hotel Hotel { get; set; }
@@ -21,7 +18,9 @@ namespace DataAccessLayer.Entities
         public int Capacity { get; set; } //quantity of мест (rename later) 
         public bool IsEmpty { get; set; }
 
+        public Reservation Reservation { get; set; }
+
         //One To Many
-        public List<Guest> Guests { get; set; } = new List<Guest>();
+        //public List<Guest> Guests { get; set; } = new List<Guest>();
     }
 }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccessLayer.Entities
 {
-    class User
+    public class User
     {
         [Key]
         public int Id { get; set; }
@@ -11,7 +11,8 @@ namespace DataAccessLayer.Entities
         [ForeignKey(nameof(Person))]
         public int PersonId { get; set; }
         //Related entity
-        public Person Person { get; set; }
+        //public Person Person { get; set; }
+        public Guest Person { get; set; }
 
         [ForeignKey(nameof(Role))]
         public int RoleId { get; set; }
