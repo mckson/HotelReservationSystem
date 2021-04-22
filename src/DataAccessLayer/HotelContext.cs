@@ -1,4 +1,6 @@
-﻿using HotelReservation.Data.Entities;
+﻿using Data.Configurations;
+using HotelReservation.Data.Configurations;
+using HotelReservation.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data
@@ -16,10 +18,12 @@ namespace HotelReservation.Data
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer(b => b.MigrationsAssembly("HotelAPI"));
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfiguration(new HotelEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new RoomEntityConfiguration());
         }
     }
 }

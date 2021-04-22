@@ -22,7 +22,6 @@ namespace HotelReservation.Data.Entities
         //public Room Room { get; set; }
         
         public int HotelId { get; set; }
-        //Related Entity
         public HotelEntity Hotel { get; set; }
 
         public ReservationEntity Reservation { get; set; }
