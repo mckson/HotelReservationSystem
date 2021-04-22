@@ -1,13 +1,23 @@
-﻿namespace DataAccessLayer.Entities
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace DataAccessLayer.Entities
 {
     class Hotel
     {
-        //Primary Key
+        [Key]
         public int Id { get; set; }
+
         public string Name { get; set; }
-        //Foreign Key
-        public int LocationId { get; set; }
         public int RoomsNumber { get; set; }
-        //public List<Room> Rooms { get; set; }
+
+        //One To One
+        public Location Location { get; set; }
+
+        //One To Many
+        public List<Room> Rooms { get; set; } = new List<Room>();
+
+        //OneToMany
+        public List<Guest> Guests { get; set; } = new List<Guest>();
     }
 }
