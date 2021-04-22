@@ -1,16 +1,14 @@
 ﻿using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataAccessLayer.Entities
+// ReSharper disable once CheckNamespace
+namespace HotelReservation.Data.Entities
 {
-    public class Guest /*: Person*/
+    public class GuestEntity /*: Person*/
     {
         public int Id { get; set; }
 
         //One To One, navigational property
-        public User User { get; set; }
+        public UserEntity User { get; set; }
 
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -22,12 +20,11 @@ namespace DataAccessLayer.Entities
         //public int RoomId { get; set; }
         ////Related entity
         //public Room Room { get; set; }
-
-        [ForeignKey(nameof(Hotel))]
+        
         public int HotelId { get; set; }
         //Related Entity
-        public Hotel Hotel { get; set; }
+        public HotelEntity Hotel { get; set; }
 
-        public Reservation Reservation { get; set; }
+        public ReservationEntity Reservation { get; set; }
     }
 }

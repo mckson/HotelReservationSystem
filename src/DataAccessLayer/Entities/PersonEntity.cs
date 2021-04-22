@@ -1,7 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace DataAccessLayer.Entities
+﻿// ReSharper disable once EmptyNamespace
+namespace HotelReservation.Data.Entities
 {
     //public abstract class Person
     //{

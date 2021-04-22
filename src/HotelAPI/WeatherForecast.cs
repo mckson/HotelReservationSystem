@@ -1,6 +1,6 @@
 using System;
 
-namespace HotelAPI
+namespace HotelReservation.API
 {
     public class WeatherForecast
     {

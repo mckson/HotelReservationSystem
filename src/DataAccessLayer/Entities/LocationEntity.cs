@@ -1,18 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace DataAccessLayer.Entities
+﻿// ReSharper disable once CheckNamespace
+namespace HotelReservation.Data.Entities
 {
-    public class Location
+    public class LocationEntity
     {
-        [Key]
         public int Id { get; set; }
-
-        [ForeignKey(nameof(Hotel))]
         public int HotelId { get; set; }
-        //Related entity
-        public Hotel Hotel { get; set; }
-
+        public HotelEntity Hotel { get; set; }
         public string Country { get; set; }
         public string Region { get; set; }
         public string City { get; set; }

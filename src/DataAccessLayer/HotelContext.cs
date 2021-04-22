@@ -1,14 +1,13 @@
-﻿using DataAccessLayer.Entities;
+﻿using HotelReservation.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 
-namespace DataAccessLayer.Context
+namespace HotelReservation.Data
 {
     public class HotelContext : DbContext
     {
-        public DbSet<Hotel> Hotels { get; set; }
-        public DbSet<Room> Rooms { get; set; }
-        public DbSet<Location> Locations { get; set; }
+        public DbSet<HotelEntity> Hotels { get; set; }
+        public DbSet<RoomEntity> Rooms { get; set; }
+        public DbSet<LocationEntity> Locations { get; set; }
         //public DbSet<Guest> Guests { get; set; }
         //public DbSet<Person> Persons { get; set; }
 

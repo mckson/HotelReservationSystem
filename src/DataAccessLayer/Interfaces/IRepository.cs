@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DataAccessLayer.Interfaces
+namespace HotelReservation.Data.Interfaces
 {
     interface IRepository<T> where T : class
     {
