@@ -1,5 +1,4 @@
-﻿using Data.Configurations;
-using HotelReservation.Data.Configurations;
+﻿using HotelReservation.Data.Configurations;
 using HotelReservation.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 

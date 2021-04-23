@@ -6,8 +6,7 @@ namespace HotelReservation.Data.Entities
     public class GuestEntity /*: Person*/
     {
         public int Id { get; set; }
-
-        //One To One, navigational property
+        
         public UserEntity User { get; set; }
 
         public string FirstName { get; set; }

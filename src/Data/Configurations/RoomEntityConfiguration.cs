@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Data.Configurations
+namespace HotelReservation.Data.Configurations
 {
     public class RoomEntityConfiguration : IEntityTypeConfiguration<RoomEntity>
     {

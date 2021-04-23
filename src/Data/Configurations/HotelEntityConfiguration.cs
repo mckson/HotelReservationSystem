@@ -8,9 +8,9 @@ namespace HotelReservation.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<HotelEntity> builder)
         {
-            builder.HasMany(x => x.Rooms)
-                .WithOne(x => x.Hotel)
-                .HasForeignKey(x => x.HotelId)
+            builder.HasMany(h => h.Rooms)
+                .WithOne(r => r.Hotel)
+                .HasForeignKey(r => r.HotelId)
                 .OnDelete(DeleteBehavior.Restrict); //change to Cascade
 
             builder.HasMany(x => x.Guests)
