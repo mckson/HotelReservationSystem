@@ -1,6 +1,5 @@
 ﻿using System;
 
-// ReSharper disable once CheckNamespace
 namespace HotelReservation.Data.Entities
 {
     public class GuestEntity /*: Person*/
@@ -15,11 +14,10 @@ namespace HotelReservation.Data.Entities
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
 
-        //[ForeignKey(nameof(Room))]
-        //public int RoomId { get; set; }
-        ////Related entity
-        //public Room Room { get; set; }
-        
+        public int RoomId { get; set; }
+        //Related entity
+        public RoomEntity Room { get; set; }
+
         public int HotelId { get; set; }
         public HotelEntity Hotel { get; set; }
 

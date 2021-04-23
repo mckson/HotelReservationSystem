@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace API.Migrations
+namespace HotelReservation.API.Migrations
 {
     [DbContext(typeof(HotelContext))]
     partial class HotelContextModelSnapshot : ModelSnapshot
@@ -44,11 +44,16 @@ namespace API.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("HotelId");
 
-                    b.ToTable("GuestEntity");
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("Guests");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.HotelEntity", b =>
@@ -99,7 +104,7 @@ namespace API.Migrations
                     b.HasIndex("HotelId")
                         .IsUnique();
 
-                    b.ToTable("LocationEntity");
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.PermissionEntity", b =>
@@ -132,8 +137,8 @@ namespace API.Migrations
                     b.Property<DateTime>("DateOut")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Deposit")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("Deposit")
+                        .HasColumnType("float");
 
                     b.Property<int>("GuestId")
                         .HasColumnType("int");
@@ -147,8 +152,8 @@ namespace API.Migrations
                     b.Property<int>("TotalDays")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("TotalPrice")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -158,7 +163,7 @@ namespace API.Migrations
                     b.HasIndex("RoomId")
                         .IsUnique();
 
-                    b.ToTable("ReservationEntity");
+                    b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoleEntity", b =>
@@ -202,7 +207,7 @@ namespace API.Migrations
 
                     b.HasIndex("HotelId");
 
-                    b.ToTable("RoomEntity");
+                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.UserEntity", b =>
@@ -242,7 +247,15 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
+                        .WithMany("Guests")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Hotel");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.LocationEntity", b =>
@@ -268,13 +281,13 @@ namespace API.Migrations
                     b.HasOne("HotelReservation.Data.Entities.GuestEntity", "Guest")
                         .WithOne("Reservation")
                         .HasForeignKey("HotelReservation.Data.Entities.ReservationEntity", "GuestId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
                         .WithOne("Reservation")
                         .HasForeignKey("HotelReservation.Data.Entities.ReservationEntity", "RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Guest");
@@ -335,6 +348,8 @@ namespace API.Migrations
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoomEntity", b =>
                 {
+                    b.Navigation("Guests");
+
                     b.Navigation("Reservation");
                 });
 #pragma warning restore 612, 618

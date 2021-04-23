@@ -9,8 +9,8 @@ namespace HotelReservation.Data
         public DbSet<HotelEntity> Hotels { get; set; }
         public DbSet<RoomEntity> Rooms { get; set; }
         public DbSet<LocationEntity> Locations { get; set; }
-        //public DbSet<Guest> Guests { get; set; }
-        //public DbSet<Person> Persons { get; set; }
+        public DbSet<GuestEntity> Guests { get; set; }
+        public DbSet<ReservationEntity> Reservations { get; set; }
 
         public HotelContext(DbContextOptions<HotelContext> options)
             : base(options)
@@ -23,6 +23,7 @@ namespace HotelReservation.Data
 
             modelBuilder.ApplyConfiguration(new HotelEntityConfiguration());
             modelBuilder.ApplyConfiguration(new RoomEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new GuestEntityConfiguration());
         }
     }
 }
