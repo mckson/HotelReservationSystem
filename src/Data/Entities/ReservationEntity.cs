@@ -6,7 +6,7 @@ namespace HotelReservation.Data.Entities
     {
         public int Id { get; set; }
 
-        public int GuestId { get; set; }
+        public Guid GuestId { get; set; }
         public GuestEntity Guest { get; set; }
 
         public int RoomId { get; set; }

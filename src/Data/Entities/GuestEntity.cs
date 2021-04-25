@@ -1,21 +1,15 @@
 ﻿using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace HotelReservation.Data.Entities
 {
-    public class GuestEntity /*: Person*/
+    public class GuestEntity : IdentityUser<Guid>
     {
-        public int Id { get; set; }
-        
-        public UserEntity User { get; set; }
-
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Email { get; set; }
 
         public int RoomId { get; set; }
-        //Related entity
         public RoomEntity Room { get; set; }
 
         public int HotelId { get; set; }

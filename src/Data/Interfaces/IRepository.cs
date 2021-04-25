@@ -1,15 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HotelReservation.Data.Interfaces
 {
     interface IRepository<T> where T : class
     {
         IEnumerable<T> GetAll();
+        Task<IEnumerable<T>> GetAllAsync();
+
         T Get(int id);
-        IEnumerable<T> Find(Func<T, Boolean> predicate);
+        Task<T> GetAsync(int id);
+
+        IEnumerable<T> Find(Func<T, bool> predicate);
+        Task<IEnumerable<T>> FindAsync(Func<T, bool> predicate);
+
         void Create(T item);
-        void Update(T newHotel);
+        Task CreateAsync(T item);
+
+        void Update(T newItem);
+        Task UpdateAsync(T newItem);
+
         void Delete(int id);
+        Task DeleteAsync(int id);
     }
 }

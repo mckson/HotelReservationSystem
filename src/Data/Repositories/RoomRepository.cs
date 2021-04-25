@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 
@@ -8,44 +9,77 @@ namespace HotelReservation.Data.Repositories
 {
     public class RoomRepository : IRepository<RoomEntity>
     {
-        private HotelContext db;
+        private readonly HotelContext _db;
 
         public RoomRepository(HotelContext context)
         {
-            db = context;
+            _db = context;
         }
 
         public IEnumerable<RoomEntity> GetAll()
         {
-            return db.Rooms;
+            return _db.Rooms;
+        }
+
+        public async Task<IEnumerable<RoomEntity>> GetAllAsync()
+        {
+            return await Task.Run(GetAll);
         }
 
         public RoomEntity Get(int id)
         {
-            return db.Rooms.Find(id);
+            return _db.Rooms.Find(id);
+        }
+
+        public async Task<RoomEntity> GetAsync(int id)
+        {
+            return await _db.Rooms.FindAsync(id);
         }
 
         public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate)
         {
-            return db.Rooms.Where(predicate);
+            return _db.Rooms.Where(predicate);
+        }
+
+        public async Task<IEnumerable<RoomEntity>> FindAsync(Func<RoomEntity, bool> predicate)
+        {
+            return await Task.Run(() => Find(predicate));
         }
 
         public void Create(RoomEntity room)
         {
-            db.Rooms.Add(room);
+            _db.Rooms.Add(room);
+        }
+
+        public async Task CreateAsync(RoomEntity room)
+        {
+            await _db.Rooms.AddAsync(room);
         }
 
         public void Update(RoomEntity newRoom)
         {
-            var oldRoom = db.Rooms.Find(newRoom.Id);
+            var oldRoom = _db.Rooms.Find(newRoom.Id);
+            oldRoom = newRoom;
+        }
+
+        public async Task UpdateAsync(RoomEntity newRoom)
+        {
+            var oldRoom = await _db.Rooms.FindAsync(newRoom.Id);
             oldRoom = newRoom;
         }
 
         public void Delete(int id)
         {
-            var deleteRoom = db.Rooms.Find(id);
+            var deleteRoom = _db.Rooms.Find(id);
             if (deleteRoom != null)
-                db.Rooms.Remove(deleteRoom);
+                _db.Rooms.Remove(deleteRoom);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var deleteRoom = await _db.Rooms.FindAsync(id);
+            if (deleteRoom != null)
+                _db.Rooms.Remove(deleteRoom);
         }
     }
 }

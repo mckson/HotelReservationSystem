@@ -22,8 +22,7 @@ namespace HotelReservation.API
         {
             services.AddControllers();
             services.AddDbContext<HotelContext>(opt =>
-                opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"), 
-                    b => b.MigrationsAssembly("API")));
+                opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,13 +47,13 @@ namespace HotelReservation.API
             });
         }
 
-        private static void UpdateDatabase(IApplicationBuilder app)
-        {
-            using var serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope();
-            using var context = serviceScope.ServiceProvider.GetService<HotelContext>();
-            if (context != null) context.Database.Migrate();
-        }
+        //private static void UpdateDatabase(IApplicationBuilder app)
+        //{
+        //    using var serviceScope = app.ApplicationServices
+        //        .GetRequiredService<IServiceScopeFactory>()
+        //        .CreateScope();
+        //    using var context = serviceScope.ServiceProvider.GetService<HotelContext>();
+        //    if (context != null) context.Database.Migrate();
+        //}
     }
 }
