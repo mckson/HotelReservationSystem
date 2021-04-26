@@ -10,9 +10,10 @@
         public bool IsEmpty { get; set; }
 
         public int HotelId { get; set; }
-        public HotelEntity Hotel { get; set; }
+        public virtual HotelEntity Hotel { get; set; }
 
-        public ReservationEntity Reservation { get; set; }
-        public GuestEntity Guest { get; set; }
+        //public int ReservationId { get; set; }
+        public virtual ReservationEntity Reservation { get; set; }
+        public virtual GuestEntity Guest { get; set; }
     }
 }

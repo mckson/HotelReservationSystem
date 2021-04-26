@@ -18,7 +18,16 @@ namespace HotelReservation.Data.Repositories
 
         public IEnumerable<HotelEntity> GetAll()
         {
-            return _db.Hotels;
+            return _db.Hotels
+                .Select(hotel => new HotelEntity
+                {
+                    Id = hotel.Id,
+                    Name = hotel.Name,
+                    Location = hotel.Location,
+                    Rooms = hotel.Rooms,
+                    RoomsNumber = hotel.RoomsNumber,
+                    EmptyRoomsNumber = hotel.EmptyRoomsNumber
+                });
         }
 
         public async Task<IEnumerable<HotelEntity>> GetAllAsync()
@@ -28,12 +37,30 @@ namespace HotelReservation.Data.Repositories
 
         public HotelEntity Get(int id)
         {
-            return _db.Hotels.Find(id);
+            var hotel = _db.Hotels.Find(id);
+            return new HotelEntity
+            {
+                Id = hotel.Id,
+                Name = hotel.Name,
+                Location = hotel.Location,
+                Rooms = hotel.Rooms,
+                RoomsNumber = hotel.RoomsNumber,
+                EmptyRoomsNumber = hotel.EmptyRoomsNumber
+            };
         }
 
         public async Task<HotelEntity> GetAsync(int id)
         {
-            return await _db.Hotels.FindAsync(id);
+            var hotel = await _db.Hotels.FindAsync(id); 
+            return new HotelEntity
+            {
+                Id = hotel.Id,
+                Name = hotel.Name,
+                Location = hotel.Location,
+                Rooms = hotel.Rooms,
+                RoomsNumber = hotel.RoomsNumber,
+                EmptyRoomsNumber = hotel.EmptyRoomsNumber
+            };
         }
 
         public async Task<IEnumerable<HotelEntity>> FindAsync(Func<HotelEntity, bool> predicate)

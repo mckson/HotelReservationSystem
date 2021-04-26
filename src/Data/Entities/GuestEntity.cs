@@ -10,11 +10,11 @@ namespace HotelReservation.Data.Entities
         public DateTime DateOfBirth { get; set; }
 
         public int RoomId { get; set; }
-        public RoomEntity Room { get; set; }
+        public virtual RoomEntity Room { get; set; }
 
         public int HotelId { get; set; }
-        public HotelEntity Hotel { get; set; }
+        public virtual HotelEntity Hotel { get; set; }
 
-        public ReservationEntity Reservation { get; set; }
+        public virtual ReservationEntity Reservation { get; set; }
     }
 }

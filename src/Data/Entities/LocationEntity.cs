@@ -11,6 +11,6 @@ namespace HotelReservation.Data.Entities
         public int BuildingNumber { get; set; }
 
         public int HotelId { get; set; }
-        public HotelEntity Hotel { get; set; }
+        public virtual HotelEntity Hotel { get; set; }
     }
 }
