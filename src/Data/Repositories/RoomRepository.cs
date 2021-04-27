@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Repositories
 {
@@ -18,7 +19,10 @@ namespace HotelReservation.Data.Repositories
 
         public IEnumerable<RoomEntity> GetAll()
         {
-            return _db.Rooms;
+            return _db.Rooms
+                .Include(room => room.Hotel)
+                .Include(room => room.Reservation)
+                .Include(room => room.Guest);
         }
 
         public async Task<IEnumerable<RoomEntity>> GetAllAsync()
@@ -28,17 +32,26 @@ namespace HotelReservation.Data.Repositories
 
         public RoomEntity Get(int id)
         {
-            return _db.Rooms.Find(id);
+            return _db.Rooms
+                .Where(room => room.Id == id)
+                .Include(room => room.Hotel)
+                .Include(room => room.Reservation)
+                .Include(room => room.Guest)
+                .FirstOrDefault();
         }
 
         public async Task<RoomEntity> GetAsync(int id)
         {
-            return await _db.Rooms.FindAsync(id);
+            return await Task.Run(() => Get(id));
         }
 
         public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate)
         {
-            return _db.Rooms.Where(predicate);
+            return _db.Rooms
+                .Include(room => room.Hotel)
+                .Include(room => room.Reservation)
+                .Include(room => room.Guest)
+                .Where(predicate);
         }
 
         public async Task<IEnumerable<RoomEntity>> FindAsync(Func<RoomEntity, bool> predicate)
@@ -56,6 +69,7 @@ namespace HotelReservation.Data.Repositories
             await _db.Rooms.AddAsync(room);
         }
 
+        //change implementation
         public void Update(RoomEntity newRoom)
         {
             var oldRoom = _db.Rooms.Find(newRoom.Id);

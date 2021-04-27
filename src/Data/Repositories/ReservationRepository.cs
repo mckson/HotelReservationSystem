@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Repositories
 {
@@ -14,6 +15,40 @@ namespace HotelReservation.Data.Repositories
         public ReservationRepository(HotelContext context)
         {
             _db = context;
+        }
+
+        public IEnumerable<ReservationEntity> GetAll()
+        {
+            return _db.Reservations
+                .Include(reservation => reservation.Rooms)
+                .Include(reservation => reservation.Guest);
+        }
+
+        public async Task<IEnumerable<ReservationEntity>> GetAllAsync()
+        {
+            return await Task.Run(GetAll);
+        }
+
+        public ReservationEntity Get(int id)
+        {
+            return _db.Reservations
+                .Where(reservation => reservation.Id == id)
+                .Include(reservation => reservation.Rooms)
+                .Include(reservation => reservation.Guest)
+                .FirstOrDefault();
+        }
+
+        public async Task<ReservationEntity> GetAsync(int id)
+        {
+            return await Task.Run(() => Get(id));
+        }
+
+        public IEnumerable<ReservationEntity> Find(Func<ReservationEntity, bool> predicate)
+        {
+            return _db.Reservations
+                .Include(reservation => reservation.Rooms)
+                .Include(reservation => reservation.Guest)
+                .Where(predicate);
         }
 
         public async Task<IEnumerable<ReservationEntity>> FindAsync(Func<ReservationEntity, bool> predicate)
@@ -29,6 +64,13 @@ namespace HotelReservation.Data.Repositories
         public async Task CreateAsync(ReservationEntity reservation)
         {
             await _db.Reservations.AddAsync(reservation);
+        }
+
+        //change implementation
+        public void Update(ReservationEntity newReservation)
+        {
+            var oldReservation = _db.Reservations.Find(newReservation.Id);
+            oldReservation = newReservation;
         }
 
         public async Task UpdateAsync(ReservationEntity newReservation)
@@ -51,37 +93,6 @@ namespace HotelReservation.Data.Repositories
 
             if (reservation != null)
                 _db.Reservations.Remove(reservation);
-        }
-
-        public async Task<ReservationEntity> GetAsync(int id)
-        {
-            return await _db.Reservations.FindAsync(id);
-        }
-
-        public IEnumerable<ReservationEntity> Find(Func<ReservationEntity, bool> predicate)
-        {
-            return _db.Reservations.Where(predicate);
-        }
-
-        public async Task<IEnumerable<ReservationEntity>> GetAllAsync()
-        {
-            return await Task.Run(GetAll);
-        }
-
-        public ReservationEntity Get(int id)
-        {
-            return _db.Reservations.Find(id);
-        }
-
-        public IEnumerable<ReservationEntity> GetAll()
-        {
-            return _db.Reservations;
-        }
-
-        public void Update(ReservationEntity newReservation)
-        {
-            var oldReservation = _db.Reservations.Find(newReservation.Id);
-            oldReservation = newReservation;
         }
     }
 }

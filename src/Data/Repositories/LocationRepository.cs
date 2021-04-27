@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Repositories
 {
@@ -14,6 +15,37 @@ namespace HotelReservation.Data.Repositories
         public LocationRepository(HotelContext context)
         {
             _db = context;
+        }
+
+        public IEnumerable<LocationEntity> GetAll()
+        {
+            return _db.Locations
+                .Include(location => location.Hotel);
+        }
+
+        public async Task<IEnumerable<LocationEntity>> GetAllAsync()
+        {
+            return await Task.Run(GetAll);
+        }
+
+        public LocationEntity Get(int id)
+        {
+            return _db.Locations
+                .Where(location => location.Id == id)
+                .Include(location => location.Hotel)
+                .FirstOrDefault();
+        }
+
+        public async Task<LocationEntity> GetAsync(int id)
+        {
+            return await Task.Run(() => Get(id));
+        }
+
+        public IEnumerable<LocationEntity> Find(Func<LocationEntity, bool> predicate)
+        {
+            return _db.Locations
+                .Include(location => location.Hotel)
+                .Where(predicate);
         }
 
         public async Task<IEnumerable<LocationEntity>> FindAsync(Func<LocationEntity, bool> predicate)
@@ -31,6 +63,14 @@ namespace HotelReservation.Data.Repositories
             await _db.Locations.AddAsync(location);
         }
 
+        public void Update(LocationEntity newLocation)
+        {
+            var oldLocation = _db.Locations.Find(newLocation);
+
+            if (oldLocation != null) oldLocation = newLocation;
+        }
+
+        //change implementation
         public async Task UpdateAsync(LocationEntity newLocation)
         {
             var oldLocation = await _db.Locations.FindAsync(newLocation);
@@ -53,39 +93,6 @@ namespace HotelReservation.Data.Repositories
 
             if (location != null)
                 _db.Locations.Remove(location);
-        }
-
-        public async Task<LocationEntity> GetAsync(int id)
-        {
-            return await _db.Locations.FindAsync(id);
-        }
-
-        public IEnumerable<LocationEntity> Find(Func<LocationEntity, bool> predicate)
-        {
-            return _db.Locations.Where(predicate);
-        }
-
-        public async Task<IEnumerable<LocationEntity>> GetAllAsync()
-        {
-            return await Task.Run(GetAll);
-        }
-
-        public LocationEntity Get(int id)
-        {
-            return _db.Locations.Find(id);
-        }
-
-        public IEnumerable<LocationEntity> GetAll()
-        {
-            return _db.Locations;
-        }
-
-        public void Update(LocationEntity newLocation)
-        {
-            var oldLocation = _db.Locations.Find(newLocation);
-
-            if (oldLocation != null)
-                oldLocation = newLocation;
         }
     }
 }

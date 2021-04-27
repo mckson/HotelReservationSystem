@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Repositories
 {
@@ -19,15 +20,12 @@ namespace HotelReservation.Data.Repositories
         public IEnumerable<HotelEntity> GetAll()
         {
             return _db.Hotels
-                .Select(hotel => new HotelEntity
-                {
-                    Id = hotel.Id,
-                    Name = hotel.Name,
-                    Location = hotel.Location,
-                    Rooms = hotel.Rooms,
-                    RoomsNumber = hotel.RoomsNumber,
-                    EmptyRoomsNumber = hotel.EmptyRoomsNumber
-                });
+                .Include(hotel => hotel.Location)
+                .Include(hotel => hotel.Rooms)
+                    .ThenInclude(room => room.Guest)
+                .Include(hotel => hotel.Rooms)
+                    .ThenInclude(room => room.Reservation)
+                .Include(hotel => hotel.Guests);
         }
 
         public async Task<IEnumerable<HotelEntity>> GetAllAsync()
@@ -37,30 +35,32 @@ namespace HotelReservation.Data.Repositories
 
         public HotelEntity Get(int id)
         {
-            var hotel = _db.Hotels.Find(id);
-            return new HotelEntity
-            {
-                Id = hotel.Id,
-                Name = hotel.Name,
-                Location = hotel.Location,
-                Rooms = hotel.Rooms,
-                RoomsNumber = hotel.RoomsNumber,
-                EmptyRoomsNumber = hotel.EmptyRoomsNumber
-            };
+            return _db.Hotels
+                .Where(hotel => hotel.Id == id)
+                .Include(hotel => hotel.Location)
+                .Include(hotel => hotel.Rooms)
+                    .ThenInclude(room => room.Guest)
+                .Include(hotel => hotel.Rooms)
+                    .ThenInclude(room => room.Reservation)
+                .Include(hotel => hotel.Guests)
+                .FirstOrDefault();
         }
 
         public async Task<HotelEntity> GetAsync(int id)
         {
-            var hotel = await _db.Hotels.FindAsync(id); 
-            return new HotelEntity
-            {
-                Id = hotel.Id,
-                Name = hotel.Name,
-                Location = hotel.Location,
-                Rooms = hotel.Rooms,
-                RoomsNumber = hotel.RoomsNumber,
-                EmptyRoomsNumber = hotel.EmptyRoomsNumber
-            };
+            return await Task.Run(() => Get(id));
+        }
+
+        public IEnumerable<HotelEntity> Find(Func<HotelEntity, bool> predicate)
+        {
+            return _db.Hotels
+                .Include(hotel => hotel.Location)
+                .Include(hotel => hotel.Rooms)
+                    .ThenInclude(room => room.Guest)
+                .Include(hotel => hotel.Rooms)
+                    .ThenInclude(room => room.Reservation)
+                .Include(hotel => hotel.Guests)
+                .Where(predicate);
         }
 
         public async Task<IEnumerable<HotelEntity>> FindAsync(Func<HotelEntity, bool> predicate)
@@ -78,6 +78,7 @@ namespace HotelReservation.Data.Repositories
             await _db.Hotels.AddAsync(hotel);
         }
 
+        //change implementation
         public void Update(HotelEntity newHotel)
         {
             var oldHotel = _db.Hotels.Find(newHotel.Id);
@@ -87,11 +88,6 @@ namespace HotelReservation.Data.Repositories
         public async Task UpdateAsync(HotelEntity newItem)
         {
             await Task.Run(() => Update(newItem));
-        }
-
-        public IEnumerable<HotelEntity> Find(Func<HotelEntity, bool> predicate)
-        {
-            return _db.Hotels.Where(predicate);
         }
 
         public void Delete(int id)
