@@ -1,5 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
-namespace HotelReservation.Data.Entities
+﻿namespace HotelReservation.Data.Entities
 {
     public class LocationEntity
     {

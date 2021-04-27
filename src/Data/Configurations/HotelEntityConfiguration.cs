@@ -20,7 +20,13 @@ namespace HotelReservation.Data.Configurations
 
             builder.HasOne(h => h.Location)
                 .WithOne(l => l.Hotel)
-                .HasForeignKey<LocationEntity>(l => l.HotelId);
+                .HasForeignKey<LocationEntity>(l => l.HotelId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(h => h.Name)
+                .HasMaxLength(100)
+                .IsRequired();
         }
     }
 }

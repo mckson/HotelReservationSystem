@@ -12,12 +12,26 @@ namespace HotelReservation.Data.Configurations
             builder.HasOne(r => r.Guest)
                 .WithOne(g => g.Room)
                 .HasForeignKey<GuestEntity>(g => g.RoomId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(r => r.Reservation)
                 .WithMany(res => res.Rooms)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(r => r.RoomNumber)
+                .IsRequired();
+
+            builder.Property(r => r.FloorNumber)
+                .IsRequired();
+
+            builder.Property(r => r.Capacity)
+                .IsRequired();
+
+            builder.Property(r => r.IsEmpty)
+                .HasDefaultValue(true)
+                .IsRequired();
         }
     }
 }

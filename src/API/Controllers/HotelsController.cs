@@ -29,7 +29,8 @@ namespace HotelReservation.API.Controllers
         public async Task<IEnumerable<HotelDTO>> Get()
         {
             var hotels = await _hoteRepo.GetAllAsync();
-            var hotelsDTO =  hotels.Select(h => new HotelDTO
+            var hotelsDTO =  hotels
+                .Select(h => new HotelDTO
                 {
                     Id = h.Id,
                     Name = h.Name,
@@ -45,14 +46,14 @@ namespace HotelReservation.API.Controllers
         public async Task<HotelDTO> Get(int id)
         {
             var hotel = await _hoteRepo.GetAsync(id);
-            var hotelDTO = new HotelDTO
+            var hotelDto = new HotelDTO
             {
                 Id = hotel.Id,
                 Name = hotel.Name,
                 Rooms = hotel.Rooms,
                 Location = hotel.Location
             };
-            return hotelDTO;
+            return hotelDto;
         }
 
         // POST api/<HotelsController>
