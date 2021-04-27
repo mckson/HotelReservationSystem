@@ -20,12 +20,12 @@ namespace HotelReservation.Data.Repositories
         public IEnumerable<HotelEntity> GetAll()
         {
             return _db.Hotels
-                .Include(hotel => hotel.Location)
+                /*.Include(hotel => hotel.Location)
                 .Include(hotel => hotel.Rooms)
                     .ThenInclude(room => room.Guest)
                 .Include(hotel => hotel.Rooms)
                     .ThenInclude(room => room.Reservation)
-                .Include(hotel => hotel.Guests);
+                .Include(hotel => hotel.Guests)*/;
         }
 
         public async Task<IEnumerable<HotelEntity>> GetAllAsync()
@@ -36,14 +36,13 @@ namespace HotelReservation.Data.Repositories
         public HotelEntity Get(int id)
         {
             return _db.Hotels
-                .Where(hotel => hotel.Id == id)
-                .Include(hotel => hotel.Location)
+                /*.Include(hotel => hotel.Location)
                 .Include(hotel => hotel.Rooms)
                     .ThenInclude(room => room.Guest)
                 .Include(hotel => hotel.Rooms)
                     .ThenInclude(room => room.Reservation)
-                .Include(hotel => hotel.Guests)
-                .FirstOrDefault();
+                .Include(hotel => hotel.Guests)*/
+                .FirstOrDefault(hotel => hotel.Id == id);
         }
 
         public async Task<HotelEntity> GetAsync(int id)
@@ -54,12 +53,12 @@ namespace HotelReservation.Data.Repositories
         public IEnumerable<HotelEntity> Find(Func<HotelEntity, bool> predicate)
         {
             return _db.Hotels
-                .Include(hotel => hotel.Location)
+                /*.Include(hotel => hotel.Location)
                 .Include(hotel => hotel.Rooms)
                     .ThenInclude(room => room.Guest)
                 .Include(hotel => hotel.Rooms)
                     .ThenInclude(room => room.Reservation)
-                .Include(hotel => hotel.Guests)
+                .Include(hotel => hotel.Guests)*/
                 .Where(predicate);
         }
 

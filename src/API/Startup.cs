@@ -23,7 +23,10 @@ namespace HotelReservation.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<HotelContext>(opt =>
-                opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection")));
+            {
+                opt.UseLazyLoadingProxies();
+                opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
+            });
             services.AddControllers();
         }
 

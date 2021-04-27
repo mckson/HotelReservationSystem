@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,8 +35,11 @@ namespace HotelReservation.API.Controllers
                 {
                     Id = h.Id,
                     Name = h.Name,
-                    Rooms = h.Rooms,
-                    Location = h.Location
+                    Rooms = h.Rooms.Select(r => new RoomDTO
+                    {
+                        HotelName = r.Hotel.Name,
+                        Number = r.RoomNumber
+                    })
                 });
 
             return hotelsDTO;
@@ -43,17 +47,30 @@ namespace HotelReservation.API.Controllers
 
         // GET api/<HotelsController>/5
         [HttpGet("{id}")]
-        public async Task<HotelDTO> Get(int id)
+        public async Task<ActionResult<HotelDTO>> Get(int id)
         {
             var hotel = await _hoteRepo.GetAsync(id);
-            var hotelDto = new HotelDTO
+            try
             {
-                Id = hotel.Id,
-                Name = hotel.Name,
-                Rooms = hotel.Rooms,
-                Location = hotel.Location
-            };
-            return hotelDto;
+                if (hotel == null) throw new Exception();
+                var hotelDto = new HotelDTO
+                {
+                    Id = hotel.Id,
+                    Name = hotel.Name,
+                    Rooms = hotel.Rooms.Select(r => new RoomDTO
+                    {
+                        HotelName = r.Hotel.Name,
+                        Number = r.RoomNumber
+                    })
+
+                };
+
+                return Ok(hotelDto);
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
         }
 
         // POST api/<HotelsController>
@@ -78,11 +95,19 @@ namespace HotelReservation.API.Controllers
         }
     }
 
+    //test class
     public class HotelDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public IEnumerable<RoomEntity> Rooms { get; set; }
+        public IEnumerable<RoomDTO> Rooms { get; set; }
         public LocationEntity Location { get; set; }
+    }
+
+    //test classs
+    public class RoomDTO
+    {
+        public int Number { get; set; }
+        public string HotelName { get; set; }
     }
 }

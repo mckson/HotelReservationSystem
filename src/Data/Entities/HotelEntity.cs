@@ -13,7 +13,7 @@ namespace HotelReservation.Data.Entities
         //public IEnumerable<RoomEntity> EmptyRooms => Rooms.Where(room => room.IsEmpty);
 
         public int CompanyId { get; set; }
-        public CompanyEntity Company { get; set; }
+        public virtual CompanyEntity Company { get; set; }
 
         public virtual LocationEntity Location { get; set; }
         public virtual IEnumerable<RoomEntity> Rooms { get; set; } 

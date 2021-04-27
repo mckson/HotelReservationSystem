@@ -20,9 +20,9 @@ namespace HotelReservation.Data.Repositories
         public IEnumerable<RoomEntity> GetAll()
         {
             return _db.Rooms
-                .Include(room => room.Hotel)
+                /*.Include(room => room.Hotel)
                 .Include(room => room.Reservation)
-                .Include(room => room.Guest);
+                .Include(room => room.Guest)*/;
         }
 
         public async Task<IEnumerable<RoomEntity>> GetAllAsync()
@@ -33,11 +33,10 @@ namespace HotelReservation.Data.Repositories
         public RoomEntity Get(int id)
         {
             return _db.Rooms
-                .Where(room => room.Id == id)
-                .Include(room => room.Hotel)
+                /*.Include(room => room.Hotel)
                 .Include(room => room.Reservation)
-                .Include(room => room.Guest)
-                .FirstOrDefault();
+                .Include(room => room.Guest)*/
+                .FirstOrDefault(room => room.Id == id);
         }
 
         public async Task<RoomEntity> GetAsync(int id)
@@ -48,9 +47,9 @@ namespace HotelReservation.Data.Repositories
         public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate)
         {
             return _db.Rooms
-                .Include(room => room.Hotel)
+                /*.Include(room => room.Hotel)
                 .Include(room => room.Reservation)
-                .Include(room => room.Guest)
+                .Include(room => room.Guest)*/
                 .Where(predicate);
         }
 

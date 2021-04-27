@@ -20,7 +20,7 @@ namespace HotelReservation.Data.Repositories
         public IEnumerable<LocationEntity> GetAll()
         {
             return _db.Locations
-                .Include(location => location.Hotel);
+               /* .Include(location => location.Hotel)*/;
         }
 
         public async Task<IEnumerable<LocationEntity>> GetAllAsync()
@@ -31,9 +31,8 @@ namespace HotelReservation.Data.Repositories
         public LocationEntity Get(int id)
         {
             return _db.Locations
-                .Where(location => location.Id == id)
-                .Include(location => location.Hotel)
-                .FirstOrDefault();
+                /*.Include(location => location.Hotel)*/
+                .FirstOrDefault(location => location.Id == id);
         }
 
         public async Task<LocationEntity> GetAsync(int id)
@@ -44,7 +43,7 @@ namespace HotelReservation.Data.Repositories
         public IEnumerable<LocationEntity> Find(Func<LocationEntity, bool> predicate)
         {
             return _db.Locations
-                .Include(location => location.Hotel)
+                /*.Include(location => location.Hotel)*/
                 .Where(predicate);
         }
 
