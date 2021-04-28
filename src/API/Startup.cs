@@ -36,14 +36,16 @@ namespace HotelReservation.API
                 opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
             });
 
-            services.AddIdentity<UserEntity, IdentityRole>()
+            services.AddIdentityCore<UserEntity>(options => { });
+            new IdentityBuilder(typeof(UserEntity), typeof(IdentityRole), services)
+                .AddRoleManager<RoleManager<IdentityRole>>()
+                .AddSignInManager<SignInManager<UserEntity>>()
+                .AddUserManager<UserManager<UserEntity>>()
                 .AddEntityFrameworkStores<HotelContext>();
 
             //services.AddSingleton<UserManager<UserEntity>>();
             //services.AddSingleton<RoleManager<IdentityRole>>();
-            //services.AddSingleton<IAccountService>(x =>
-            //    new AccountService(x.GetRequiredService<UserManager<UserEntity>>(),
-            //        x.GetRequiredService<RoleManager<IdentityRole>>()));
+            services.AddScoped<IAccountService, AccountService>();
 
             //services.AddIdentityServer()
             //    .AddApiAuthorization<IdentityUser, HotelContext>();
@@ -80,26 +82,26 @@ namespace HotelReservation.API
             //    });
 
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                //Password settings
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
+            //services.Configure<IdentityOptions>(options =>
+            //{
+            //    //Password settings
+            //    options.Password.RequireDigit = true;
+            //    options.Password.RequireLowercase = true;
+            //    options.Password.RequireNonAlphanumeric = true;
+            //    options.Password.RequireUppercase = true;
+            //    options.Password.RequiredLength = 6;
+            //    options.Password.RequiredUniqueChars = 1;
 
-                // Lockout settings.
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
+            //    // Lockout settings.
+            //    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            //    options.Lockout.MaxFailedAccessAttempts = 5;
+            //    options.Lockout.AllowedForNewUsers = true;
 
-                // User settings.
-                options.User.AllowedUserNameCharacters =
-                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = false;
-            });
+            //    // User settings.
+            //    options.User.AllowedUserNameCharacters =
+            //        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+            //    options.User.RequireUniqueEmail = false;
+            //});
 
             services.AddControllers();
         }

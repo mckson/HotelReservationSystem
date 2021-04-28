@@ -33,16 +33,18 @@ namespace HotelReservation.API.Controllers
 
             var now = DateTime.UtcNow;
 
+            var claims = await _accountService.GetIdentityAsync(user.Email, user.Password);
+            var key =
+                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["AuthOptions:key"]));
+
             var jwt = new JwtSecurityToken(
                 issuer: _configuration["AuthOptions:issuer"],
                 audience: _configuration["AuthOptions:audience"],
                 notBefore: now,
-                claims: _accountService.GetIdentityAsync(user.Email, user.Password).Result.Claims,
+                claims: claims.Claims,
                 expires: now.Add(TimeSpan.FromMinutes(double.Parse(_configuration["AuthOptions:lifetime"]))),
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["AuthOptions:key"])),
-                    SecurityAlgorithms.HmacSha256)
-            );
+                signingCredentials: new SigningCredentials(key,
+                    SecurityAlgorithms.HmacSha256));
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             var response = new

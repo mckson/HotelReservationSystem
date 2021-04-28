@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data
 {
-    public class HotelContext : IdentityDbContext/*, IPersistedGrantDbContext*/
+    public class HotelContext : IdentityDbContext<UserEntity>
     {
         public HotelContext(DbContextOptions<HotelContext> options)
             : base(options)
@@ -30,13 +30,5 @@ namespace HotelReservation.Data
             modelBuilder.ApplyConfiguration(new CompanyEntityConfiguration());
             modelBuilder.ApplyConfiguration(new LocationEntityConfiguration());
         }
-
-        public async Task<int> SaveChangesAsync()
-        {
-            return await Task.Run(SaveChanges);
-        }
-
-        //public DbSet<PersistedGrant> PersistedGrants { get; set; }
-        //public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
     }
 }

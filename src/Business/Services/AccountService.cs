@@ -28,7 +28,7 @@ namespace HotelReservation.Business.Services
             if (String.IsNullOrEmpty(email) || String.IsNullOrEmpty(password))
                 return null;
 
-            var userEntity = await _userManager.Users.FirstAsync(u => u.Email == email);
+            var userEntity = await _userManager.FindByEmailAsync(email);
             if (userEntity == null)
             {
                 return null;
@@ -38,7 +38,8 @@ namespace HotelReservation.Business.Services
                 return null;
             }
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<UserEntity, UserModel>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<UserEntity, UserModel>()
+                .ForMember("Password", opt => opt.MapFrom(c => c.PasswordHash)));
             var mapper = new Mapper(config);
 
             return mapper.Map<UserEntity, UserModel>(userEntity);
@@ -74,11 +75,11 @@ namespace HotelReservation.Business.Services
 
             if (userEntity != null)
             {
+                var roles = await _userManager.GetRolesAsync(userEntity);
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimsIdentity.DefaultNameClaimType, userEntity.Email),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType,
-                        _userManager.GetRolesAsync(userEntity).Result[0])
+                    new Claim(ClaimsIdentity.DefaultRoleClaimType, "User")
                 };
 
                 ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,

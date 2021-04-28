@@ -11,6 +11,7 @@ namespace HotelReservation.Data.Configurations
             builder.HasOne(g => g.Reservation)
                 .WithOne(r => r.User)
                 .HasForeignKey<ReservationEntity>(r => r.UserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(g => g.FirstName)

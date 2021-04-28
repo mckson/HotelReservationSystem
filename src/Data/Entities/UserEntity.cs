@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace HotelReservation.Data.Entities
 {
-    public class UserEntity : IdentityUser<string>
+    public class UserEntity : IdentityUser
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
