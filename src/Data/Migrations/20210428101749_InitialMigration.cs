@@ -105,8 +105,8 @@ namespace HotelReservation.Data.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(nullable: false),
-                    ProviderKey = table.Column<string>(nullable: false),
+                    LoginProvider = table.Column<string>(maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>(maxLength: 128, nullable: false),
                     ProviderDisplayName = table.Column<string>(nullable: true),
                     UserId = table.Column<string>(nullable: false)
                 },
@@ -150,8 +150,8 @@ namespace HotelReservation.Data.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(nullable: false),
-                    LoginProvider = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
+                    LoginProvider = table.Column<string>(maxLength: 128, nullable: false),
+                    Name = table.Column<string>(maxLength: 128, nullable: false),
                     Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -210,25 +210,6 @@ namespace HotelReservation.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Reservations",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    GuestId = table.Column<Guid>(nullable: false),
-                    ReservationDate = table.Column<DateTime>(nullable: false),
-                    DateIn = table.Column<DateTime>(nullable: false),
-                    DateOut = table.Column<DateTime>(nullable: false),
-                    TotalDays = table.Column<int>(nullable: false),
-                    Deposit = table.Column<double>(nullable: false),
-                    TotalPrice = table.Column<double>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reservations", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Rooms",
                 columns: table => new
                 {
@@ -250,16 +231,10 @@ namespace HotelReservation.Data.Migrations
                         principalTable: "Hotels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Rooms_Reservations_ReservationId",
-                        column: x => x.ReservationId,
-                        principalTable: "Reservations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Guests",
+                name: "SystemUsers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
@@ -285,17 +260,42 @@ namespace HotelReservation.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Guests", x => x.Id);
+                    table.PrimaryKey("PK_SystemUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Guests_Hotels_HotelId",
+                        name: "FK_SystemUsers_Hotels_HotelId",
                         column: x => x.HotelId,
                         principalTable: "Hotels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Guests_Rooms_RoomId",
+                        name: "FK_SystemUsers_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reservations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<Guid>(nullable: false),
+                    ReservationDate = table.Column<DateTime>(nullable: false),
+                    DateIn = table.Column<DateTime>(nullable: false),
+                    DateOut = table.Column<DateTime>(nullable: false),
+                    TotalDays = table.Column<int>(nullable: false),
+                    Deposit = table.Column<double>(nullable: false),
+                    TotalPrice = table.Column<double>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reservations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reservations_SystemUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "SystemUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -340,17 +340,6 @@ namespace HotelReservation.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Guests_HotelId",
-                table: "Guests",
-                column: "HotelId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Guests_RoomId",
-                table: "Guests",
-                column: "RoomId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Hotels_CompanyId",
                 table: "Hotels",
                 column: "CompanyId");
@@ -362,9 +351,9 @@ namespace HotelReservation.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reservations_GuestId",
+                name: "IX_Reservations_UserId",
                 table: "Reservations",
-                column: "GuestId",
+                column: "UserId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -377,11 +366,22 @@ namespace HotelReservation.Data.Migrations
                 table: "Rooms",
                 column: "ReservationId");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_SystemUsers_HotelId",
+                table: "SystemUsers",
+                column: "HotelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SystemUsers_RoomId",
+                table: "SystemUsers",
+                column: "RoomId",
+                unique: true);
+
             migrationBuilder.AddForeignKey(
-                name: "FK_Reservations_Guests_GuestId",
-                table: "Reservations",
-                column: "GuestId",
-                principalTable: "Guests",
+                name: "FK_Rooms_Reservations_ReservationId",
+                table: "Rooms",
+                column: "ReservationId",
+                principalTable: "Reservations",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -389,16 +389,20 @@ namespace HotelReservation.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Guests_Hotels_HotelId",
-                table: "Guests");
+                name: "FK_Hotels_Companies_CompanyId",
+                table: "Hotels");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Rooms_Hotels_HotelId",
                 table: "Rooms");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Guests_Rooms_RoomId",
-                table: "Guests");
+                name: "FK_SystemUsers_Hotels_HotelId",
+                table: "SystemUsers");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Reservations_SystemUsers_UserId",
+                table: "Reservations");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -425,19 +429,19 @@ namespace HotelReservation.Data.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
+                name: "Companies");
+
+            migrationBuilder.DropTable(
                 name: "Hotels");
 
             migrationBuilder.DropTable(
-                name: "Companies");
+                name: "SystemUsers");
 
             migrationBuilder.DropTable(
                 name: "Rooms");
 
             migrationBuilder.DropTable(
                 name: "Reservations");
-
-            migrationBuilder.DropTable(
-                name: "Guests");
         }
     }
 }

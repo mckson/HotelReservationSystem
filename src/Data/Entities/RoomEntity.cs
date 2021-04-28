@@ -13,6 +13,6 @@
         public virtual HotelEntity Hotel { get; set; }
         
         public virtual ReservationEntity Reservation { get; set; }
-        public virtual GuestEntity Guest { get; set; }
+        public virtual UserEntity User { get; set; }
     }
 }

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Data.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    [Migration("20210427110227_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20210428161405_UserEntityTypeKeyChanged")]
+    partial class UserEntityTypeKeyChanged
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -36,83 +36,6 @@ namespace HotelReservation.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("HotelReservation.Data.Entities.GuestEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<int>("HotelId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HotelId");
-
-                    b.HasIndex("RoomId")
-                        .IsUnique();
-
-                    b.ToTable("Guests");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.HotelEntity", b =>
@@ -194,9 +117,6 @@ namespace HotelReservation.Data.Migrations
                     b.Property<double>("Deposit")
                         .HasColumnType("float");
 
-                    b.Property<Guid>("GuestId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("ReservationDate")
                         .HasColumnType("datetime2");
 
@@ -206,10 +126,14 @@ namespace HotelReservation.Data.Migrations
                     b.Property<double>("TotalPrice")
                         .HasColumnType("float");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("GuestId")
-                        .IsUnique();
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Reservations");
                 });
@@ -248,6 +172,82 @@ namespace HotelReservation.Data.Migrations
                     b.HasIndex("ReservationId");
 
                     b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.UserEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)")
+                        .HasMaxLength(100);
+
+                    b.Property<int>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)")
+                        .HasMaxLength(100);
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("RoomId")
+                        .IsUnique();
+
+                    b.ToTable("SystemUsers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -446,20 +446,6 @@ namespace HotelReservation.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("HotelReservation.Data.Entities.GuestEntity", b =>
-                {
-                    b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
-                        .WithMany("Guests")
-                        .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
-                        .WithOne("Guest")
-                        .HasForeignKey("HotelReservation.Data.Entities.GuestEntity", "RoomId")
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
-
             modelBuilder.Entity("HotelReservation.Data.Entities.HotelEntity", b =>
                 {
                     b.HasOne("HotelReservation.Data.Entities.CompanyEntity", "Company")
@@ -480,11 +466,10 @@ namespace HotelReservation.Data.Migrations
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationEntity", b =>
                 {
-                    b.HasOne("HotelReservation.Data.Entities.GuestEntity", "Guest")
+                    b.HasOne("HotelReservation.Data.Entities.UserEntity", "User")
                         .WithOne("Reservation")
-                        .HasForeignKey("HotelReservation.Data.Entities.ReservationEntity", "GuestId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("HotelReservation.Data.Entities.ReservationEntity", "UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoomEntity", b =>
@@ -498,6 +483,20 @@ namespace HotelReservation.Data.Migrations
                     b.HasOne("HotelReservation.Data.Entities.ReservationEntity", "Reservation")
                         .WithMany("Rooms")
                         .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.UserEntity", b =>
+                {
+                    b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
+                        .WithMany("Users")
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
+                        .WithOne("User")
+                        .HasForeignKey("HotelReservation.Data.Entities.UserEntity", "RoomId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 

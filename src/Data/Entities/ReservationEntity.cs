@@ -7,8 +7,8 @@ namespace HotelReservation.Data.Entities
     {
         public int Id { get; set; }
 
-        public Guid GuestId { get; set; }
-        public virtual GuestEntity Guest { get; set; }
+        public string UserId { get; set; }
+        public virtual UserEntity User { get; set; }
         
         public virtual IEnumerable<RoomEntity> Rooms { get; set; }
         

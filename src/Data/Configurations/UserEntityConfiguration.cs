@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HotelReservation.Data.Configurations
 {
-    public class GuestEntityConfiguration : IEntityTypeConfiguration<GuestEntity>
+    public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
     {
-        public void Configure(EntityTypeBuilder<GuestEntity> builder)
+        public void Configure(EntityTypeBuilder<UserEntity> builder)
         {
             builder.HasOne(g => g.Reservation)
-                .WithOne(r => r.Guest)
-                .HasForeignKey<ReservationEntity>(r => r.GuestId)
+                .WithOne(r => r.User)
+                .HasForeignKey<ReservationEntity>(r => r.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(g => g.FirstName)

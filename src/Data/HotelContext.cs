@@ -1,11 +1,12 @@
-﻿using HotelReservation.Data.Configurations;
+﻿using System.Threading.Tasks;
+using HotelReservation.Data.Configurations;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data
 {
-    public class HotelContext : IdentityDbContext
+    public class HotelContext : IdentityDbContext/*, IPersistedGrantDbContext*/
     {
         public HotelContext(DbContextOptions<HotelContext> options)
             : base(options)
@@ -16,7 +17,7 @@ namespace HotelReservation.Data
         public DbSet<HotelEntity> Hotels { get; set; }
         public DbSet<RoomEntity> Rooms { get; set; }
         public DbSet<LocationEntity> Locations { get; set; }
-        public DbSet<GuestEntity> Guests { get; set; }
+        public DbSet<UserEntity> SystemUsers { get; set; }
         public DbSet<ReservationEntity> Reservations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -25,9 +26,17 @@ namespace HotelReservation.Data
 
             modelBuilder.ApplyConfiguration(new HotelEntityConfiguration());
             modelBuilder.ApplyConfiguration(new RoomEntityConfiguration());
-            modelBuilder.ApplyConfiguration(new GuestEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
             modelBuilder.ApplyConfiguration(new CompanyEntityConfiguration());
             modelBuilder.ApplyConfiguration(new LocationEntityConfiguration());
         }
+
+        public async Task<int> SaveChangesAsync()
+        {
+            return await Task.Run(SaveChanges);
+        }
+
+        //public DbSet<PersistedGrant> PersistedGrants { get; set; }
+        //public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
     }
 }

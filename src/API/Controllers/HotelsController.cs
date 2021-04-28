@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using HotelReservation.Data;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -26,6 +27,7 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET: api/<HotelsController>
+        [Authorize]
         [HttpGet]
         public async Task<IEnumerable<HotelDTO>> Get()
         {
@@ -67,7 +69,7 @@ namespace HotelReservation.API.Controllers
 
                 return Ok(hotelDto);
             }
-            catch (Exception ex)
+            catch
             {
                 return NotFound();
             }
