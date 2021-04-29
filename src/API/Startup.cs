@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace HotelReservation.API
 {
@@ -43,6 +44,7 @@ namespace HotelReservation.API
                 .AddUserManager<UserManager<UserEntity>>()
                 .AddEntityFrameworkStores<HotelContext>();
 
+            services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
             //services.AddSingleton<UserManager<UserEntity>>();
             //services.AddSingleton<RoleManager<IdentityRole>>();
             services.AddScoped<IAccountService, AccountService>();
@@ -76,13 +78,18 @@ namespace HotelReservation.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            UpdateDatabase(app);
+            //UpdateDatabase(app);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
             app.UseHttpsRedirection();
+
+            // Write streamlined request completion events, instead of the more verbose ones from the framework.
+            // To use the default framework request logging instead, remove this line and set the "Microsoft"
+            // level in appsettings.json to "Information".
+            app.UseSerilogRequestLogging();
 
             app.UseRouting();
 

@@ -47,7 +47,7 @@ namespace HotelReservation.API.Controllers
                 audience: _configuration["AuthOptions:audience"],
                 notBefore: now,
                 claims: claims.Claims,
-                expires: now.Add(TimeSpan.FromMinutes(double.Parse(_configuration["AuthOptions:lifetime"]))),
+                expires: now.AddSeconds(double.Parse(_configuration["AuthOptions:lifetime"] + 10)),
                 signingCredentials: new SigningCredentials(key,
                     SecurityAlgorithms.HmacSha256));
 

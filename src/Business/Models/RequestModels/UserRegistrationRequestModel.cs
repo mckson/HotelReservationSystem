@@ -20,7 +20,7 @@ namespace HotelReservation.Business.Models.RequestModels
         public string PasswordConfirm { get; set; }
 
         [Required(ErrorMessage = "Phone is required")]
-        [Phone(ErrorMessage = "It must be a phone number")]
+        [Phone]
         public string PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Date of Birth is required")]

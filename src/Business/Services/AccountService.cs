@@ -18,12 +18,17 @@ namespace HotelReservation.Business.Services
         private readonly UserManager<UserEntity> _userManager;
         private readonly RoleManager<IdentityRole> _roleManger;
         private readonly HotelContext _db;
+        private readonly IPasswordHasher<UserEntity> _passwordHasher;
 
-        public AccountService(UserManager<UserEntity> userManager, RoleManager<IdentityRole> roleManager, HotelContext context)
+        public AccountService(UserManager<UserEntity> userManager, 
+            RoleManager<IdentityRole> roleManager,
+            HotelContext context,
+            IPasswordHasher<UserEntity> passwordHasher)
         {
             _userManager = userManager;
             _roleManger = roleManager;
             _db = context;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<UserModel> AuthenticateAsync(string email, string password)
@@ -36,10 +41,14 @@ namespace HotelReservation.Business.Services
             {
                 return null;
             }
-            if (userEntity.PasswordHash != password)
-            {
+            //if (userEntity.PasswordHash != password)
+            //{
+            //    return null;
+            //}
+
+            if (_passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, password) ==
+                PasswordVerificationResult.Failed)
                 return null;
-            }
 
             var config = new MapperConfiguration(cfg => cfg.CreateMap<UserEntity, UserModel>()
                 .ForMember("Password", opt => opt.MapFrom(c => c.PasswordHash)));
@@ -59,7 +68,6 @@ namespace HotelReservation.Business.Services
             if (isExistingUser)
                 return null;
 
-            //computing hash
             user.Password = password;
 
             var configEntity = new MapperConfiguration(cfg => cfg.CreateMap<UserRegistrationRequestModel, UserEntity>());
@@ -67,7 +75,8 @@ namespace HotelReservation.Business.Services
 
             var userEntity = mapperEntity.Map<UserRegistrationRequestModel, UserEntity>(user);
             userEntity.UserName ??= user.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
-            userEntity.PasswordHash = user.Password; //add hash function here
+            userEntity.PasswordHash = _passwordHasher.HashPassword(userEntity, user.Password);
+            //userEntity.PasswordHash = user.Password; //add hash function here
 
             var result = await _userManager.CreateAsync(userEntity);
 
@@ -95,9 +104,9 @@ namespace HotelReservation.Business.Services
         {
             var userEntity =
                 await _userManager.Users.FirstOrDefaultAsync(user =>
-                    user.Email == email && user.PasswordHash == password);
+                    user.Email == email);
 
-            if (userEntity != null)
+            if (userEntity != null && _passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, password) == PasswordVerificationResult.Success)
             {
                 var roles = await _userManager.GetRolesAsync(userEntity);
                 var claims = new List<Claim>
