@@ -1,16 +1,20 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
+using HotelReservation.Business.Models.RequestModels;
+using HotelReservation.Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HotelReservation.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -24,6 +28,7 @@ namespace HotelReservation.API.Controllers
             _accountService = accountService;
         }
 
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<IActionResult> Authenticate(UserModel user)
         {
@@ -55,6 +60,20 @@ namespace HotelReservation.API.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register(UserRegistrationRequestModel user)
+        {
+            var registredUser = await _accountService.RegisterAsync(user, user.Password);
 
+            if (registredUser == null)
+                return BadRequest(new {errorText = "User with such email exists"});
+
+            //var config = new MapperConfiguration(cfg => cfg.CreateMap<UserRegistrationRequestModel, UserModel>());
+            //var mapper = new Mapper(config);
+            //var userModel = mapper.Map<UserRegistrationRequestModel, UserModel>(registredUser);
+
+            return await Authenticate(registredUser);
+        } 
     }
 }

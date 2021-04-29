@@ -9,9 +9,9 @@ namespace HotelReservation.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<RoomEntity> builder)
         {
-            builder.HasOne(r => r.User)
+            builder.HasMany(r => r.Users)
                 .WithOne(g => g.Room)
-                .HasForeignKey<UserEntity>(g => g.RoomId)
+                .HasForeignKey(g => g.RoomId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
+using HotelReservation.Business.Models.RequestModels;
+using HotelReservation.Data;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,13 @@ namespace HotelReservation.Business.Services
     {
         private readonly UserManager<UserEntity> _userManager;
         private readonly RoleManager<IdentityRole> _roleManger;
+        private readonly HotelContext _db;
 
-        public AccountService(UserManager<UserEntity> userManager, RoleManager<IdentityRole> roleManager)
+        public AccountService(UserManager<UserEntity> userManager, RoleManager<IdentityRole> roleManager, HotelContext context)
         {
             _userManager = userManager;
             _roleManger = roleManager;
+            _db = context;
         }
 
         public async Task<UserModel> AuthenticateAsync(string email, string password)
@@ -46,25 +49,46 @@ namespace HotelReservation.Business.Services
 
         }
 
-        public async Task RegisterAsync(UserModel user, string password)
+        public async Task<UserModel> RegisterAsync(UserRegistrationRequestModel user, string password)
         {
             if (String.IsNullOrEmpty(password) || user == null)
-                return;
+                return null;
 
             bool isExistingUser = await _userManager.Users.AnyAsync(userEntity => userEntity.Email == user.Email);
 
             if (isExistingUser)
-                return;
+                return null;
 
             //computing hash
             user.Password = password;
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<UserModel, UserEntity>());
-            var mapper = new Mapper(config);
+            var configEntity = new MapperConfiguration(cfg => cfg.CreateMap<UserRegistrationRequestModel, UserEntity>());
+            var mapperEntity = new Mapper(configEntity);
 
-            var userEntity = mapper.Map<UserModel, UserEntity>(user);
+            var userEntity = mapperEntity.Map<UserRegistrationRequestModel, UserEntity>(user);
+            userEntity.UserName ??= user.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
+            userEntity.PasswordHash = user.Password; //add hash function here
 
-            await _userManager.CreateAsync(userEntity);
+            var result = await _userManager.CreateAsync(userEntity);
+
+            IEnumerable<IdentityError> errors;
+            if (result.Succeeded)
+            {
+
+            }
+            else
+            {
+                errors = result.Errors;
+            }
+            //await _db.SaveChangesAsync();
+
+            var isAdded = await _userManager.FindByEmailAsync(userEntity.Email);
+
+            var configModel = new MapperConfiguration(cfg => cfg.CreateMap<UserRegistrationRequestModel, UserModel>());
+            var mapperModel = new Mapper(configModel);
+            var userModel = mapperModel.Map<UserRegistrationRequestModel, UserModel>(user);
+
+            return userModel;
         }
 
         public async Task<ClaimsIdentity> GetIdentityAsync(string email, string password)

@@ -1,4 +1,6 @@
-﻿namespace HotelReservation.Data.Entities
+﻿using System.Collections.Generic;
+
+namespace HotelReservation.Data.Entities
 {
     public class RoomEntity
     {
@@ -13,6 +15,6 @@
         public virtual HotelEntity Hotel { get; set; }
         
         public virtual ReservationEntity Reservation { get; set; }
-        public virtual UserEntity User { get; set; }
+        public virtual IEnumerable<UserEntity> Users { get; set; }
     }
 }
