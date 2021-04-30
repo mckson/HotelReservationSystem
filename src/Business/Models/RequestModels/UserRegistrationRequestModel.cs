@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace HotelReservation.Business.Models.RequestModels
@@ -25,7 +24,7 @@ namespace HotelReservation.Business.Models.RequestModels
 
         [Required(ErrorMessage = "Date of Birth is required")]
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         
         [Required(ErrorMessage = "First name is required")]
         public string FirstName { get; set; }

@@ -11,98 +11,69 @@ namespace HotelReservation.Data.Repositories
     public class HotelRepository : IRepository<HotelEntity>
     {
         private readonly HotelContext _db;
+        private readonly DbSet<HotelEntity> _hotels;
 
         public HotelRepository(HotelContext context)
         {
             _db = context;
+            _hotels = context.Hotels;
         }
 
-        public IEnumerable<HotelEntity> GetAll()
-        {
-            return _db.Hotels
-                /*.Include(hotel => hotel.Location)
-                .Include(hotel => hotel.Rooms)
-                    .ThenInclude(room => room.Guest)
-                .Include(hotel => hotel.Rooms)
-                    .ThenInclude(room => room.Reservation)
-                .Include(hotel => hotel.Guests)*/;
-        }
+        public IEnumerable<HotelEntity> GetAll() => _hotels;
 
-        public async Task<IEnumerable<HotelEntity>> GetAllAsync()
-        {
-            return await Task.Run(GetAll);
-        }
+        public async Task<IEnumerable<HotelEntity>> GetAllAsync() => await Task.Run(GetAll);
 
-        public HotelEntity Get(int id)
-        {
-            return _db.Hotels
-                /*.Include(hotel => hotel.Location)
-                .Include(hotel => hotel.Rooms)
-                    .ThenInclude(room => room.Guest)
-                .Include(hotel => hotel.Rooms)
-                    .ThenInclude(room => room.Reservation)
-                .Include(hotel => hotel.Guests)*/
-                .FirstOrDefault(hotel => hotel.Id == id);
-        }
+        public HotelEntity Get(int id) => _hotels.FirstOrDefault(hotel => hotel.Id == id);
 
-        public async Task<HotelEntity> GetAsync(int id)
-        {
-            return await Task.Run(() => Get(id));
-        }
+        public async Task<HotelEntity> GetAsync(int id) => await Task.Run(() => Get(id));
 
-        public IEnumerable<HotelEntity> Find(Func<HotelEntity, bool> predicate)
-        {
-            return _db.Hotels
-                /*.Include(hotel => hotel.Location)
-                .Include(hotel => hotel.Rooms)
-                    .ThenInclude(room => room.Guest)
-                .Include(hotel => hotel.Rooms)
-                    .ThenInclude(room => room.Reservation)
-                .Include(hotel => hotel.Guests)*/
-                .Where(predicate);
-        }
+        public IEnumerable<HotelEntity> Find(Func<HotelEntity, bool> predicate) => _hotels.Where(predicate);
 
-        public async Task<IEnumerable<HotelEntity>> FindAsync(Func<HotelEntity, bool> predicate)
-        {
-            return await Task.Run(() => Find(predicate));
-        }
+        public async Task<IEnumerable<HotelEntity>> FindAsync(Func<HotelEntity, bool> predicate) =>
+            await Task.Run(() => Find(predicate));
 
         public void Create(HotelEntity hotel)
         {
-            _db.Hotels.Add(hotel);
+            _hotels.Add(hotel);
+            _db.SaveChanges();
         }
 
         public async Task CreateAsync(HotelEntity hotel)
         {
-            await _db.Hotels.AddAsync(hotel);
+            await _hotels.AddAsync(hotel);
+            await _db.SaveChangesAsync();
         }
 
         //change implementation
         public void Update(HotelEntity newHotel)
         {
-            var oldHotel = _db.Hotels.Find(newHotel.Id);
+            var oldHotel = _hotels.Find(newHotel.Id);
             oldHotel = newHotel;
+            _db.SaveChanges();
         }
 
-        public async Task UpdateAsync(HotelEntity newItem)
-        {
-            await Task.Run(() => Update(newItem));
-        }
+        public async Task UpdateAsync(HotelEntity newItem) => await Task.Run(() => Update(newItem));
 
         public void Delete(int id)
         {
-            var hotel = _db.Hotels.Find(id);
+            var hotel = _hotels.Find(id);
 
             if (hotel != null)
-                _db.Hotels.Remove(hotel);
+            {
+                _hotels.Remove(hotel);
+                _db.SaveChanges();
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
-            var hotel = await _db.Hotels.FindAsync(id);
+            var hotel = await _hotels.FindAsync(id);
 
             if (hotel != null)
-                _db.Hotels.Remove(hotel);
+            {
+                _hotels.Remove(hotel);
+                await _db.SaveChangesAsync();
+            }
         }
     }
 }

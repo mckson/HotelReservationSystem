@@ -11,85 +11,80 @@ namespace HotelReservation.Data.Repositories
     public class CompanyRepository : IRepository<CompanyEntity>
     {
         private readonly HotelContext _db;
+        private readonly DbSet<CompanyEntity> _companies;
 
         public CompanyRepository(HotelContext context)
         {
             _db = context;
+            _companies = context.Companies;
         }
 
-        public IEnumerable<CompanyEntity> GetAll()
-        {
-            return _db.Companies
-                /*.Include(c => c.Hotels)*/;
-        }
+        public IEnumerable<CompanyEntity> GetAll() => _db.Companies;
 
-        public async Task<IEnumerable<CompanyEntity>> GetAllAsync()
-        {
-            return await Task.Run(GetAll);
-        }
+        public async Task<IEnumerable<CompanyEntity>> GetAllAsync() => await Task.Run(GetAll);
 
-        public CompanyEntity Get(int id)
-        {
-            return _db.Companies
-                //.Include(c => c.Hotels)
-                .FirstOrDefault(company => company.Id == id);
-        }
+        public CompanyEntity Get(int id) => _companies.FirstOrDefault(company => company.Id == id);
 
-        public async Task<CompanyEntity> GetAsync(int id)
-        {
-            return await Task.Run(() => Get(id));
-        }
+        public async Task<CompanyEntity> GetAsync(int id) => await Task.Run(() => Get(id));
 
-        public IEnumerable<CompanyEntity> Find(Func<CompanyEntity, bool> predicate)
-        {
-            return _db.Companies
-                //.Include(company => company.Hotels)
-                .Where(predicate);
-        }
+        public IEnumerable<CompanyEntity> Find(Func<CompanyEntity, bool> predicate) => _companies.Where(predicate);
 
-        public async Task<IEnumerable<CompanyEntity>> FindAsync(Func<CompanyEntity, bool> predicate)
-        {
-            return await Task.Run(() => Find(predicate));
-        }
+        public async Task<IEnumerable<CompanyEntity>> FindAsync(Func<CompanyEntity, bool> predicate) =>
+            await Task.Run(() => Find(predicate));
 
         public void Create(CompanyEntity company)
         {
-            _db.Companies.Add(company);
+            _companies.Add(company);
+            _db.SaveChanges();
         }
 
         public async Task CreateAsync(CompanyEntity company)
         {
-            await _db.Companies.AddAsync(company);
+            await _companies.AddAsync(company);
+            await _db.SaveChangesAsync();
         }
 
         public void Update(CompanyEntity newCompany)
         {
-            var oldCompany = _db.Companies.Find(newCompany.Id);
+            var oldCompany = _companies.Find(newCompany.Id);
 
-            if (oldCompany != null) oldCompany = newCompany;
+            if (oldCompany == null) return;
+
+            oldCompany = newCompany;
+            _db.SaveChanges();
+
         }
 
         public async Task UpdateAsync(CompanyEntity newCompany)
         {
-            var oldCompany = await _db.Companies.FindAsync(newCompany.Id);
+            var oldCompany = await _companies.FindAsync(newCompany.Id);
 
-            if (oldCompany != null) oldCompany = newCompany;
+            if (oldCompany != null)
+            {
+                oldCompany = newCompany;
+                await _db.SaveChangesAsync();
+            }
         }
 
         public void Delete(int id)
         {
-            var company = _db.Companies.Find(id);
+            var company = _companies.Find(id);
 
-            if (company != null)
-                _db.Companies.Remove(company);
+            if (company == null) return;
+
+            _companies.Remove(company);
+            _db.SaveChanges();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var company = await _db.Companies.FindAsync(id);
+            var company = await _companies.FindAsync(id);
 
             if (company != null)
-                _db.Companies.Remove(company);
+            {
+                _companies.Remove(company);
+                await _db.SaveChangesAsync();
+            }
         }
     }
 }

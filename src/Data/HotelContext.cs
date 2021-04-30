@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using HotelReservation.Data.Configurations;
+﻿using HotelReservation.Data.Configurations;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

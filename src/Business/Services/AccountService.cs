@@ -3,35 +3,30 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Castle.Core.Internal;
 using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.RequestModels;
-using HotelReservation.Data;
+using HotelReservation.Business.Models.ResponseModels;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace HotelReservation.Business.Services
 {
     public class AccountService : IAccountService
     {
         private readonly UserManager<UserEntity> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManger;
-        private readonly HotelContext _db;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
 
         public AccountService(UserManager<UserEntity> userManager, 
-            RoleManager<IdentityRole> roleManager,
-            HotelContext context,
             IPasswordHasher<UserEntity> passwordHasher)
         {
             _userManager = userManager;
-            _roleManger = roleManager;
-            _db = context;
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<UserModel> AuthenticateAsync(string email, string password)
+        public async Task<UserResponseModel> AuthenticateAsync(string email, string password)
         {
             if (String.IsNullOrEmpty(email) || String.IsNullOrEmpty(password))
                 return null;
@@ -50,23 +45,23 @@ namespace HotelReservation.Business.Services
                 PasswordVerificationResult.Failed)
                 return null;
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<UserEntity, UserModel>()
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<UserEntity, UserResponseModel>()
                 .ForMember("Password", opt => opt.MapFrom(c => c.PasswordHash)));
             var mapper = new Mapper(config);
 
-            return mapper.Map<UserEntity, UserModel>(userEntity);
+            return mapper.Map<UserEntity, UserResponseModel>(userEntity);
 
         }
 
-        public async Task<UserModel> RegisterAsync(UserRegistrationRequestModel user, string password)
+        public async Task<UserResponseModel> RegisterAsync(UserRegistrationRequestModel user, string password)
         {
             if (String.IsNullOrEmpty(password) || user == null)
                 return null;
 
-            bool isExistingUser = await _userManager.Users.AnyAsync(userEntity => userEntity.Email == user.Email);
+            var existingUserEntity = await _userManager.FindByEmailAsync(user.Email);
 
-            if (isExistingUser)
-                return null;
+            if (existingUserEntity != null)
+                return null;    //add error "user with such email exists"
 
             user.Password = password;
 
@@ -76,26 +71,17 @@ namespace HotelReservation.Business.Services
             var userEntity = mapperEntity.Map<UserRegistrationRequestModel, UserEntity>(user);
             userEntity.UserName ??= user.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
             userEntity.PasswordHash = _passwordHasher.HashPassword(userEntity, user.Password);
-            //userEntity.PasswordHash = user.Password; //add hash function here
 
             var result = await _userManager.CreateAsync(userEntity);
+            var addedUserEntity = await _userManager.FindByEmailAsync(user.Email);
+            var addedUserRoles = await _userManager.GetRolesAsync(addedUserEntity);
 
-            IEnumerable<IdentityError> errors;
-            if (result.Succeeded)
-            {
+            if (result == IdentityResult.Success && addedUserRoles.IsNullOrEmpty())
+                await _userManager.AddToRoleAsync(addedUserEntity, "User");
 
-            }
-            else
-            {
-                errors = result.Errors;
-            }
-            //await _db.SaveChangesAsync();
-
-            var isAdded = await _userManager.FindByEmailAsync(userEntity.Email);
-
-            var configModel = new MapperConfiguration(cfg => cfg.CreateMap<UserRegistrationRequestModel, UserModel>());
+            var configModel = new MapperConfiguration(cfg => cfg.CreateMap<UserRegistrationRequestModel, UserResponseModel>());
             var mapperModel = new Mapper(configModel);
-            var userModel = mapperModel.Map<UserRegistrationRequestModel, UserModel>(user);
+            var userModel = mapperModel.Map<UserRegistrationRequestModel, UserResponseModel>(user);
 
             return userModel;
         }
@@ -108,12 +94,18 @@ namespace HotelReservation.Business.Services
 
             if (userEntity != null && _passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, password) == PasswordVerificationResult.Success)
             {
-                var roles = await _userManager.GetRolesAsync(userEntity);
+                await _userManager.GetRolesAsync(userEntity);
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, userEntity.Email),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, "User")
+                    // this guarantees the token is unique
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
+
+                //Adds all roles to claims
+                foreach (var role in await _userManager.GetRolesAsync(userEntity))
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
 
                 ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);

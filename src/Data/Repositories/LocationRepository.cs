@@ -11,87 +11,81 @@ namespace HotelReservation.Data.Repositories
     public class LocationRepository : IRepository<LocationEntity>
     {
         private readonly HotelContext _db;
+        private readonly DbSet<LocationEntity> _locations;
 
         public LocationRepository(HotelContext context)
         {
             _db = context;
+            _locations = context.Locations;
         }
 
-        public IEnumerable<LocationEntity> GetAll()
-        {
-            return _db.Locations
-               /* .Include(location => location.Hotel)*/;
-        }
+        public IEnumerable<LocationEntity> GetAll() => _locations;
 
-        public async Task<IEnumerable<LocationEntity>> GetAllAsync()
-        {
-            return await Task.Run(GetAll);
-        }
+        public async Task<IEnumerable<LocationEntity>> GetAllAsync() => await Task.Run(GetAll);
 
-        public LocationEntity Get(int id)
-        {
-            return _db.Locations
-                /*.Include(location => location.Hotel)*/
-                .FirstOrDefault(location => location.Id == id);
-        }
+        public LocationEntity Get(int id) => _locations.FirstOrDefault(location => location.Id == id);
 
-        public async Task<LocationEntity> GetAsync(int id)
-        {
-            return await Task.Run(() => Get(id));
-        }
+        public async Task<LocationEntity> GetAsync(int id) => await Task.Run(() => Get(id));
 
-        public IEnumerable<LocationEntity> Find(Func<LocationEntity, bool> predicate)
-        {
-            return _db.Locations
-                /*.Include(location => location.Hotel)*/
-                .Where(predicate);
-        }
+        public IEnumerable<LocationEntity> Find(Func<LocationEntity, bool> predicate) => _locations.Where(predicate);
 
-        public async Task<IEnumerable<LocationEntity>> FindAsync(Func<LocationEntity, bool> predicate)
-        {
-            return await Task.Run(() => Find(predicate));
-        }
+        public async Task<IEnumerable<LocationEntity>> FindAsync(Func<LocationEntity, bool> predicate) => await Task.Run(() => Find(predicate));
 
         public void Create(LocationEntity location)
         {
-            _db.Locations.Add(location);
+            _locations.Add(location);
+            _db.SaveChanges();
         }
 
         public async Task CreateAsync(LocationEntity location)
         {
-            await _db.Locations.AddAsync(location);
+            await _locations.AddAsync(location);
+            await _db.SaveChangesAsync();
         }
 
         public void Update(LocationEntity newLocation)
         {
-            var oldLocation = _db.Locations.Find(newLocation);
+            var oldLocation = _locations.Find(newLocation);
 
-            if (oldLocation != null) oldLocation = newLocation;
+            if (oldLocation != null)
+            {
+                oldLocation = newLocation;
+                _db.SaveChanges();
+            }
         }
 
         //change implementation
         public async Task UpdateAsync(LocationEntity newLocation)
         {
-            var oldLocation = await _db.Locations.FindAsync(newLocation);
+            var oldLocation = await _locations.FindAsync(newLocation);
 
             if (oldLocation != null)
+            {
                 oldLocation = newLocation;
+                await _db.SaveChangesAsync();
+            }
         }
 
         public void Delete(int id)
         {
-            var location = _db.Locations.Find(id);
+            var location = _locations.Find(id);
 
             if (location != null)
-                _db.Locations.Remove(location);
+            {
+                _locations.Remove(location);
+                _db.SaveChanges();
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
-            var location = await _db.Locations.FindAsync(id);
+            var location = await _locations.FindAsync(id);
 
             if (location != null)
-                _db.Locations.Remove(location);
+            {
+                _locations.Remove(location);
+                await _db.SaveChangesAsync();
+            }
         }
     }
 }

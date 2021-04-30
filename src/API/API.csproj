@@ -29,4 +29,9 @@
     <ProjectReference Include="..\Business\Business.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Authorization\Handlers\" />
+    <Folder Include="Authorization\Requirements\" />
+  </ItemGroup>
+
 </Project>

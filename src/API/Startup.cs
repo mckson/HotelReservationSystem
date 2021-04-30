@@ -1,9 +1,10 @@
-using System;
 using System.Text;
 using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Mappers;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
 using HotelReservation.Data.Entities;
+using HotelReservation.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,8 +23,6 @@ namespace HotelReservation.API
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-
-            //UpdateDatabase(app);
         }
 
         public IConfiguration Configuration { get; }
@@ -45,12 +44,8 @@ namespace HotelReservation.API
                 .AddEntityFrameworkStores<HotelContext>();
 
             services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
-            //services.AddSingleton<UserManager<UserEntity>>();
-            //services.AddSingleton<RoleManager<IdentityRole>>();
-            services.AddScoped<IAccountService, AccountService>();
 
-            //services.AddIdentityServer()
-            //    .AddApiAuthorization<IdentityUser, HotelContext>();
+            services.AddScoped<IAccountService, AccountService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -72,13 +67,36 @@ namespace HotelReservation.API
                     };
                 });
 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("GetHotelsPermission",
+                    policy =>
+                    {
+                        policy.RequireAuthenticatedUser();
+                    });
+
+                options.AddPolicy("PostHotelsPermission", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireRole("Admin", "Manager");
+                });
+            });
+
+
+            services.AddScoped<HotelRepository>();
+            services.AddScoped<CompanyRepository>();
+            services.AddScoped<LocationRepository>();
+            services.AddSingleton<LocationMapper>();
+            services.AddSingleton<RoomMapper>();
+            services.AddSingleton<HotelMapper>();
+            services.AddScoped<IHotelsService, HotelsService>();
+
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //UpdateDatabase(app);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -100,15 +118,6 @@ namespace HotelReservation.API
             {
                 endpoints.MapControllers();
             });
-        }
-
-        private static void UpdateDatabase(IApplicationBuilder app)
-        {
-            using var serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope();
-            using var context = serviceScope.ServiceProvider.GetService<HotelContext>();
-                if (context != null) context.Database.Migrate();
         }
     }
 }

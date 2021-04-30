@@ -1,87 +1,54 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using HotelReservation.Data;
-using HotelReservation.Data.Entities;
-using HotelReservation.Data.Repositories;
+using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Models.RequestModels;
+using HotelReservation.Business.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace HotelReservation.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HotelsController : ControllerBase
     {
-        private readonly HotelContext _db;
-        private readonly HotelRepository _hoteRepo;
+        private readonly IHotelsService _service;
 
-        public HotelsController(HotelContext context)
+        public HotelsController(IHotelsService service)
         {
-            _db = context;
-            _hoteRepo = new HotelRepository(_db);
+            _service = service;
         }
 
         // GET: api/<HotelsController>
-        [Authorize]
+        [Authorize(Policy = "GetHotelsPermission")]
         [HttpGet]
-        public async Task<IEnumerable<HotelDTO>> Get()
+        public async Task<ActionResult<IEnumerable<HotelResponseModel>>> GetHotels()
         {
-            var hotels = await _hoteRepo.GetAllAsync();
-            var hotelsDTO =  hotels
-                .Select(h => new HotelDTO
-                {
-                    Id = h.Id,
-                    Name = h.Name,
-                    Rooms = h.Rooms.Select(r => new RoomDTO
-                    {
-                        HotelName = r.Hotel.Name,
-                        Number = r.RoomNumber
-                    })
-                });
+            var hotelsResponse = await _service.GetHotelsAsync();
+            if (hotelsResponse == null) return NotFound("There is no hotels in system");
 
-            return hotelsDTO;
+            return Ok(hotelsResponse);
         }
 
         // GET api/<HotelsController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<HotelDTO>> Get(int id)
+        public async Task<ActionResult<HotelResponseModel>> GetHotel(int id)
         {
-            var hotel = await _hoteRepo.GetAsync(id);
-            try
-            {
-                if (hotel == null) throw new Exception();
-                var hotelDto = new HotelDTO
-                {
-                    Id = hotel.Id,
-                    Name = hotel.Name,
-                    Rooms = hotel.Rooms.Select(r => new RoomDTO
-                    {
-                        HotelName = r.Hotel.Name,
-                        Number = r.RoomNumber
-                    })
+            var hotelResponse = await _service.GetAsync(id);
+            if (hotelResponse == null) return NotFound();
 
-                };
-
-                return Ok(hotelDto);
-            }
-            catch
-            {
-                return NotFound();
-            }
+            return Ok(hotelResponse);
         }
 
         // POST api/<HotelsController>
+        [Authorize(Policy = "PostHotelsPermission")]
         [HttpPost]
-        public async Task<ActionResult<HotelEntity>> Post([FromBody] HotelEntity hotel)
+        public async Task<ActionResult<HotelResponseModel>> CreateHotel([FromBody] HotelRequestModel hotelRequest)
         {
-            await _hoteRepo.CreateAsync(hotel);
-            await _db.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new {id = hotel.Id}, hotel);
+            var hotelResponse = await _service.CreateAsync(hotelRequest);
+
+            return Ok(hotelResponse);
         }
 
         // PUT api/<HotelsController>/5
@@ -95,21 +62,5 @@ namespace HotelReservation.API.Controllers
         public void Delete(int id)
         {
         }
-    }
-
-    //test class
-    public class HotelDTO
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public IEnumerable<RoomDTO> Rooms { get; set; }
-        public LocationEntity Location { get; set; }
-    }
-
-    //test classs
-    public class RoomDTO
-    {
-        public int Number { get; set; }
-        public string HotelName { get; set; }
     }
 }

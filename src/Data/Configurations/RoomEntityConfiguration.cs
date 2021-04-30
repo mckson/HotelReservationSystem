@@ -1,7 +1,6 @@
 ﻿using HotelReservation.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace HotelReservation.Data.Configurations
 {

@@ -11,88 +11,71 @@ namespace HotelReservation.Data.Repositories
     public class RoomRepository : IRepository<RoomEntity>
     {
         private readonly HotelContext _db;
+        private readonly DbSet<RoomEntity> _rooms;
 
         public RoomRepository(HotelContext context)
         {
             _db = context;
+            _rooms = context.Rooms;
         }
 
-        public IEnumerable<RoomEntity> GetAll()
-        {
-            return _db.Rooms
-                /*.Include(room => room.Hotel)
-                .Include(room => room.Reservation)
-                .Include(room => room.Guest)*/;
-        }
+        public IEnumerable<RoomEntity> GetAll() => _rooms;
 
-        public async Task<IEnumerable<RoomEntity>> GetAllAsync()
-        {
-            return await Task.Run(GetAll);
-        }
+        public async Task<IEnumerable<RoomEntity>> GetAllAsync() => await Task.Run(GetAll);
 
-        public RoomEntity Get(int id)
-        {
-            return _db.Rooms
-                /*.Include(room => room.Hotel)
-                .Include(room => room.Reservation)
-                .Include(room => room.Guest)*/
-                .FirstOrDefault(room => room.Id == id);
-        }
+        public RoomEntity Get(int id) => _rooms.FirstOrDefault(room => room.Id == id);
 
-        public async Task<RoomEntity> GetAsync(int id)
-        {
-            return await Task.Run(() => Get(id));
-        }
+        public async Task<RoomEntity> GetAsync(int id) => await Task.Run(() => Get(id));
 
-        public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate)
-        {
-            return _db.Rooms
-                /*.Include(room => room.Hotel)
-                .Include(room => room.Reservation)
-                .Include(room => room.Guest)*/
-                .Where(predicate);
-        }
+        public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate) => _rooms.Where(predicate);
 
-        public async Task<IEnumerable<RoomEntity>> FindAsync(Func<RoomEntity, bool> predicate)
-        {
-            return await Task.Run(() => Find(predicate));
-        }
+        public async Task<IEnumerable<RoomEntity>> FindAsync(Func<RoomEntity, bool> predicate) => await Task.Run(() => Find(predicate));
 
         public void Create(RoomEntity room)
         {
-            _db.Rooms.Add(room);
+            _rooms.Add(room);
+            _db.SaveChanges();
         }
 
         public async Task CreateAsync(RoomEntity room)
         {
-            await _db.Rooms.AddAsync(room);
+            await _rooms.AddAsync(room);
+            await _db.SaveChangesAsync();
         }
 
         //change implementation
         public void Update(RoomEntity newRoom)
         {
-            var oldRoom = _db.Rooms.Find(newRoom.Id);
+            var oldRoom = _rooms.Find(newRoom.Id);
             oldRoom = newRoom;
+            _db.SaveChanges();
         }
 
         public async Task UpdateAsync(RoomEntity newRoom)
         {
-            var oldRoom = await _db.Rooms.FindAsync(newRoom.Id);
+            var oldRoom = await _rooms.FindAsync(newRoom.Id);
             oldRoom = newRoom;
+            await _db.SaveChangesAsync();
         }
 
         public void Delete(int id)
         {
-            var deleteRoom = _db.Rooms.Find(id);
+            var deleteRoom = _rooms.Find(id);
             if (deleteRoom != null)
-                _db.Rooms.Remove(deleteRoom);
+            {
+                _rooms.Remove(deleteRoom);
+                _db.SaveChanges();
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
-            var deleteRoom = await _db.Rooms.FindAsync(id);
+            var deleteRoom = await _rooms.FindAsync(id);
             if (deleteRoom != null)
-                _db.Rooms.Remove(deleteRoom);
+            {
+                _rooms.Remove(deleteRoom);
+                await _db.SaveChangesAsync();
+            }
         }
     }
 }
