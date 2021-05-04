@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models.RequestModels;
 using HotelReservation.Business.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HotelReservation.API.Controllers
 {
@@ -23,20 +24,23 @@ namespace HotelReservation.API.Controllers
         // GET: api/<HotelsController>
         [Authorize(Policy = "GetHotelsPermission")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HotelResponseModel>>> GetHotels()
+        public ActionResult<IEnumerable<HotelResponseModel>> GetHotels()
         {
-            var hotelsResponse = await _service.GetHotelsAsync();
-            if (hotelsResponse == null) return NotFound("There is no hotels in system");
+            var hotelsResponse = _service.GetHotels();
+            if (hotelsResponse == null)
+                return NotFound("There is no hotels in system");
 
             return Ok(hotelsResponse);
         }
 
         // GET api/<HotelsController>/5
+        [Authorize(Policy = "GetHotelsPermission")]
         [HttpGet("{id}")]
         public async Task<ActionResult<HotelResponseModel>> GetHotel(int id)
         {
             var hotelResponse = await _service.GetAsync(id);
-            if (hotelResponse == null) return NotFound();
+            if (hotelResponse == null)
+                return NotFound();
 
             return Ok(hotelResponse);
         }
@@ -46,21 +50,66 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotel([FromBody] HotelRequestModel hotelRequest)
         {
-            var hotelResponse = await _service.CreateAsync(hotelRequest);
+            try
+            {
+                var hotelResponse = await _service.CreateAsync(hotelRequest);
 
-            return Ok(hotelResponse);
+                return Ok(hotelResponse);
+            }
+            catch (DataException ex)
+            {
+                if (ex.Status == ErrorStatus.NotFound)
+                    return NotFound($"{ex.Status}: {ex.Message}");
+
+                if (ex.Status == ErrorStatus.HasLinkedEntity)
+                    return BadRequest($"{ex.Status}: {ex.Message}");
+
+                return BadRequest();
+            }
         }
 
         // PUT api/<HotelsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [Authorize(Policy = "UpdateHotelsPermission")]
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<HotelResponseModel>> PutAsync(int id, [FromBody] HotelRequestModel hotelRequest)
         {
+            try
+            {
+                var hotelResponse = await _service.UpdateAsync(id, hotelRequest);
+
+                return Ok(hotelResponse);
+            }
+            catch (DataException ex)
+            {
+                if (ex.Status == ErrorStatus.NotFound)
+                    return NotFound($"{ex.Status}: {ex.Message}");
+
+                if (ex.Status == ErrorStatus.HasLinkedEntity)
+                    return BadRequest($"{ex.Status}: {ex.Message}");
+
+                return BadRequest();
+            }
         }
 
         // DELETE api/<HotelsController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
+            try
+            {
+                await _service.DeleteAsync(id);
+                return Ok();
+            }
+            catch (DataException ex)
+            {
+                if (ex.Status == ErrorStatus.NotFound)
+                    return NotFound($"{ex.Status}: {ex.Message}");
+
+                if (ex.Status == ErrorStatus.HasLinkedEntity)
+                    return BadRequest($"{ex.Status}: {ex.Message}");
+
+                return BadRequest();
+            }
         }
     }
 }

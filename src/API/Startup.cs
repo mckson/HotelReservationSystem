@@ -1,9 +1,10 @@
-using System.Text;
+﻿using System.Text;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Mappers;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
 using HotelReservation.Data.Entities;
+using HotelReservation.Data.Interfaces;
 using HotelReservation.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -69,26 +70,38 @@ namespace HotelReservation.API
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("GetHotelsPermission",
+                options.AddPolicy(
+                    "GetHotelsPermission",
                     policy =>
                     {
                         policy.RequireAuthenticatedUser();
                     });
 
-                options.AddPolicy("PostHotelsPermission", policy =>
+                options.AddPolicy(
+                    "PostHotelsPermission",
+                    policy =>
                 {
                     policy.RequireAuthenticatedUser();
                     policy.RequireRole("Admin", "Manager");
                 });
+
+                options.AddPolicy(
+                    "UpdateHotelsPermission",
+                    policy =>
+                    {
+                        policy.RequireAuthenticatedUser();
+                        policy.RequireRole("Admin", "Manager");
+                    });
             });
 
+            services.AddScoped<IRepository<HotelEntity>, HotelRepository>();
+            services.AddScoped<IRepository<CompanyEntity>, CompanyRepository>();
+            services.AddScoped<IRepository<LocationEntity>, LocationRepository>();
 
-            services.AddScoped<HotelRepository>();
-            services.AddScoped<CompanyRepository>();
-            services.AddScoped<LocationRepository>();
             services.AddSingleton<LocationMapper>();
             services.AddSingleton<RoomMapper>();
             services.AddSingleton<HotelMapper>();
+
             services.AddScoped<IHotelsService, HotelsService>();
 
             services.AddControllers();

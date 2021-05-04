@@ -19,10 +19,9 @@ namespace HotelReservation.Data.Repositories
             _companies = context.Companies;
         }
 
-        public IEnumerable<CompanyEntity> GetAll() => _db.Companies;
+        public IEnumerable<CompanyEntity> GetAll() => _companies;
 
-        public async Task<IEnumerable<CompanyEntity>> GetAllAsync() => await Task.Run(GetAll);
-
+        // public async Task<IEnumerable<CompanyEntity>> GetAllAsync() => await Task.Run(GetAll);
         public CompanyEntity Get(int id) => _companies.FirstOrDefault(company => company.Id == id);
 
         public async Task<CompanyEntity> GetAsync(int id) => await Task.Run(() => Get(id));
@@ -48,11 +47,11 @@ namespace HotelReservation.Data.Repositories
         {
             var oldCompany = _companies.Find(newCompany.Id);
 
-            if (oldCompany == null) return;
+            if (oldCompany == null)
+                return;
 
             oldCompany = newCompany;
             _db.SaveChanges();
-
         }
 
         public async Task UpdateAsync(CompanyEntity newCompany)
@@ -70,7 +69,8 @@ namespace HotelReservation.Data.Repositories
         {
             var company = _companies.Find(id);
 
-            if (company == null) return;
+            if (company == null)
+                return;
 
             _companies.Remove(company);
             _db.SaveChanges();

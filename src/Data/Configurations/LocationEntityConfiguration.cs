@@ -8,6 +8,11 @@ namespace HotelReservation.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<LocationEntity> builder)
         {
+            builder.HasOne(l => l.Hotel)
+                .WithOne(h => h.Location)
+                .HasForeignKey<HotelEntity>(h => h.LocationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.Property(l => l.Country)
                 .HasMaxLength(50)
                 .IsRequired();

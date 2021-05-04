@@ -17,12 +17,16 @@ namespace HotelReservation.Business.Mappers
             {
                 cfg.CreateMap<HotelEntity, HotelResponseModel>()
                     .ForMember("HotelName", opt => opt.MapFrom(entity => entity.Name))
-                    .ForMember("Location",
+                    .ForMember(
+                        "Location",
                         opt => opt.MapFrom(entity => locationMapper.EntityToResponse(entity.Location)))
-                    .ForMember("Rooms",
+                    .ForMember(
+                        "Rooms",
                         opt => opt.MapFrom(entity => entity.Rooms.Select(r => roomMapper.EntityToResponse(r))))
                     .ForMember("CompanyName", opt => opt.MapFrom(entity => entity.Company.Title));
 
+                cfg.CreateMap<HotelRequestModel, HotelEntity>()
+                    .ForMember("Name", opt => opt.MapFrom(request => request.HotelName));
             });
 
             _mapper = new Mapper(configuration);
@@ -36,6 +40,11 @@ namespace HotelReservation.Business.Mappers
         public HotelResponseModel RequestToResponse(HotelRequestModel requestModel)
         {
             throw new System.NotImplementedException();
+        }
+
+        public HotelEntity RequestToEntity(HotelRequestModel requestModel)
+        {
+            return _mapper.Map<HotelRequestModel, HotelEntity>(requestModel);
         }
     }
 }

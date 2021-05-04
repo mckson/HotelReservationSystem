@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HotelReservation.Data.Migrations
 {
+    /// <summary>
+    /// /
+    /// </summary>
     public partial class NotRequiredUserReservationRelation : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,7 +28,7 @@ namespace HotelReservation.Data.Migrations
                 table: "AspNetUsers",
                 maxLength: 100,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
 
             migrationBuilder.AddColumn<int>(
                 name: "HotelId",
@@ -38,7 +41,7 @@ namespace HotelReservation.Data.Migrations
                 table: "AspNetUsers",
                 maxLength: 100,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
 
             migrationBuilder.AddColumn<int>(
                 name: "RoomId",

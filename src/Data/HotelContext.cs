@@ -13,10 +13,13 @@ namespace HotelReservation.Data
         }
 
         public DbSet<CompanyEntity> Companies { get; set; }
+
         public DbSet<HotelEntity> Hotels { get; set; }
+
         public DbSet<RoomEntity> Rooms { get; set; }
+
         public DbSet<LocationEntity> Locations { get; set; }
-        public DbSet<UserEntity> SystemUsers { get; set; }
+
         public DbSet<ReservationEntity> Reservations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -19,7 +19,8 @@ namespace HotelReservation.Business.Services
         private readonly UserManager<UserEntity> _userManager;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
 
-        public AccountService(UserManager<UserEntity> userManager, 
+        public AccountService(
+            UserManager<UserEntity> userManager,
             IPasswordHasher<UserEntity> passwordHasher)
         {
             _userManager = userManager;
@@ -28,7 +29,7 @@ namespace HotelReservation.Business.Services
 
         public async Task<UserResponseModel> AuthenticateAsync(string email, string password)
         {
-            if (String.IsNullOrEmpty(email) || String.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 return null;
 
             var userEntity = await _userManager.FindByEmailAsync(email);
@@ -36,11 +37,11 @@ namespace HotelReservation.Business.Services
             {
                 return null;
             }
-            //if (userEntity.PasswordHash != password)
-            //{
-            //    return null;
-            //}
 
+            // if (userEntity.PasswordHash != password)
+            // {
+            //     return null;
+            // }
             if (_passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, password) ==
                 PasswordVerificationResult.Failed)
                 return null;
@@ -50,18 +51,17 @@ namespace HotelReservation.Business.Services
             var mapper = new Mapper(config);
 
             return mapper.Map<UserEntity, UserResponseModel>(userEntity);
-
         }
 
         public async Task<UserResponseModel> RegisterAsync(UserRegistrationRequestModel user, string password)
         {
-            if (String.IsNullOrEmpty(password) || user == null)
+            if (string.IsNullOrEmpty(password) || user == null)
                 return null;
 
             var existingUserEntity = await _userManager.FindByEmailAsync(user.Email);
 
             if (existingUserEntity != null)
-                return null;    //add error "user with such email exists"
+                return null;    // add error "user with such email exists"
 
             user.Password = password;
 
@@ -101,13 +101,16 @@ namespace HotelReservation.Business.Services
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
 
-                //Adds all roles to claims
+                // Adds all roles to claims
                 foreach (var role in await _userManager.GetRolesAsync(userEntity))
                 {
                     claims.Add(new Claim(ClaimTypes.Role, role));
                 }
 
-                ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
+                ClaimsIdentity claimsIdentity = new ClaimsIdentity(
+                    claims,
+                    "Token",
+                    ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);
 
                 return claimsIdentity;

@@ -4,14 +4,16 @@ using HotelReservation.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HotelReservation.Data.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    partial class HotelContextModelSnapshot : ModelSnapshot
+    [Migration("20210504123949_LocationIdAddedToHotelEntityV1.1")]
+    partial class LocationIdAddedToHotelEntityV11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,10 +60,6 @@ namespace HotelReservation.Data.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.HasIndex("LocationId")
-                        .IsUnique()
-                        .HasFilter("[LocationId] IS NOT NULL");
-
                     b.ToTable("Hotels");
                 });
 
@@ -85,6 +83,9 @@ namespace HotelReservation.Data.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
+                    b.Property<int?>("HotelId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Region")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
@@ -96,6 +97,10 @@ namespace HotelReservation.Data.Migrations
                         .HasMaxLength(100);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("HotelId")
+                        .IsUnique()
+                        .HasFilter("[HotelId] IS NOT NULL");
 
                     b.ToTable("Locations");
                 });
@@ -398,10 +403,13 @@ namespace HotelReservation.Data.Migrations
                         .WithMany("Hotels")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
 
-                    b.HasOne("HotelReservation.Data.Entities.LocationEntity", "Location")
-                        .WithOne("Hotel")
-                        .HasForeignKey("HotelReservation.Data.Entities.HotelEntity", "LocationId")
+            modelBuilder.Entity("HotelReservation.Data.Entities.LocationEntity", b =>
+                {
+                    b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
+                        .WithOne("Location")
+                        .HasForeignKey("HotelReservation.Data.Entities.LocationEntity", "HotelId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 

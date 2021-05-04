@@ -43,18 +43,16 @@ namespace HotelReservation.Data.Repositories
             await _db.SaveChangesAsync();
         }
 
-        //change implementation
+        // change implementation
         public void Update(RoomEntity newRoom)
         {
-            var oldRoom = _rooms.Find(newRoom.Id);
-            oldRoom = newRoom;
+            _rooms.Find(newRoom.Id);
             _db.SaveChanges();
         }
 
         public async Task UpdateAsync(RoomEntity newRoom)
         {
-            var oldRoom = await _rooms.FindAsync(newRoom.Id);
-            oldRoom = newRoom;
+            await _rooms.FindAsync(newRoom.Id);
             await _db.SaveChangesAsync();
         }
 

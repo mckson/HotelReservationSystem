@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HotelReservation.Data.Migrations
 {
+    /// <summary>
+    /// /
+    /// </summary>
     public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

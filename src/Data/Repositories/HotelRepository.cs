@@ -44,15 +44,18 @@ namespace HotelReservation.Data.Repositories
             await _db.SaveChangesAsync();
         }
 
-        //change implementation
+        // change implementation
         public void Update(HotelEntity newHotel)
         {
-            var oldHotel = _hotels.Find(newHotel.Id);
-            oldHotel = newHotel;
+            _hotels.Update(newHotel);
             _db.SaveChanges();
         }
 
-        public async Task UpdateAsync(HotelEntity newItem) => await Task.Run(() => Update(newItem));
+        public async Task UpdateAsync(HotelEntity newItem)
+        {
+            _hotels.Update(newItem);
+            await _db.SaveChangesAsync();
+        }
 
         public void Delete(int id)
         {

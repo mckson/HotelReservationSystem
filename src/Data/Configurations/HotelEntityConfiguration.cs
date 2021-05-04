@@ -19,12 +19,11 @@ namespace HotelReservation.Data.Configurations
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(h => h.Location)
-                .WithOne(l => l.Hotel)
-                .HasForeignKey<LocationEntity>(l => l.HotelId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
-
+            // builder.HasOne(h => h.Location)
+            //    .WithOne(l => l.Hotel)
+            //    .HasForeignKey<LocationEntity>(l => l.HotelId)
+            //    .IsRequired(false)
+            //    .OnDelete(DeleteBehavior.Restrict);
             builder.Property(h => h.Name)
                 .HasMaxLength(100)
                 .IsRequired();

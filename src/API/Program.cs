@@ -1,4 +1,4 @@
-using HotelReservation.Data;
+﻿using HotelReservation.Data;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -29,12 +29,12 @@ namespace HotelReservation.API
 
                 using (var services = host.Services.CreateScope())
                 {
-                    var dbContext = services.ServiceProvider.GetRequiredService<HotelContext>();
+                    var context = services.ServiceProvider.GetRequiredService<HotelContext>();
                     var userManger = services.ServiceProvider.GetRequiredService<UserManager<UserEntity>>();
                     var roleManager = services.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                     var configuration = services.ServiceProvider.GetRequiredService<IConfiguration>();
 
-                    await dbContext.Database.MigrateAsync();
+                    await context.Database.MigrateAsync();
 
                     var adminLogin = configuration["AdminLogin:Email"];
                     var adminPassword = configuration["AdminLogin:Password"];
@@ -44,7 +44,7 @@ namespace HotelReservation.API
                     var managerRole = new IdentityRole("Manager");
                     var userRole = new IdentityRole("User");
 
-                    if (!dbContext.Roles.Any())
+                    if (!context.Roles.Any())
                     {
                         await roleManager.CreateAsync(adminRole);
                         await roleManager.CreateAsync(managerRole);
@@ -52,15 +52,15 @@ namespace HotelReservation.API
                     }
                     else
                     {
-                        if (!dbContext.Roles.Any(r => r.Name == adminRole.Name))
+                        if (!context.Roles.Any(r => r.Name == adminRole.Name))
                             await roleManager.CreateAsync(adminRole);
-                        if (!dbContext.Roles.Any(r => r.Name == managerRole.Name))
+                        if (!context.Roles.Any(r => r.Name == managerRole.Name))
                             await roleManager.CreateAsync(managerRole);
-                        if (!dbContext.Roles.Any(r => r.Name == userRole.Name))
+                        if (!context.Roles.Any(r => r.Name == userRole.Name))
                             await roleManager.CreateAsync(userRole);
                     }
 
-                    if (!dbContext.Users.Any(u => u.UserName == adminLogin))
+                    if (!context.Users.Any(u => u.UserName == adminLogin))
                     {
                         var admin = new UserEntity
                         {
@@ -73,6 +73,7 @@ namespace HotelReservation.API
                         await userManger.AddToRoleAsync(admin, adminRole.Name);
                     }
                 }
+
                 await host.RunAsync();
             }
             catch (Exception exception)

@@ -43,7 +43,7 @@ namespace HotelReservation.Data.Repositories
             await _db.SaveChangesAsync();
         }
 
-        //change implementation
+        // change implementation
         public void Update(ReservationEntity newReservation)
         {
             var oldReservation = _reservations.Find(newReservation.Id);
@@ -62,7 +62,8 @@ namespace HotelReservation.Data.Repositories
         {
             var reservation = _reservations.Find(id);
 
-            if (reservation == null) return;
+            if (reservation == null)
+                return;
 
             _reservations.Remove(reservation);
             _db.SaveChanges();

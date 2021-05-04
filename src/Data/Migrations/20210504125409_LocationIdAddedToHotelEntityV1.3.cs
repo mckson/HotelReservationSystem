@@ -5,16 +5,16 @@ namespace HotelReservation.Data.Migrations
     /// <summary>
     /// /
     /// </summary>
-    public partial class HotelUserRelationToUnrequiredChanged : Migration
+    public partial class LocationIdAddedToHotelEntityV13 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // not implemented
+            // null
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // not implemented
+            // null
         }
     }
 }

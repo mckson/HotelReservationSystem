@@ -15,7 +15,7 @@ namespace HotelReservation.Business.Mappers
             var configuration = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<LocationEntity, LocationResponseModel>().ReverseMap();
-                cfg.CreateMap<LocationRequestModel, LocationResponseModel>();   //implement
+                cfg.CreateMap<LocationRequestModel, LocationResponseModel>();   // implement
             });
 
             _mapper = new Mapper(configuration);
@@ -27,6 +27,11 @@ namespace HotelReservation.Business.Mappers
         }
 
         public LocationResponseModel RequestToResponse(LocationRequestModel requestModel)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public LocationEntity RequestToEntity(LocationRequestModel requestModel)
         {
             throw new System.NotImplementedException();
         }

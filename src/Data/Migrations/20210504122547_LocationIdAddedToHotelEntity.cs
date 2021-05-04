@@ -5,38 +5,32 @@ namespace HotelReservation.Data.Migrations
     /// <summary>
     /// /
     /// </summary>
-    public partial class AddedNullableFKForUser : Migration
+    public partial class LocationIdAddedToHotelEntity : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<int>(
-                name: "RoomId",
-                table: "AspNetUsers",
+                name: "CompanyId",
+                table: "Hotels",
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "HotelId",
-                table: "AspNetUsers",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "int");
+            migrationBuilder.AddColumn<int>(
+                name: "LocationId",
+                table: "Hotels",
+                nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
-                name: "RoomId",
-                table: "AspNetUsers",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldNullable: true);
+            migrationBuilder.DropColumn(
+                name: "LocationId",
+                table: "Hotels");
 
             migrationBuilder.AlterColumn<int>(
-                name: "HotelId",
-                table: "AspNetUsers",
+                name: "CompanyId",
+                table: "Hotels",
                 type: "int",
                 nullable: false,
                 oldClrType: typeof(int),

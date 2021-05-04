@@ -17,7 +17,7 @@ namespace HotelReservation.Business.Mappers
                 cfg.CreateMap<RoomEntity, RoomResponseModel>()
                     .ForMember("HotelName", opt => opt.MapFrom(entity => entity.Hotel.Name))
                     .ReverseMap();
-                cfg.CreateMap<RoomRequestModel, RoomResponseModel>();   //implement
+                cfg.CreateMap<RoomRequestModel, RoomResponseModel>();   // implement
             });
 
             _mapper = new Mapper(configuration);
@@ -29,6 +29,11 @@ namespace HotelReservation.Business.Mappers
         }
 
         public RoomResponseModel RequestToResponse(RoomRequestModel requestModel)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public RoomEntity RequestToEntity(RoomRequestModel requestModel)
         {
             throw new System.NotImplementedException();
         }

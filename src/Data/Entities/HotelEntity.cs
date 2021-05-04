@@ -8,15 +8,16 @@ namespace HotelReservation.Data.Entities
 
         public string Name { get; set; }
 
-        //public int RoomsNumber => Rooms.Count();
-        //public int EmptyRoomsNumber => Rooms.Count(room => room.IsEmpty);
-        //public IEnumerable<RoomEntity> EmptyRooms => Rooms.Where(room => room.IsEmpty);
+        public int? CompanyId { get; set; }
 
-        public int CompanyId { get; set; }
+        public int? LocationId { get; set; }
+
         public virtual CompanyEntity Company { get; set; }
 
         public virtual LocationEntity Location { get; set; }
-        public virtual IEnumerable<RoomEntity> Rooms { get; set; } 
+
+        public virtual IEnumerable<RoomEntity> Rooms { get; set; }
+
         public virtual IEnumerable<UserEntity> Users { get; set; }
     }
 }

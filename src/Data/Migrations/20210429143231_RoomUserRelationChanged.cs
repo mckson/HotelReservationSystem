@@ -2,6 +2,9 @@
 
 namespace HotelReservation.Data.Migrations
 {
+    /// <summary>
+    /// /
+    /// </summary>
     public partial class RoomUserRelationChanged : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -46,7 +46,8 @@ namespace HotelReservation.API.Controllers
                 notBefore: now,
                 claims: claims.Claims,
                 expires: now.AddSeconds(double.Parse(_configuration["AuthOptions:lifetime"] + 10)),
-                signingCredentials: new SigningCredentials(key,
+                signingCredentials: new SigningCredentials(
+                    key,
                     SecurityAlgorithms.HmacSha256));
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
@@ -65,9 +66,9 @@ namespace HotelReservation.API.Controllers
             var registeredUser = await _accountService.RegisterAsync(user, user.Password);
 
             if (registeredUser == null)
-                return BadRequest(new {errorText = "User with such email exists"});
+                return BadRequest(new { errorText = "User with such email exists" });
 
             return await Authenticate(registeredUser);
-        } 
+        }
     }
 }

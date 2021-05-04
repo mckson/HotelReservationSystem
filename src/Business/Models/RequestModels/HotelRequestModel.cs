@@ -8,28 +8,27 @@ namespace HotelReservation.Business.Models.RequestModels
         [MaxLength(100)]
         public string HotelName { get; set; }
 
-        [Required]
-        [MaxLength(100)]
-        public string CompanyName { get; set; }
+        public int CompanyId { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        public string Country { get; set; }
+        public int LocationId { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        public string Region { get; set; }
-
-        [Required]
-        [MaxLength(50)]
-        public string City { get; set; }
-
-        [Required]
-        [MaxLength(100)]
-        public string Street { get; set; }
-
-        [Required]
-        [Range(1, 1000)]
-        public int BuildingNumber { get; set; }
+        // [Required]
+        // [MaxLength(100)]
+        // public string CompanyName { get; set; }
+        // [Required]
+        // [MaxLength(50)]
+        // public string Country { get; set; }
+        // [Required]
+        // [MaxLength(50)]
+        // public string Region { get; set; }
+        // [Required]
+        // [MaxLength(50)]
+        // public string City { get; set; }
+        // [Required]
+        // [MaxLength(100)]
+        // public string Street { get; set; }
+        // [Required]
+        // [Range(1, 1000)]
+        // public int BuildingNumber { get; set; }
     }
 }

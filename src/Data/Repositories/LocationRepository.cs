@@ -54,7 +54,7 @@ namespace HotelReservation.Data.Repositories
             }
         }
 
-        //change implementation
+        // change implementation
         public async Task UpdateAsync(LocationEntity newLocation)
         {
             var oldLocation = await _locations.FindAsync(newLocation);

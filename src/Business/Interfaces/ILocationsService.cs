@@ -5,8 +5,8 @@ using HotelReservation.Data.Entities;
 
 namespace HotelReservation.Business.Interfaces
 {
-    public interface IHotelsService : IBaseService<HotelEntity, HotelRequestModel, HotelResponseModel>
+    public interface ILocationsService : IBaseService<LocationEntity, LocationRequestModel, LocationResponseModel>
     {
-        public IEnumerable<HotelResponseModel> GetHotels();
+        IEnumerable<LocationResponseModel> GetLocations();
     }
 }
