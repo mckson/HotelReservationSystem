@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using HotelReservation.API.Models.RequestModels;
+using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.RequestModels;
-using HotelReservation.Business.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,6 +45,72 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
+        // GET api/<HotelsController>/5/Rooms
+        [Authorize(Policy = "GetHotelsPermission")]
+        [HttpGet("{id:int}/Rooms")]
+        public async Task<ActionResult<IEnumerable<RoomResponseModel>>> GetHotelRooms([FromRoute] int id)
+        {
+            try
+            {
+                var roomsResponse = await _service.GetHotelRooms(id);
+
+                return Ok(roomsResponse);
+            }
+            catch (DataException ex)
+            {
+                return ex.Status switch
+                {
+                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
+                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
+                    _ => BadRequest()
+                };
+            }
+        }
+
+        // GET api/<HotelsController>/5/Location
+        [Authorize(Policy = "GetHotelsPermission")]
+        [HttpGet("{id:int}/Location")]
+        public async Task<ActionResult<LocationResponseModel>> GetHotelLocation([FromRoute] int id)
+        {
+            try
+            {
+                var locationResponse = await _service.GetHotelLocation(id);
+
+                return Ok(locationResponse);
+            }
+            catch (DataException ex)
+            {
+                return ex.Status switch
+                {
+                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
+                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
+                    _ => BadRequest()
+                };
+            }
+        }
+
+        // GET api/<HotelsController>/5/Company
+        [Authorize(Policy = "GetHotelsPermission")]
+        [HttpGet("{id:int}/Company")]
+        public async Task<ActionResult<CompanyResponseModel>> GetHotelCompany([FromRoute] int id)
+        {
+            try
+            {
+                var companyResponse = await _service.GetHotelCompany(id);
+
+                return Ok(companyResponse);
+            }
+            catch (DataException ex)
+            {
+                return ex.Status switch
+                {
+                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
+                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
+                    _ => BadRequest()
+                };
+            }
+        }
+
         // POST api/<HotelsController>
         [Authorize(Policy = "PostHotelsPermission")]
         [HttpPost]
@@ -58,13 +124,12 @@ namespace HotelReservation.API.Controllers
             }
             catch (DataException ex)
             {
-                if (ex.Status == ErrorStatus.NotFound)
-                    return NotFound($"{ex.Status}: {ex.Message}");
-
-                if (ex.Status == ErrorStatus.HasLinkedEntity)
-                    return BadRequest($"{ex.Status}: {ex.Message}");
-
-                return BadRequest();
+                return ex.Status switch
+                {
+                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
+                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
+                    _ => BadRequest()
+                };
             }
         }
 
@@ -81,18 +146,17 @@ namespace HotelReservation.API.Controllers
             }
             catch (DataException ex)
             {
-                if (ex.Status == ErrorStatus.NotFound)
-                    return NotFound($"{ex.Status}: {ex.Message}");
-
-                if (ex.Status == ErrorStatus.HasLinkedEntity)
-                    return BadRequest($"{ex.Status}: {ex.Message}");
-
-                return BadRequest();
+                return ex.Status switch
+                {
+                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
+                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
+                    _ => BadRequest()
+                };
             }
         }
 
         // DELETE api/<HotelsController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
             try
@@ -102,13 +166,12 @@ namespace HotelReservation.API.Controllers
             }
             catch (DataException ex)
             {
-                if (ex.Status == ErrorStatus.NotFound)
-                    return NotFound($"{ex.Status}: {ex.Message}");
-
-                if (ex.Status == ErrorStatus.HasLinkedEntity)
-                    return BadRequest($"{ex.Status}: {ex.Message}");
-
-                return BadRequest();
+                return ex.Status switch
+                {
+                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
+                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
+                    _ => BadRequest()
+                };
             }
         }
     }

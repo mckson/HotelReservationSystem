@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Castle.Core.Internal;
 using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.RequestModels;
-using HotelReservation.Business.Models.ResponseModels;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

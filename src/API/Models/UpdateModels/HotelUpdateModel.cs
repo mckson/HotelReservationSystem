@@ -1,4 +1,4 @@
-﻿namespace HotelReservation.Business.Models.UpdateModels
+﻿namespace HotelReservation.API.Models.UpdateModels
 {
     public class HotelUpdateModel
     {

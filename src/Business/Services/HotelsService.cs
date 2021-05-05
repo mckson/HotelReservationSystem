@@ -2,9 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Mappers;
-using HotelReservation.Business.Models.RequestModels;
-using HotelReservation.Business.Models.ResponseModels;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 
@@ -12,7 +9,7 @@ namespace HotelReservation.Business.Services
 {
     public class HotelsService : IHotelsService
     {
-        private readonly HotelMapper _mapper;
+        private readonly IMapper<HotelEntity, HotelResponseModel, HotelRequestModel> _mapper;
 
         private readonly IRepository<HotelEntity> _repo;
 
@@ -20,9 +17,25 @@ namespace HotelReservation.Business.Services
 
         private readonly IRepository<LocationEntity> _locationRepo;
 
-        public HotelsService(HotelMapper mapper, IRepository<HotelEntity> hotelRepository, IRepository<CompanyEntity> companyRepository, IRepository<LocationEntity> locationRepo)
+        private readonly IMapper<RoomEntity, RoomResponseModel, RoomRequestModel> _roomMapper;
+
+        private readonly IMapper<LocationEntity, LocationResponseModel, LocationRequestModel> _locationMapper;
+
+        private readonly IMapper<CompanyEntity, CompanyResponseModel, CompanyRequestModel> _companyMapper;
+
+        public HotelsService(
+            IMapper<HotelEntity, HotelResponseModel, HotelRequestModel> mapper,
+            IMapper<RoomEntity, RoomResponseModel, RoomRequestModel> roomMapper,
+            IMapper<LocationEntity, LocationResponseModel, LocationRequestModel> locationMapper,
+            IMapper<CompanyEntity, CompanyResponseModel, CompanyRequestModel> companyMapper,
+            IRepository<HotelEntity> hotelRepository,
+            IRepository<CompanyEntity> companyRepository,
+            IRepository<LocationEntity> locationRepo)
         {
             _mapper = mapper;
+            _roomMapper = roomMapper;
+            _locationMapper = locationMapper;
+            _companyMapper = companyMapper;
             _repo = hotelRepository;
             _companyRepo = companyRepository;
             _locationRepo = locationRepo;
@@ -137,6 +150,33 @@ namespace HotelReservation.Business.Services
             var hotelEntities = _repo.GetAll();
             var hotelResponseModels = hotelEntities.Select(entity => _mapper.EntityToResponse(entity));
             return hotelResponseModels;
+        }
+
+        public async Task<IEnumerable<RoomResponseModel>> GetHotelRooms(int id)
+        {
+            var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
+                "Hotel with such id does not exist",
+                ErrorStatus.NotFound);
+
+            return hotelEntity.Rooms.Select(roomEntity => _roomMapper.EntityToResponse(roomEntity));
+        }
+
+        public async Task<LocationResponseModel> GetHotelLocation(int id)
+        {
+            var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
+                "Hotel with such id does not exist",
+                ErrorStatus.NotFound);
+
+            return _locationMapper.EntityToResponse(hotelEntity.Location);
+        }
+
+        public async Task<CompanyResponseModel> GetHotelCompany(int id)
+        {
+            var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
+                "Hotel with such id does not exist",
+                ErrorStatus.NotFound);
+
+            return _companyMapper.EntityToResponse(hotelEntity.Company);
         }
     }
 }

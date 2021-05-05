@@ -1,21 +1,20 @@
 ﻿using AutoMapper;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.RequestModels;
-using HotelReservation.Business.Models.ResponseModels;
 using HotelReservation.Data.Entities;
 
-namespace HotelReservation.Business.Mappers
+namespace HotelReservation.API.Mappers
 {
-    public class RoomMapper : IMapper<RoomEntity, RoomResponseModel, RoomRequestModel>
+    public class RoomMapper/*: IMapper<RoomEntity, RoomResponseModel, RoomRequestModel>*/
     {
-        private readonly Mapper _mapper;
+        /*private readonly Mapper _mapper;
 
         public RoomMapper()
         {
             var configuration = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<RoomEntity, RoomResponseModel>()
-                    .ForMember("HotelName", opt => opt.MapFrom(entity => entity.Hotel.Name))
+                    .ForMember(
+                        "HotelUrl",
+                        opt => opt.MapFrom(entity => $"https://localhost:5001/api/Hotels/{entity.HotelId}"))
                     .ReverseMap();
                 cfg.CreateMap<RoomRequestModel, RoomResponseModel>();   // implement
             });
@@ -36,6 +35,6 @@ namespace HotelReservation.Business.Mappers
         public RoomEntity RequestToEntity(RoomRequestModel requestModel)
         {
             throw new System.NotImplementedException();
-        }
+        }*/
     }
 }

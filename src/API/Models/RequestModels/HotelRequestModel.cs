@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HotelReservation.Business.Models.RequestModels
+namespace HotelReservation.API.Models.RequestModels
 {
     public class HotelRequestModel
     {

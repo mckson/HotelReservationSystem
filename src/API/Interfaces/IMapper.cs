@@ -1,4 +1,4 @@
-﻿namespace HotelReservation.Business.Interfaces
+﻿namespace HotelReservation.API.Interfaces
 {
     public interface IMapper<TEntityModel, TResponseModel, TRequestModel>
     {

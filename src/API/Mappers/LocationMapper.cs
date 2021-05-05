@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.RequestModels;
-using HotelReservation.Business.Models.ResponseModels;
 using HotelReservation.Data.Entities;
 
-namespace HotelReservation.Business.Mappers
+namespace HotelReservation.API.Mappers
 {
-    public class LocationMapper : IMapper<LocationEntity, LocationResponseModel, LocationRequestModel>
+    public class LocationMapper /*: IMapper<LocationEntity, LocationResponseModel, LocationRequestModel>*/
     {
-        private readonly Mapper _mapper;
+        /*private readonly Mapper _mapper;
 
         public LocationMapper()
         {
@@ -34,6 +31,6 @@ namespace HotelReservation.Business.Mappers
         public LocationEntity RequestToEntity(LocationRequestModel requestModel)
         {
             throw new System.NotImplementedException();
-        }
+        }*/
     }
 }

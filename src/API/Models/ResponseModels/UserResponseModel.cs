@@ -1,4 +1,4 @@
-﻿namespace HotelReservation.Business.Models.ResponseModels
+﻿namespace HotelReservation.API.Models.ResponseModels
 {
     public class UserResponseModel
     {

@@ -1,6 +1,9 @@
 ﻿using System.Text;
+using HotelReservation.API.Interfaces;
+using HotelReservation.API.Mappers;
+using HotelReservation.API.Models.RequestModels;
+using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Mappers;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
 using HotelReservation.Data.Entities;
@@ -98,9 +101,10 @@ namespace HotelReservation.API
             services.AddScoped<IRepository<CompanyEntity>, CompanyRepository>();
             services.AddScoped<IRepository<LocationEntity>, LocationRepository>();
 
-            services.AddSingleton<LocationMapper>();
-            services.AddSingleton<RoomMapper>();
-            services.AddSingleton<HotelMapper>();
+            services.AddSingleton<IMapper<LocationEntity, LocationResponseModel, LocationRequestModel>, LocationMapper>();
+            services.AddSingleton<IMapper<RoomEntity, RoomResponseModel, RoomRequestModel>, RoomMapper>();
+            services.AddSingleton<IMapper<HotelEntity, HotelResponseModel, HotelRequestModel>, HotelMapper>();
+            services.AddSingleton<IMapper<CompanyEntity, CompanyResponseModel, CompanyRequestModel>, CompanyMapper>();
 
             services.AddScoped<IHotelsService, HotelsService>();
 

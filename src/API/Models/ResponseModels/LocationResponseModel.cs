@@ -1,9 +1,7 @@
-﻿namespace HotelReservation.Data.Entities
+﻿namespace HotelReservation.API.Models.ResponseModels
 {
-    public class LocationEntity
+    public class LocationResponseModel
     {
-        public int Id { get; set; }
-
         public string Country { get; set; }
 
         public string Region { get; set; }
@@ -13,7 +11,5 @@
         public string Street { get; set; }
 
         public int BuildingNumber { get; set; }
-
-        public virtual HotelEntity Hotel { get; set; }
     }
 }

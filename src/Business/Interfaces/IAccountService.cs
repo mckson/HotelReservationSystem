@@ -1,7 +1,5 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
-using HotelReservation.Business.Models.RequestModels;
-using HotelReservation.Business.Models.ResponseModels;
 
 namespace HotelReservation.Business.Interfaces
 {

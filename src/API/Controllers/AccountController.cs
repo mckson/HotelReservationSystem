@@ -2,9 +2,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
+using HotelReservation.API.Models.RequestModels;
+using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.RequestModels;
-using HotelReservation.Business.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
