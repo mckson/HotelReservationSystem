@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 
@@ -9,103 +10,73 @@ namespace HotelReservation.Business.Services
 {
     public class HotelsService : IHotelsService
     {
-        private readonly IMapper<HotelEntity, HotelResponseModel, HotelRequestModel> _mapper;
-
         private readonly IRepository<HotelEntity> _repo;
 
         private readonly IRepository<CompanyEntity> _companyRepo;
 
         private readonly IRepository<LocationEntity> _locationRepo;
-
-        private readonly IMapper<RoomEntity, RoomResponseModel, RoomRequestModel> _roomMapper;
-
-        private readonly IMapper<LocationEntity, LocationResponseModel, LocationRequestModel> _locationMapper;
-
-        private readonly IMapper<CompanyEntity, CompanyResponseModel, CompanyRequestModel> _companyMapper;
+        private readonly IMapper _mapper;
 
         public HotelsService(
-            IMapper<HotelEntity, HotelResponseModel, HotelRequestModel> mapper,
-            IMapper<RoomEntity, RoomResponseModel, RoomRequestModel> roomMapper,
-            IMapper<LocationEntity, LocationResponseModel, LocationRequestModel> locationMapper,
-            IMapper<CompanyEntity, CompanyResponseModel, CompanyRequestModel> companyMapper,
+            IMapper mapper,
             IRepository<HotelEntity> hotelRepository,
             IRepository<CompanyEntity> companyRepository,
             IRepository<LocationEntity> locationRepo)
         {
-            _mapper = mapper;
-            _roomMapper = roomMapper;
-            _locationMapper = locationMapper;
-            _companyMapper = companyMapper;
             _repo = hotelRepository;
             _companyRepo = companyRepository;
             _locationRepo = locationRepo;
+            _mapper = mapper;
         }
 
-        public async Task<HotelResponseModel> CreateAsync(HotelRequestModel requestModel)
+        public async Task<HotelModel> CreateAsync(HotelModel model)
         {
-            // var companyEntity =
-            //     (await _companyRepo.FindAsync(c => c.Title == requestModel.CompanyName)).FirstOrDefault();
-            // var locationEntity = (await _locationRepo.FindAsync(l =>
-            //     l.BuildingNumber == requestModel.BuildingNumber &&
-            //     l.City == requestModel.City &&
-            //     l.Street == requestModel.Street &&
-            //     l.Region == requestModel.Region &&
-            //     l.Country == requestModel.Country))
-            //     .FirstOrDefault();
-            //  companyEntity ??= new CompanyEntity
-            //  {
-            //      Title = requestModel.CompanyName
-            //  };
-            //  locationEntity ??= new LocationEntity
-            //  {
-            //      Country = requestModel.Country,
-            //      Region = requestModel.Region,
-            //      City = requestModel.City,
-            //      Street = requestModel.Street,
-            //      BuildingNumber = requestModel.BuildingNumber
-            //  };
-            var unused = await _companyRepo.GetAsync(requestModel.CompanyId) ??
+            var unused = await _companyRepo.GetAsync(model.Company.Title) ??
                                 throw new DataException("Company with such id does not exist", ErrorStatus.NotFound);
-            var locationEntity = await _locationRepo.GetAsync(requestModel.LocationId) ??
+            var locationEntity = await _locationRepo.GetAsync(model.LocationId.Value) ??
                                  throw new DataException("Location with such id does not exist", ErrorStatus.NotFound);
 
             if (locationEntity.Hotel != null)
                 throw new DataException("That location already has linked hotel", ErrorStatus.HasLinkedEntity);
 
-            var hotelEntity = new HotelEntity
-            {
-                CompanyId = requestModel.CompanyId,
-                Name = requestModel.HotelName,
-                LocationId = requestModel.LocationId
-            };
+            // var hotelEntity = new HotelEntity
+            // {
+            //     CompanyId = model.CompanyId,
+            //     Name = model.Name,
+            //     LocationId = model.LocationId
+            // };
+            var hotelEntity = _mapper.Map<HotelEntity>(model);
 
             await _repo.CreateAsync(hotelEntity);
 
-            return _mapper.EntityToResponse(hotelEntity);
+            return model;
         }
 
-        public async Task<HotelResponseModel> GetAsync(int id)
+        public async Task<HotelModel> GetAsync(int id)
         {
             var hotelEntity = await _repo.GetAsync(id);
-            return _mapper.EntityToResponse(hotelEntity);
+            return _mapper.Map<HotelModel>(hotelEntity);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<HotelModel> DeleteAsync(int id)
         {
             var unused = await _repo.GetAsync(id) ?? throw new DataException(
                 "Hotel with such id does not exist", ErrorStatus.NotFound);
 
-            await _repo.DeleteAsync(id);
+            var deletedHotel = await _repo.DeleteAsync(id);
+
+            return _mapper.Map<HotelModel>(deletedHotel);
         }
 
-        public async Task<HotelResponseModel> UpdateAsync(int id, HotelRequestModel requestModel)
+        public async Task<HotelModel> UpdateAsync(int id, HotelModel model)
         {
+            // var hotelEntity = _mapper.Map<HotelEntity>(model);
             var hotelEntity = await _repo.GetAsync(id) ??
                               throw new DataException("Hotel with such id does not exist", ErrorStatus.NotFound);
 
-            if (requestModel.CompanyId != hotelEntity.CompanyId)
+            if (model.CompanyId != hotelEntity.CompanyId)
             {
-                var unused = await _companyRepo.GetAsync(requestModel.CompanyId) ??
+                var unused = await _companyRepo.GetAsync(model.CompanyId.Value) ??
                                        throw new DataException(
                                            "Company with such id does not exist",
                                            ErrorStatus.NotFound);
@@ -118,12 +89,12 @@ namespace HotelReservation.Business.Services
                                            ErrorStatus.NotFound);
                 }
 
-                hotelEntity.CompanyId = requestModel.CompanyId;
+                hotelEntity.CompanyId = model.CompanyId;
             }
 
-            if (requestModel.LocationId != hotelEntity.LocationId)
+            if (model.LocationId != hotelEntity.LocationId)
             {
-                var newLocationEntity = await _locationRepo.GetAsync(requestModel.LocationId) ??
+                var newLocationEntity = await _locationRepo.GetAsync(model.LocationId.Value) ??
                                         throw new DataException("Location with such id does not exist", ErrorStatus.NotFound);
 
                 if (newLocationEntity.Hotel != null)
@@ -135,48 +106,41 @@ namespace HotelReservation.Business.Services
                                          throw new DataException("Location with such id does not exist", ErrorStatus.NotFound);
                 }
 
-                hotelEntity.LocationId = requestModel.LocationId;
+                hotelEntity.LocationId = model.LocationId;
             }
-
-            hotelEntity.Name = requestModel.HotelName;
 
             await _repo.UpdateAsync(hotelEntity);
 
-            return _mapper.EntityToResponse(hotelEntity);
+            return model;
         }
 
-        public IEnumerable<HotelResponseModel> GetHotels()
+        public IEnumerable<HotelModel> GetHotels()
         {
             var hotelEntities = _repo.GetAll();
-            var hotelResponseModels = hotelEntities.Select(entity => _mapper.EntityToResponse(entity));
+            var hotelResponseModels = _mapper.Map<IEnumerable<HotelModel>>(hotelEntities);
             return hotelResponseModels;
         }
 
-        public async Task<IEnumerable<RoomResponseModel>> GetHotelRooms(int id)
-        {
-            var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
-                "Hotel with such id does not exist",
-                ErrorStatus.NotFound);
-
-            return hotelEntity.Rooms.Select(roomEntity => _roomMapper.EntityToResponse(roomEntity));
-        }
-
-        public async Task<LocationResponseModel> GetHotelLocation(int id)
-        {
-            var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
-                "Hotel with such id does not exist",
-                ErrorStatus.NotFound);
-
-            return _locationMapper.EntityToResponse(hotelEntity.Location);
-        }
-
-        public async Task<CompanyResponseModel> GetHotelCompany(int id)
-        {
-            var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
-                "Hotel with such id does not exist",
-                ErrorStatus.NotFound);
-
-            return _companyMapper.EntityToResponse(hotelEntity.Company);
-        }
+        // public async Task<IEnumerable<HotelModel>> GetHotelRooms(int id)
+        // {
+        //     var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
+        //         "Hotel with such id does not exist",
+        //         ErrorStatus.NotFound);
+        //     return hotelEntity.Rooms.Select(roomEntity => _roomMapper.EntityToResponse(roomEntity));
+        // }
+        // public async Task<LocationResponseModel> GetHotelLocation(int id)
+        // {
+        //     var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
+        //         "Hotel with such id does not exist",
+        //         ErrorStatus.NotFound);
+        //     return _locationMapper.EntityToResponse(hotelEntity.Location);
+        // }
+        // public async Task<CompanyResponseModel> GetHotelCompany(int id)
+        // {
+        //     var hotelEntity = await _repo.GetAsync(id) ?? throw new DataException(
+        //         "Hotel with such id does not exist",
+        //         ErrorStatus.NotFound);
+        //     return _companyMapper.EntityToResponse(hotelEntity.Company);
+        // }
     }
 }

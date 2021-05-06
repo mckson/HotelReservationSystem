@@ -2,9 +2,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
-using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Models.UserModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -19,24 +20,31 @@ namespace HotelReservation.API.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public AccountController(IConfiguration configuration, IAccountService accountService)
+        public AccountController(
+            IConfiguration configuration,
+            IAccountService accountService,
+            IMapper mapper)
         {
             _configuration = configuration;
             _accountService = accountService;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public async Task<IActionResult> Authenticate(UserResponseModel user)
+        public async Task<IActionResult> Authenticate(UserAuthenticationRequestModel userAuthRequestModel)
         {
-            var loggedUser = await _accountService.AuthenticateAsync(user.Email, user.Password);
+            var userAuthModel = _mapper.Map<UserAuthenticationModel>(userAuthRequestModel);
+            var loggedUser = await _accountService.AuthenticateAsync(userAuthModel);
+
             if (loggedUser == null)
                 return BadRequest(new { errorText = "Invalid email or password" });
 
             var now = DateTime.UtcNow;
 
-            var claims = await _accountService.GetIdentityAsync(user.Email, user.Password);
+            var claims = await _accountService.GetIdentityAsync(userAuthModel);
             var key =
                 new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["AuthOptions:key"]));
 
@@ -61,14 +69,15 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<IActionResult> Register(UserRegistrationRequestModel user)
+        public async Task<IActionResult> Register(UserRegistrationRequestModel userRequestModel)
         {
-            var registeredUser = await _accountService.RegisterAsync(user, user.Password);
+            var userModel = _mapper.Map<UserRegistrationModel>(userRequestModel);
+            var registeredUserAuth = await _accountService.RegisterAsync(userModel);
 
-            if (registeredUser == null)
+            if (registeredUserAuth == null)
                 return BadRequest(new { errorText = "User with such email exists" });
 
-            return await Authenticate(registeredUser);
+            return await Authenticate(_mapper.Map<UserAuthenticationRequestModel>(registeredUserAuth));
         }
     }
 }

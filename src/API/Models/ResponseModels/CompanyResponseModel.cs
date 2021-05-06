@@ -4,8 +4,10 @@ namespace HotelReservation.API.Models.ResponseModels
 {
     public class CompanyResponseModel
     {
-        public string CompanyName { get; set; }
+        public int Id { get; set; }
 
-        public IEnumerable<string> HotelsUrls { get; set; }
+        public string Title { get; set; }
+
+        public IEnumerable<HotelResponseModel> Hotels { get; set; }
     }
 }

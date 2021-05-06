@@ -5,30 +5,16 @@ namespace HotelReservation.API.Models.RequestModels
     public class HotelRequestModel
     {
         [Required]
+        public int Id { get; set; }
+
+        [Required]
         [MaxLength(100)]
-        public string HotelName { get; set; }
+        public string Name { get; set; }
 
-        public int CompanyId { get; set; }
+        [Required]
+        public CompanyRequestModel Company { get; set; }
 
-        public int LocationId { get; set; }
-
-        // [Required]
-        // [MaxLength(100)]
-        // public string CompanyName { get; set; }
-        // [Required]
-        // [MaxLength(50)]
-        // public string Country { get; set; }
-        // [Required]
-        // [MaxLength(50)]
-        // public string Region { get; set; }
-        // [Required]
-        // [MaxLength(50)]
-        // public string City { get; set; }
-        // [Required]
-        // [MaxLength(100)]
-        // public string Street { get; set; }
-        // [Required]
-        // [Range(1, 1000)]
-        // public int BuildingNumber { get; set; }
+        [Required]
+        public LocationRequestModel Location { get; set; }
     }
 }

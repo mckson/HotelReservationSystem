@@ -1,8 +1,7 @@
-﻿using System.Text;
-using HotelReservation.API.Interfaces;
-using HotelReservation.API.Mappers;
-using HotelReservation.API.Models.RequestModels;
-using HotelReservation.API.Models.ResponseModels;
+﻿using System;
+using System.Text;
+using AutoMapper;
+using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
@@ -101,10 +100,19 @@ namespace HotelReservation.API
             services.AddScoped<IRepository<CompanyEntity>, CompanyRepository>();
             services.AddScoped<IRepository<LocationEntity>, LocationRepository>();
 
-            services.AddSingleton<IMapper<LocationEntity, LocationResponseModel, LocationRequestModel>, LocationMapper>();
+            // var mappingConfig = new MapperConfiguration(config =>
+            // {
+            //     config.AddProfile(new ModelEntityMapperProfile());
+            //     config.AddProfile(new ModelToModelApiProfile());
+            // });
+            // var mapper = mappingConfig.CreateMapper();
+            // services.AddSingleton(mapper);
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            /*services.AddSingleton<IMapper<LocationEntity, LocationResponseModel, LocationRequestModel>, LocationMapper>();
             services.AddSingleton<IMapper<RoomEntity, RoomResponseModel, RoomRequestModel>, RoomMapper>();
             services.AddSingleton<IMapper<HotelEntity, HotelResponseModel, HotelRequestModel>, HotelMapper>();
-            services.AddSingleton<IMapper<CompanyEntity, CompanyResponseModel, CompanyRequestModel>, CompanyMapper>();
+            services.AddSingleton<IMapper<CompanyEntity, CompanyResponseModel, CompanyRequestModel>, CompanyMapper>();*/
 
             services.AddScoped<IHotelsService, HotelsService>();
 

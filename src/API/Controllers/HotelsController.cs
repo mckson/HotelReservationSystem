@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,18 +17,21 @@ namespace HotelReservation.API.Controllers
     public class HotelsController : ControllerBase
     {
         private readonly IHotelsService _service;
+        private readonly IMapper _mapper;
 
-        public HotelsController(IHotelsService service)
+        public HotelsController(IHotelsService service, IMapper mapper)
         {
             _service = service;
+            _mapper = mapper;
         }
 
         // GET: api/<HotelsController>
-        [Authorize(Policy = "GetHotelsPermission")]
+        // [Authorize(Policy = "GetHotelsPermission")]
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult<IEnumerable<HotelResponseModel>> GetHotels()
         {
-            var hotelsResponse = _service.GetHotels();
+            var hotelsResponse = _mapper.Map<IEnumerable<HotelResponseModel>>(_service.GetHotels());
             if (hotelsResponse == null)
                 return NotFound("There is no hotels in system");
 
@@ -34,18 +39,19 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET api/<HotelsController>/5
-        [Authorize(Policy = "GetHotelsPermission")]
+        // [Authorize(Policy = "GetHotelsPermission")]
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<HotelResponseModel>> GetHotel(int id)
         {
-            var hotelResponse = await _service.GetAsync(id);
+            var hotelResponse = _mapper.Map<HotelResponseModel>(await _service.GetAsync(id));
             if (hotelResponse == null)
                 return NotFound();
 
             return Ok(hotelResponse);
         }
 
-        // GET api/<HotelsController>/5/Rooms
+        /*// GET api/<HotelsController>/5/Rooms
         [Authorize(Policy = "GetHotelsPermission")]
         [HttpGet("{id:int}/Rooms")]
         public async Task<ActionResult<IEnumerable<RoomResponseModel>>> GetHotelRooms([FromRoute] int id)
@@ -109,16 +115,18 @@ namespace HotelReservation.API.Controllers
                     _ => BadRequest()
                 };
             }
-        }
+        }*/
 
         // POST api/<HotelsController>
-        [Authorize(Policy = "PostHotelsPermission")]
+        // [Authorize(Policy = "PostHotelsPermission")]
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotel([FromBody] HotelRequestModel hotelRequest)
         {
             try
             {
-                var hotelResponse = await _service.CreateAsync(hotelRequest);
+                var hotelResponse =
+                    _mapper.Map<HotelResponseModel>(await _service.CreateAsync(_mapper.Map<HotelModel>(hotelRequest)));
 
                 return Ok(hotelResponse);
             }
@@ -140,7 +148,7 @@ namespace HotelReservation.API.Controllers
         {
             try
             {
-                var hotelResponse = await _service.UpdateAsync(id, hotelRequest);
+                var hotelResponse = _mapper.Map<HotelResponseModel>(await _service.UpdateAsync(id, _mapper.Map<HotelModel>(hotelRequest)));
 
                 return Ok(hotelResponse);
             }

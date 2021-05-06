@@ -10,7 +10,8 @@
 
         public bool IsEmpty { get; set; }
 
-        // public string HotelName { get; set; }
-        public string HotelUrl { get; set; }
+        public int HotelId { get; set; }
+
+        public string HotelName { get; set; }
     }
 }

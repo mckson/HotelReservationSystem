@@ -1,14 +1,15 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
+using HotelReservation.Business.Models.UserModels;
 
 namespace HotelReservation.Business.Interfaces
 {
     public interface IAccountService
     {
-        Task<UserResponseModel> AuthenticateAsync(string email, string password);
+        Task<UserModel> AuthenticateAsync(UserAuthenticationModel user);
 
-        Task<UserResponseModel> RegisterAsync(UserRegistrationRequestModel user, string password);
+        Task<UserAuthenticationModel> RegisterAsync(UserRegistrationModel user);
 
-        Task<ClaimsIdentity> GetIdentityAsync(string email, string password);
+        Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel user);
     }
 }

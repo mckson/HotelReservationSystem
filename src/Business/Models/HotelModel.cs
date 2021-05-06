@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HotelReservation.Business.Models.UserModels;
 
 namespace HotelReservation.Business.Models
 {
@@ -7,6 +8,10 @@ namespace HotelReservation.Business.Models
         public int Id { get; set; }
 
         public string Name { get; set; }
+
+        public int? CompanyId { get; set; }
+
+        public int? LocationId { get; set; }
 
         public CompanyModel Company { get; set; }
 

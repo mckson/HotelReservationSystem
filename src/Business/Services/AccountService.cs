@@ -4,7 +4,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Castle.Core.Internal;
+using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Models;
+using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,105 +19,89 @@ namespace HotelReservation.Business.Services
     {
         private readonly UserManager<UserEntity> _userManager;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
+        private readonly IMapper _mapper;
 
         public AccountService(
             UserManager<UserEntity> userManager,
-            IPasswordHasher<UserEntity> passwordHasher)
+            IPasswordHasher<UserEntity> passwordHasher,
+            IMapper mapper)
         {
             _userManager = userManager;
             _passwordHasher = passwordHasher;
+            _mapper = mapper;
         }
 
-        public async Task<UserResponseModel> AuthenticateAsync(string email, string password)
+        public async Task<UserModel> AuthenticateAsync(UserAuthenticationModel user)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-                return null;
+            if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password))
+                throw new DataException("Password and email cannot be empty", ErrorStatus.EmptyInput);
 
-            var userEntity = await _userManager.FindByEmailAsync(email);
-            if (userEntity == null)
-            {
-                return null;
-            }
+            var userEntity = await _userManager.FindByEmailAsync(user.Email) ??
+                             throw new DataException("User with such email does not exist", ErrorStatus.NotFound);
 
-            // if (userEntity.PasswordHash != password)
-            // {
-            //     return null;
-            // }
-            if (_passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, password) ==
+            if (_passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, user.Password) ==
                 PasswordVerificationResult.Failed)
-                return null;
+                throw new DataException("Incorrect password", ErrorStatus.IncorrectInput);
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<UserEntity, UserResponseModel>()
-                .ForMember("Password", opt => opt.MapFrom(c => c.PasswordHash)));
-            var mapper = new Mapper(config);
-
-            return mapper.Map<UserEntity, UserResponseModel>(userEntity);
+            return _mapper.Map<UserModel>(userEntity);
         }
 
-        public async Task<UserResponseModel> RegisterAsync(UserRegistrationRequestModel user, string password)
+        public async Task<UserAuthenticationModel> RegisterAsync(UserRegistrationModel userRegistration)
         {
-            if (string.IsNullOrEmpty(password) || user == null)
-                return null;
+            if (userRegistration == null)
+                throw new DataException("User cannot be empty", ErrorStatus.EmptyInput);
 
-            var existingUserEntity = await _userManager.FindByEmailAsync(user.Email);
+            var existingUserEntity = await _userManager.FindByEmailAsync(userRegistration.Email);
 
             if (existingUserEntity != null)
-                return null;    // add error "user with such email exists"
+                throw new DataException("User with such email already exists", ErrorStatus.AlreadyExisted);
 
-            user.Password = password;
+            var userEntity = _mapper.Map<UserEntity>(userRegistration);
 
-            var configEntity = new MapperConfiguration(cfg => cfg.CreateMap<UserRegistrationRequestModel, UserEntity>());
-            var mapperEntity = new Mapper(configEntity);
-
-            var userEntity = mapperEntity.Map<UserRegistrationRequestModel, UserEntity>(user);
-            userEntity.UserName ??= user.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
-            userEntity.PasswordHash = _passwordHasher.HashPassword(userEntity, user.Password);
+            userEntity.UserName ??= userRegistration.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
+            userEntity.PasswordHash = _passwordHasher.HashPassword(userEntity, userRegistration.Password);
 
             var result = await _userManager.CreateAsync(userEntity);
-            var addedUserEntity = await _userManager.FindByEmailAsync(user.Email);
+            var addedUserEntity = await _userManager.FindByEmailAsync(userRegistration.Email);
             var addedUserRoles = await _userManager.GetRolesAsync(addedUserEntity);
 
             if (result == IdentityResult.Success && addedUserRoles.IsNullOrEmpty())
                 await _userManager.AddToRoleAsync(addedUserEntity, "User");
 
-            var configModel = new MapperConfiguration(cfg => cfg.CreateMap<UserRegistrationRequestModel, UserResponseModel>());
-            var mapperModel = new Mapper(configModel);
-            var userModel = mapperModel.Map<UserRegistrationRequestModel, UserResponseModel>(user);
-
-            return userModel;
+            return _mapper.Map<UserAuthenticationModel>(userRegistration);
         }
 
-        public async Task<ClaimsIdentity> GetIdentityAsync(string email, string password)
+        public async Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel userAuth)
         {
             var userEntity =
                 await _userManager.Users.FirstOrDefaultAsync(user =>
-                    user.Email == email);
+                    user.Email == userAuth.Email) ??
+                throw new DataException("There is no user with such email", ErrorStatus.NotFound);
 
-            if (userEntity != null && _passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, password) == PasswordVerificationResult.Success)
+            if (userAuth.Password == null ||
+                _passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, userAuth.Password) !=
+                PasswordVerificationResult.Success)
+                throw new DataException("Wrong password", ErrorStatus.IncorrectInput);
+
+            var claims = new List<Claim>
             {
-                await _userManager.GetRolesAsync(userEntity);
-                var claims = new List<Claim>
-                {
-                    // this guarantees the token is unique
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                };
+                // this guarantees the token is unique
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
 
-                // Adds all roles to claims
-                foreach (var role in await _userManager.GetRolesAsync(userEntity))
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                }
-
-                ClaimsIdentity claimsIdentity = new ClaimsIdentity(
-                    claims,
-                    "Token",
-                    ClaimsIdentity.DefaultNameClaimType,
-                    ClaimsIdentity.DefaultRoleClaimType);
-
-                return claimsIdentity;
+            // Adds all roles to claims
+            foreach (var role in await _userManager.GetRolesAsync(userEntity))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            return null;
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(
+                claims,
+                "Token",
+                ClaimsIdentity.DefaultNameClaimType,
+                ClaimsIdentity.DefaultRoleClaimType);
+
+            return claimsIdentity;
         }
     }
 }

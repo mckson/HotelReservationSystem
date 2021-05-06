@@ -27,6 +27,11 @@ namespace HotelReservation.Data.Repositories
 
         public async Task<RoomEntity> GetAsync(int id) => await Task.Run(() => Get(id));
 
+        public async Task<RoomEntity> GetAsync(string name)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate) => _rooms.Where(predicate);
 
         public async Task<IEnumerable<RoomEntity>> FindAsync(Func<RoomEntity, bool> predicate) => await Task.Run(() => Find(predicate));
@@ -56,24 +61,30 @@ namespace HotelReservation.Data.Repositories
             await _db.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public RoomEntity Delete(int id)
         {
             var deleteRoom = _rooms.Find(id);
+
             if (deleteRoom != null)
             {
                 _rooms.Remove(deleteRoom);
                 _db.SaveChanges();
             }
+
+            return deleteRoom;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<RoomEntity> DeleteAsync(int id)
         {
             var deleteRoom = await _rooms.FindAsync(id);
+
             if (deleteRoom != null)
             {
                 _rooms.Remove(deleteRoom);
                 await _db.SaveChangesAsync();
             }
+
+            return deleteRoom;
         }
     }
 }

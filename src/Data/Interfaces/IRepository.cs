@@ -4,30 +4,31 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.Data.Interfaces
 {
-    public interface IRepository<T>
-        where T : class
+    public interface IRepository<TEntity>
+        where TEntity : class
     {
-        IEnumerable<T> GetAll();
+        IEnumerable<TEntity> GetAll();
 
-        // Task<IEnumerable<T>> GetAllAsync();
-        T Get(int id);
+        TEntity Get(int id);
 
-        Task<T> GetAsync(int id);
+        Task<TEntity> GetAsync(int id);
 
-        IEnumerable<T> Find(Func<T, bool> predicate);
+        Task<TEntity> GetAsync(string name);
 
-        Task<IEnumerable<T>> FindAsync(Func<T, bool> predicate);
+        IEnumerable<TEntity> Find(Func<TEntity, bool> predicate);
 
-        void Create(T item);
+        Task<IEnumerable<TEntity>> FindAsync(Func<TEntity, bool> predicate);
 
-        Task CreateAsync(T item);
+        void Create(TEntity item);
 
-        void Update(T newItem);
+        Task CreateAsync(TEntity item);
 
-        Task UpdateAsync(T newItem);
+        void Update(TEntity newItem);
 
-        void Delete(int id);
+        Task UpdateAsync(TEntity newItem);
 
-        Task DeleteAsync(int id);
+        TEntity Delete(int id);
+
+        Task<TEntity> DeleteAsync(int id);
     }
 }

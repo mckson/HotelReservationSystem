@@ -5,7 +5,10 @@ namespace HotelReservation.Business
     public enum ErrorStatus
     {
         NotFound,
-        HasLinkedEntity
+        HasLinkedEntity,
+        EmptyInput,
+        IncorrectInput,
+        AlreadyExisted
     }
 
     public class DataException : Exception
