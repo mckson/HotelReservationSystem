@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.Business.Models.UserModels
 {
@@ -26,8 +27,12 @@ namespace HotelReservation.Business.Models.UserModels
 
         public int? HotelId { get; set; }
 
-        public virtual HotelModel Hotel { get; set; }
+        public HotelModel Hotel { get; set; }
 
-        public virtual ReservationModel Reservation { get; set; }
+        public ReservationModel Reservation { get; set; }
+
+        public List<RefreshTokenModel> RefreshTokens { get; set; }
+
+        public string JwtToken { get; set; }
     }
 }

@@ -118,8 +118,8 @@ namespace HotelReservation.API.Controllers
         }*/
 
         // POST api/<HotelsController>
-        // [Authorize(Policy = "PostHotelsPermission")]
-        [AllowAnonymous]
+        [Authorize(Policy = "PostHotelsPermission")]
+        // [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotel([FromBody] HotelRequestModel hotelRequest)
         {

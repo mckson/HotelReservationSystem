@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
 namespace HotelReservation.Data.Entities
@@ -20,5 +21,7 @@ namespace HotelReservation.Data.Entities
         public virtual HotelEntity Hotel { get; set; }
 
         public virtual ReservationEntity Reservation { get; set; }
+
+        public virtual List<RefreshTokenEntity> RefreshTokens { get; set; }
     }
 }

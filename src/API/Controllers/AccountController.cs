@@ -1,15 +1,14 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
+using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models.UserModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 
 namespace HotelReservation.API.Controllers
 {
@@ -19,22 +18,19 @@ namespace HotelReservation.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
-        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
 
         public AccountController(
-            IConfiguration configuration,
             IAccountService accountService,
             IMapper mapper)
         {
-            _configuration = configuration;
             _accountService = accountService;
             _mapper = mapper;
         }
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public async Task<IActionResult> Authenticate(UserAuthenticationRequestModel userAuthRequestModel)
+        public async Task<ActionResult<UserResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
         {
             var userAuthModel = _mapper.Map<UserAuthenticationModel>(userAuthRequestModel);
             var loggedUser = await _accountService.AuthenticateAsync(userAuthModel);
@@ -42,34 +38,15 @@ namespace HotelReservation.API.Controllers
             if (loggedUser == null)
                 return BadRequest(new { errorText = "Invalid email or password" });
 
-            var now = DateTime.UtcNow;
+            var responseUser = _mapper.Map<UserResponseModel>(loggedUser);
+            SetTokenCookie(responseUser.RefreshToken);
 
-            var claims = await _accountService.GetIdentityAsync(userAuthModel);
-            var key =
-                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["AuthOptions:key"]));
-
-            var jwt = new JwtSecurityToken(
-                issuer: _configuration["AuthOptions:issuer"],
-                audience: _configuration["AuthOptions:audience"],
-                notBefore: now,
-                claims: claims.Claims,
-                expires: now.AddSeconds(double.Parse(_configuration["AuthOptions:lifetime"] + 10)),
-                signingCredentials: new SigningCredentials(
-                    key,
-                    SecurityAlgorithms.HmacSha256));
-
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-            var response = new
-            {
-                access_token = encodedJwt
-            };
-
-            return Ok(response);
+            return Ok(responseUser);
         }
 
         [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<IActionResult> Register(UserRegistrationRequestModel userRequestModel)
+        public async Task<ActionResult<UserResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
         {
             var userModel = _mapper.Map<UserRegistrationModel>(userRequestModel);
             var registeredUserAuth = await _accountService.RegisterAsync(userModel);
@@ -78,6 +55,49 @@ namespace HotelReservation.API.Controllers
                 return BadRequest(new { errorText = "User with such email exists" });
 
             return await Authenticate(_mapper.Map<UserAuthenticationRequestModel>(registeredUserAuth));
+        }
+
+        [AllowAnonymous]
+        [HttpPost("Refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["RefreshToken"];
+            var response = await _accountService.RefreshToken(refreshToken);
+
+            if (response == null)
+                return Unauthorized(new { message = "Invalid token" });
+
+            var responseUser = _mapper.Map<UserResponseModel>(response);
+            SetTokenCookie(responseUser.RefreshToken);
+
+            return Ok(responseUser);
+        }
+
+        [HttpPost("Revoke-token")]
+        public IActionResult RevokeToken([FromBody] RevokeTokenRequest model)
+        {
+            // accept token from request body or cookie
+            var token = model.Token ?? Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(token))
+                return BadRequest(new { message = "Token is required" });
+
+            var response = _accountService.RevokeToken(token);
+
+            if (!response)
+                return NotFound(new { message = "Token not found" });
+
+            return Ok(new { message = "Token revoked" });
+        }
+
+        private void SetTokenCookie(string token)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddHours(4)
+            };
+            Response.Cookies.Append("RefreshToken", token, cookieOptions);
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Text;
-using AutoMapper;
-using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
@@ -35,6 +33,7 @@ namespace HotelReservation.API
         {
             services.AddDbContext<HotelContext>(opt =>
             {
+                opt.EnableSensitiveDataLogging();
                 opt.UseLazyLoadingProxies();
                 opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
             });
@@ -48,6 +47,7 @@ namespace HotelReservation.API
 
             services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
 
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAccountService, AccountService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -63,6 +63,8 @@ namespace HotelReservation.API
                         ValidAudience = Configuration["AuthOptions:audience"],
 
                         ValidateLifetime = true,
+                        // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
+                        ClockSkew = TimeSpan.Zero,
 
                         IssuerSigningKey =
                             new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["AuthOptions:key"])),
