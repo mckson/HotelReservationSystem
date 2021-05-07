@@ -4,14 +4,16 @@ using HotelReservation.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HotelReservation.Data.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    partial class HotelContextModelSnapshot : ModelSnapshot
+    [Migration("20210507072757_RemovedCompanyEntity")]
+    partial class RemovedCompanyEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,12 +28,19 @@ namespace HotelReservation.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocationId")
+                        .IsUnique()
+                        .HasFilter("[LocationId] IS NOT NULL");
 
                     b.ToTable("Hotels");
                 });
@@ -56,9 +65,6 @@ namespace HotelReservation.Data.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<int>("HotelId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Region")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
@@ -70,9 +76,6 @@ namespace HotelReservation.Data.Migrations
                         .HasMaxLength(100);
 
                     b.HasKey("Id");
-
-                    b.HasIndex("HotelId")
-                        .IsUnique();
 
                     b.ToTable("Locations");
                 });
@@ -369,13 +372,12 @@ namespace HotelReservation.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("HotelReservation.Data.Entities.LocationEntity", b =>
+            modelBuilder.Entity("HotelReservation.Data.Entities.HotelEntity", b =>
                 {
-                    b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
-                        .WithOne("Location")
-                        .HasForeignKey("HotelReservation.Data.Entities.LocationEntity", "HotelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("HotelReservation.Data.Entities.LocationEntity", "Location")
+                        .WithOne("Hotel")
+                        .HasForeignKey("HotelReservation.Data.Entities.HotelEntity", "LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationEntity", b =>

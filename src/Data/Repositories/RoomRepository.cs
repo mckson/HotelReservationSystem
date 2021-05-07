@@ -21,57 +21,26 @@ namespace HotelReservation.Data.Repositories
 
         public IEnumerable<RoomEntity> GetAll() => _rooms;
 
-        public async Task<IEnumerable<RoomEntity>> GetAllAsync() => await Task.Run(GetAll);
+        public async Task<RoomEntity> GetAsync(int id) =>
+            await _rooms.FirstOrDefaultAsync(room => room.Id == id);
 
-        public RoomEntity Get(int id) => _rooms.FirstOrDefault(room => room.Id == id);
+        public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate) =>
+            _rooms.Where(predicate);
 
-        public async Task<RoomEntity> GetAsync(int id) => await Task.Run(() => Get(id));
-
-        public async Task<RoomEntity> GetAsync(string name)
+        public async Task<RoomEntity> CreateAsync(RoomEntity room)
         {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate) => _rooms.Where(predicate);
-
-        public async Task<IEnumerable<RoomEntity>> FindAsync(Func<RoomEntity, bool> predicate) => await Task.Run(() => Find(predicate));
-
-        public void Create(RoomEntity room)
-        {
-            _rooms.Add(room);
-            _db.SaveChanges();
-        }
-
-        public async Task CreateAsync(RoomEntity room)
-        {
-            await _rooms.AddAsync(room);
+            var addedRoomEntry = await _rooms.AddAsync(room);
             await _db.SaveChangesAsync();
+
+            return addedRoomEntry.Entity;
         }
 
-        // change implementation
-        public void Update(RoomEntity newRoom)
+        public async Task<RoomEntity> UpdateAsync(RoomEntity newRoom)
         {
-            _rooms.Find(newRoom.Id);
-            _db.SaveChanges();
-        }
-
-        public async Task UpdateAsync(RoomEntity newRoom)
-        {
-            await _rooms.FindAsync(newRoom.Id);
+            var updatedRoomEntry = _rooms.Update(newRoom);
             await _db.SaveChangesAsync();
-        }
 
-        public RoomEntity Delete(int id)
-        {
-            var deleteRoom = _rooms.Find(id);
-
-            if (deleteRoom != null)
-            {
-                _rooms.Remove(deleteRoom);
-                _db.SaveChanges();
-            }
-
-            return deleteRoom;
+            return updatedRoomEntry.Entity;
         }
 
         public async Task<RoomEntity> DeleteAsync(int id)

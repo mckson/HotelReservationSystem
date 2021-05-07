@@ -8,10 +8,6 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public string Name { get; set; }
 
-        public int CompanyId { get; set; }
-
-        public string CompanyTitle { get; set; }
-
         public int LocationId { get; set; }
 
         public LocationResponseModel Location { get; set; }

@@ -14,6 +14,8 @@
 
         public int BuildingNumber { get; set; }
 
+        public int HotelId { get; set; }
+
         public HotelModel Hotel { get; set; }
     }
 }

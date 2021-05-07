@@ -8,13 +8,9 @@ namespace HotelReservation.Business
     {
         public ModelEntityMapperProfile()
         {
-            CreateMap<HotelEntity, HotelModel>();
-            CreateMap<LocationEntity, LocationModel>();
-
-            CreateMap<CompanyEntity, CompanyModel>()
-                .ReverseMap();
-
-            CreateMap<RoomEntity, RoomModel>();
+            CreateMap<HotelEntity, HotelModel>().ReverseMap();
+            CreateMap<LocationEntity, LocationModel>().ReverseMap();
+            CreateMap<RoomEntity, RoomModel>().ReverseMap();
         }
     }
 }

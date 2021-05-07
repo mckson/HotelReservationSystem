@@ -21,59 +21,26 @@ namespace HotelReservation.Data.Repositories
 
         public IEnumerable<ReservationEntity> GetAll() => _reservations;
 
-        public async Task<IEnumerable<ReservationEntity>> GetAllAsync() => await Task.Run(GetAll);
+        public async Task<ReservationEntity> GetAsync(int id) =>
+            await _reservations.FirstOrDefaultAsync(reservation => reservation.Id == id);
 
-        public ReservationEntity Get(int id) => _reservations.FirstOrDefault(reservation => reservation.Id == id);
+        public IEnumerable<ReservationEntity> Find(Func<ReservationEntity, bool> predicate) =>
+            _reservations.Where(predicate);
 
-        public async Task<ReservationEntity> GetAsync(int id) => await Task.Run(() => Get(id));
-
-        public async Task<ReservationEntity> GetAsync(string name)
+        public async Task<ReservationEntity> CreateAsync(ReservationEntity reservation)
         {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<ReservationEntity> Find(Func<ReservationEntity, bool> predicate) => _reservations.Where(predicate);
-
-        public async Task<IEnumerable<ReservationEntity>> FindAsync(Func<ReservationEntity, bool> predicate) => await Task.Run(() => Find(predicate));
-
-        public void Create(ReservationEntity reservation)
-        {
-            _reservations.Add(reservation);
-            _db.SaveChanges();
-        }
-
-        public async Task CreateAsync(ReservationEntity reservation)
-        {
-            await _reservations.AddAsync(reservation);
+            var addedReservationEntry = await _reservations.AddAsync(reservation);
             await _db.SaveChangesAsync();
+
+            return addedReservationEntry.Entity;
         }
 
-        // change implementation
-        public void Update(ReservationEntity newReservation)
+        public async Task<ReservationEntity> UpdateAsync(ReservationEntity newReservation)
         {
-            var oldReservation = _reservations.Find(newReservation.Id);
-            oldReservation = newReservation;
-            _db.SaveChanges();
-        }
-
-        public async Task UpdateAsync(ReservationEntity newReservation)
-        {
-            var oldReservation = await _reservations.FindAsync(newReservation.Id);
-            oldReservation = newReservation;
+            var addedReservationEntry = _reservations.Update(newReservation);
             await _db.SaveChangesAsync();
-        }
 
-        public ReservationEntity Delete(int id)
-        {
-            var reservation = _reservations.Find(id);
-
-            if (reservation != null)
-            {
-                _reservations.Remove(reservation);
-                _db.SaveChanges();
-            }
-
-            return reservation;
+            return addedReservationEntry.Entity;
         }
 
         public async Task<ReservationEntity> DeleteAsync(int id)

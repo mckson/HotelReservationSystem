@@ -96,23 +96,10 @@ namespace HotelReservation.API
                     });
             });
 
-            services.AddScoped<IRepository<HotelEntity>, HotelRepository>();
-            services.AddScoped<IRepository<CompanyEntity>, CompanyRepository>();
-            services.AddScoped<IRepository<LocationEntity>, LocationRepository>();
+            services.AddScoped<IHotelRepository, HotelRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
 
-            // var mappingConfig = new MapperConfiguration(config =>
-            // {
-            //     config.AddProfile(new ModelEntityMapperProfile());
-            //     config.AddProfile(new ModelToModelApiProfile());
-            // });
-            // var mapper = mappingConfig.CreateMapper();
-            // services.AddSingleton(mapper);
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-            /*services.AddSingleton<IMapper<LocationEntity, LocationResponseModel, LocationRequestModel>, LocationMapper>();
-            services.AddSingleton<IMapper<RoomEntity, RoomResponseModel, RoomRequestModel>, RoomMapper>();
-            services.AddSingleton<IMapper<HotelEntity, HotelResponseModel, HotelRequestModel>, HotelMapper>();
-            services.AddSingleton<IMapper<CompanyEntity, CompanyResponseModel, CompanyRequestModel>, CompanyMapper>();*/
 
             services.AddScoped<IHotelsService, HotelsService>();
 

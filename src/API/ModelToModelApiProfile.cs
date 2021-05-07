@@ -10,13 +10,7 @@ namespace HotelReservation.API
         public ModelToModelApiProfile()
         {
             CreateMap<HotelRequestModel, HotelModel>();
-            CreateMap<HotelModel, HotelResponseModel>()
-                .ForMember(
-                    response => response.CompanyTitle,
-                    opt => opt.MapFrom(model => model.Company.Title));
-
-            CreateMap<CompanyModel, CompanyResponseModel>();
-            CreateMap<CompanyRequestModel, CompanyModel>();
+            CreateMap<HotelModel, HotelResponseModel>();
 
             CreateMap<RoomModel, RoomResponseModel>()
                 .ForMember(

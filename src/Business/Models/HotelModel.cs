@@ -9,12 +9,6 @@ namespace HotelReservation.Business.Models
 
         public string Name { get; set; }
 
-        public int? CompanyId { get; set; }
-
-        public int? LocationId { get; set; }
-
-        public CompanyModel Company { get; set; }
-
         public LocationModel Location { get; set; }
 
         public IEnumerable<RoomModel> Rooms { get; set; }

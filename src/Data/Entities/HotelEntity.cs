@@ -8,12 +8,6 @@ namespace HotelReservation.Data.Entities
 
         public string Name { get; set; }
 
-        public int? CompanyId { get; set; }
-
-        public int? LocationId { get; set; }
-
-        public virtual CompanyEntity Company { get; set; }
-
         public virtual LocationEntity Location { get; set; }
 
         public virtual IEnumerable<RoomEntity> Rooms { get; set; }

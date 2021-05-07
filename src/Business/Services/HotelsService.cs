@@ -10,46 +10,43 @@ namespace HotelReservation.Business.Services
 {
     public class HotelsService : IHotelsService
     {
-        private readonly IRepository<HotelEntity> _repo;
+        private readonly IHotelRepository _repo;
 
-        private readonly IRepository<CompanyEntity> _companyRepo;
+        private readonly ILocationRepository _locationRepo;
 
-        private readonly IRepository<LocationEntity> _locationRepo;
         private readonly IMapper _mapper;
 
         public HotelsService(
             IMapper mapper,
-            IRepository<HotelEntity> hotelRepository,
-            IRepository<CompanyEntity> companyRepository,
-            IRepository<LocationEntity> locationRepo)
+            IHotelRepository hotelRepository,
+            ILocationRepository locationRepo)
         {
             _repo = hotelRepository;
-            _companyRepo = companyRepository;
             _locationRepo = locationRepo;
             _mapper = mapper;
         }
 
         public async Task<HotelModel> CreateAsync(HotelModel model)
         {
-            var unused = await _companyRepo.GetAsync(model.Company.Title) ??
-                                throw new DataException("Company with such id does not exist", ErrorStatus.NotFound);
-            var locationEntity = await _locationRepo.GetAsync(model.LocationId.Value) ??
-                                 throw new DataException("Location with such id does not exist", ErrorStatus.NotFound);
+            var locationEntity = await _locationRepo.GetAsync(
+                model.Location.Country,
+                model.Location.Region,
+                model.Location.City,
+                model.Location.Street,
+                model.Location.BuildingNumber);
 
-            if (locationEntity.Hotel != null)
-                throw new DataException("That location already has linked hotel", ErrorStatus.HasLinkedEntity);
+            if (locationEntity != null)
+                throw new DataException("Location already exist", ErrorStatus.AlreadyExist);
 
-            // var hotelEntity = new HotelEntity
-            // {
-            //     CompanyId = model.CompanyId,
-            //     Name = model.Name,
-            //     LocationId = model.LocationId
-            // };
+            locationEntity = _mapper.Map<LocationEntity>(model.Location);
+            // var createdLocation = await _locationRepo.CreateAsync(locationEntity);
             var hotelEntity = _mapper.Map<HotelEntity>(model);
 
-            await _repo.CreateAsync(hotelEntity);
+            hotelEntity.Location = locationEntity;
 
-            return model;
+            var createdHotelModel = await _repo.CreateAsync(hotelEntity);
+
+            return _mapper.Map<HotelModel>(createdHotelModel);
         }
 
         public async Task<HotelModel> GetAsync(int id)
@@ -70,48 +67,13 @@ namespace HotelReservation.Business.Services
 
         public async Task<HotelModel> UpdateAsync(int id, HotelModel model)
         {
-            // var hotelEntity = _mapper.Map<HotelEntity>(model);
             var hotelEntity = await _repo.GetAsync(id) ??
                               throw new DataException("Hotel with such id does not exist", ErrorStatus.NotFound);
 
-            if (model.CompanyId != hotelEntity.CompanyId)
-            {
-                var unused = await _companyRepo.GetAsync(model.CompanyId.Value) ??
-                                       throw new DataException(
-                                           "Company with such id does not exist",
-                                           ErrorStatus.NotFound);
+            hotelEntity.Name = model.Name;
 
-                if (hotelEntity.CompanyId != null)
-                {
-                    var unused1 = await _companyRepo.GetAsync(hotelEntity.CompanyId.Value) ??
-                                       throw new DataException(
-                                           "Company with such id does not exist",
-                                           ErrorStatus.NotFound);
-                }
-
-                hotelEntity.CompanyId = model.CompanyId;
-            }
-
-            if (model.LocationId != hotelEntity.LocationId)
-            {
-                var newLocationEntity = await _locationRepo.GetAsync(model.LocationId.Value) ??
-                                        throw new DataException("Location with such id does not exist", ErrorStatus.NotFound);
-
-                if (newLocationEntity.Hotel != null)
-                    throw new DataException("That location already has linked hotel", ErrorStatus.HasLinkedEntity);
-
-                if (hotelEntity.LocationId != null)
-                {
-                    var unused = await _locationRepo.GetAsync(hotelEntity.LocationId.Value) ??
-                                         throw new DataException("Location with such id does not exist", ErrorStatus.NotFound);
-                }
-
-                hotelEntity.LocationId = model.LocationId;
-            }
-
-            await _repo.UpdateAsync(hotelEntity);
-
-            return model;
+            var updatedHotel = await _repo.UpdateAsync(hotelEntity);
+            return _mapper.Map<HotelModel>(updatedHotel);
         }
 
         public IEnumerable<HotelModel> GetHotels()

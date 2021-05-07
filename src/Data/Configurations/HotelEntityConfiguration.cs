@@ -8,6 +8,11 @@ namespace HotelReservation.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<HotelEntity> builder)
         {
+            builder.HasOne(h => h.Location)
+                .WithOne(l => l.Hotel)
+                .HasForeignKey<LocationEntity>(l => l.HotelId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasMany(h => h.Rooms)
                 .WithOne(r => r.Hotel)
                 .HasForeignKey(r => r.HotelId)
@@ -19,11 +24,6 @@ namespace HotelReservation.Data.Configurations
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // builder.HasOne(h => h.Location)
-            //    .WithOne(l => l.Hotel)
-            //    .HasForeignKey<LocationEntity>(l => l.HotelId)
-            //    .IsRequired(false)
-            //    .OnDelete(DeleteBehavior.Restrict);
             builder.Property(h => h.Name)
                 .HasMaxLength(100)
                 .IsRequired();

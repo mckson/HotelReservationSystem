@@ -8,7 +8,7 @@ namespace HotelReservation.Business
         HasLinkedEntity,
         EmptyInput,
         IncorrectInput,
-        AlreadyExisted
+        AlreadyExist
     }
 
     public class DataException : Exception

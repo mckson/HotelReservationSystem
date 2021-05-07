@@ -134,6 +134,7 @@ namespace HotelReservation.API.Controllers
             {
                 return ex.Status switch
                 {
+                    ErrorStatus.AlreadyExist => NotFound($"{ex.Status}: {ex.Message}"),
                     ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
                     ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
                     _ => BadRequest()

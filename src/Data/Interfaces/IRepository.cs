@@ -9,25 +9,13 @@ namespace HotelReservation.Data.Interfaces
     {
         IEnumerable<TEntity> GetAll();
 
-        TEntity Get(int id);
-
         Task<TEntity> GetAsync(int id);
-
-        Task<TEntity> GetAsync(string name);
 
         IEnumerable<TEntity> Find(Func<TEntity, bool> predicate);
 
-        Task<IEnumerable<TEntity>> FindAsync(Func<TEntity, bool> predicate);
+        Task<TEntity> CreateAsync(TEntity item);
 
-        void Create(TEntity item);
-
-        Task CreateAsync(TEntity item);
-
-        void Update(TEntity newItem);
-
-        Task UpdateAsync(TEntity newItem);
-
-        TEntity Delete(int id);
+        Task<TEntity> UpdateAsync(TEntity newItem);
 
         Task<TEntity> DeleteAsync(int id);
     }

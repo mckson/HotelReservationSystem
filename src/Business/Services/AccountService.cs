@@ -54,7 +54,7 @@ namespace HotelReservation.Business.Services
             var existingUserEntity = await _userManager.FindByEmailAsync(userRegistration.Email);
 
             if (existingUserEntity != null)
-                throw new DataException("User with such email already exists", ErrorStatus.AlreadyExisted);
+                throw new DataException("User with such email already exists", ErrorStatus.AlreadyExist);
 
             var userEntity = _mapper.Map<UserEntity>(userRegistration);
 

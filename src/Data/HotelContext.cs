@@ -12,8 +12,6 @@ namespace HotelReservation.Data
         {
         }
 
-        public DbSet<CompanyEntity> Companies { get; set; }
-
         public DbSet<HotelEntity> Hotels { get; set; }
 
         public DbSet<RoomEntity> Rooms { get; set; }
@@ -29,7 +27,6 @@ namespace HotelReservation.Data
             modelBuilder.ApplyConfiguration(new HotelEntityConfiguration());
             modelBuilder.ApplyConfiguration(new RoomEntityConfiguration());
             modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
-            modelBuilder.ApplyConfiguration(new CompanyEntityConfiguration());
             modelBuilder.ApplyConfiguration(new LocationEntityConfiguration());
         }
     }
