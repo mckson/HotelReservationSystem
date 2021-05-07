@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -8,6 +10,7 @@ using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
+using HotelReservation.Data;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,15 +23,21 @@ namespace HotelReservation.Business.Services
         private readonly UserManager<UserEntity> _userManager;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
         private readonly IMapper _mapper;
+        private readonly ITokenService _tokenService;
+        private readonly HotelContext _context;
 
         public AccountService(
             UserManager<UserEntity> userManager,
             IPasswordHasher<UserEntity> passwordHasher,
-            IMapper mapper)
+            ITokenService tokenService,
+            IMapper mapper,
+            HotelContext context)
         {
             _userManager = userManager;
+            _tokenService = tokenService;
             _passwordHasher = passwordHasher;
             _mapper = mapper;
+            _context = context;
         }
 
         public async Task<UserModel> AuthenticateAsync(UserAuthenticationModel user)
@@ -43,7 +52,18 @@ namespace HotelReservation.Business.Services
                 PasswordVerificationResult.Failed)
                 throw new DataException("Incorrect password", ErrorStatus.IncorrectInput);
 
-            return _mapper.Map<UserModel>(userEntity);
+            var claims = await GetIdentityAsync(user);
+
+            var encodedJwt = _tokenService.GenerateJwtToken(claims);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            var refreshTokenEntity = _mapper.Map<RefreshTokenEntity>(refreshToken);
+            userEntity.RefreshTokens.Add(refreshTokenEntity);
+            await _userManager.UpdateAsync(userEntity);
+
+            var userModel = _mapper.Map<UserModel>(userEntity);
+            userModel.JwtToken = encodedJwt;
+
+            return userModel;
         }
 
         public async Task<UserAuthenticationModel> RegisterAsync(UserRegistrationModel userRegistration)
@@ -71,18 +91,69 @@ namespace HotelReservation.Business.Services
             return _mapper.Map<UserAuthenticationModel>(userRegistration);
         }
 
-        public async Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel userAuth)
+        public async Task<UserModel> RefreshToken(string token)
+        {
+            var userEntity = _userManager.Users.FirstOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+
+            if (userEntity == null)
+                return null;
+
+            var refreshToken = userEntity.RefreshTokens.Single(t => t.Token == token);
+
+            if (!refreshToken.IsActive)
+                return null;
+
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.ReplacedByToken = newRefreshToken.Token;
+            userEntity.RefreshTokens.Add(_mapper.Map<RefreshTokenEntity>(newRefreshToken));
+
+            await _userManager.UpdateAsync(userEntity);
+
+            var user = _mapper.Map<UserModel>(userEntity);
+
+            var claims = await GetIdentityAsync(_mapper.Map<UserAuthenticationModel>(user));
+            var jwtToken = _tokenService.GenerateJwtToken(claims);
+
+            var userModel = _mapper.Map<UserModel>(user);
+            userModel.JwtToken = jwtToken;
+
+            return userModel;
+        }
+
+        public bool RevokeToken(string token)
+        {
+            var user = _userManager.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+            var userModel = _mapper.Map<UserModel>(user);
+
+            // return false if no user found with token
+            if (userModel == null)
+                return false;
+
+            var refreshToken = userModel.RefreshTokens.Single(x => x.Token == token);
+
+            // return false if token is not active
+            if (!refreshToken.IsActive)
+                return false;
+
+            // revoke token and save
+            refreshToken.Revoked = DateTime.UtcNow;
+            _userManager.UpdateAsync(_mapper.Map<UserEntity>(userModel));
+
+            return true;
+        }
+
+        private async Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel userAuth)
         {
             var userEntity =
                 await _userManager.Users.FirstOrDefaultAsync(user =>
                     user.Email == userAuth.Email) ??
                 throw new DataException("There is no user with such email", ErrorStatus.NotFound);
 
-            if (userAuth.Password == null ||
-                _passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, userAuth.Password) !=
-                PasswordVerificationResult.Success)
-                throw new DataException("Wrong password", ErrorStatus.IncorrectInput);
-
+            // if (userAuth.Password == null ||
+            //    _passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, userAuth.Password) !=
+            //    PasswordVerificationResult.Success)
+            //    throw new DataException("Wrong password", ErrorStatus.IncorrectInput);
             var claims = new List<Claim>
             {
                 // this guarantees the token is unique

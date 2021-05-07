@@ -1,7 +1,9 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Models;
+using HotelReservation.Business.Models.UserModels;
 
 namespace HotelReservation.API
 {
@@ -19,6 +21,11 @@ namespace HotelReservation.API
 
             CreateMap<LocationModel, LocationResponseModel>();
             CreateMap<LocationRequestModel, LocationModel>();
+
+            CreateMap<UserModel, UserResponseModel>()
+                .ForMember(
+                    response => response.RefreshToken,
+                    opt => opt.MapFrom(model => model.RefreshTokens.Last().Token));
         }
     }
 }

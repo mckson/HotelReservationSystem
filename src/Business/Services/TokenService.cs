@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,7 +19,7 @@ namespace HotelReservation.Business.Services
             _configuration = configuration;
         }
 
-        public string CreateToken(ClaimsIdentity claims)
+        public string GenerateJwtToken(ClaimsIdentity claims)
         {
             var timeNow = DateTime.UtcNow;
 
@@ -34,6 +36,23 @@ namespace HotelReservation.Business.Services
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
+        }
+
+        public RefreshTokenModel GenerateRefreshToken()
+        {
+            using (var rngCryptoServiceProvider = new RNGCryptoServiceProvider())
+            {
+                var randomBytes = new byte[64];
+
+                rngCryptoServiceProvider.GetBytes(randomBytes);
+
+                return new RefreshTokenModel
+                {
+                    Token = Convert.ToBase64String(randomBytes),
+                    Expires = DateTime.UtcNow.AddMinutes(5),
+                    Created = DateTime.UtcNow
+                };
+            }
         }
     }
 }

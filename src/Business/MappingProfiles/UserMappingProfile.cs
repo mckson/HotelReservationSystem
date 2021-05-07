@@ -14,6 +14,7 @@ namespace HotelReservation.Business.MappingProfiles
             CreateMap<UserModel, UserEntity>()
                 .ReverseMap();
             CreateMap<UserRegistrationModel, UserAuthenticationModel>();
+            CreateMap<UserModel, UserAuthenticationModel>();
         }
     }
 }
