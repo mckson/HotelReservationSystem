@@ -19,16 +19,16 @@ namespace HotelReservation.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
-        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
+        private readonly ITokenService _tokenService;
 
         public AccountController(
-            IConfiguration configuration,
             IAccountService accountService,
+            ITokenService tokenService,
             IMapper mapper)
         {
-            _configuration = configuration;
             _accountService = accountService;
+            _tokenService = tokenService;
             _mapper = mapper;
         }
 
@@ -42,23 +42,10 @@ namespace HotelReservation.API.Controllers
             if (loggedUser == null)
                 return BadRequest(new { errorText = "Invalid email or password" });
 
-            var now = DateTime.UtcNow;
-
             var claims = await _accountService.GetIdentityAsync(userAuthModel);
-            var key =
-                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["AuthOptions:key"]));
 
-            var jwt = new JwtSecurityToken(
-                issuer: _configuration["AuthOptions:issuer"],
-                audience: _configuration["AuthOptions:audience"],
-                notBefore: now,
-                claims: claims.Claims,
-                expires: now.AddSeconds(double.Parse(_configuration["AuthOptions:lifetime"] + 10)),
-                signingCredentials: new SigningCredentials(
-                    key,
-                    SecurityAlgorithms.HmacSha256));
+            var encodedJwt = _tokenService.CreateToken(claims);
 
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             var response = new
             {
                 access_token = encodedJwt

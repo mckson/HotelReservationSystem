@@ -48,6 +48,7 @@ namespace HotelReservation.API
 
             services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
 
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAccountService, AccountService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -62,7 +63,7 @@ namespace HotelReservation.API
                         ValidateAudience = true,
                         ValidAudience = Configuration["AuthOptions:audience"],
 
-                        ValidateLifetime = true,
+                        ValidateLifetime = false,
 
                         IssuerSigningKey =
                             new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["AuthOptions:key"])),
