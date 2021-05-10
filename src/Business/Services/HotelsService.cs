@@ -26,21 +26,21 @@ namespace HotelReservation.Business.Services
             _mapper = mapper;
         }
 
-        public async Task<HotelModel> CreateAsync(HotelModel model)
+        public async Task<HotelModel> CreateAsync(HotelModel userModel)
         {
             var locationEntity = await _locationRepo.GetAsync(
-                model.Location.Country,
-                model.Location.Region,
-                model.Location.City,
-                model.Location.Street,
-                model.Location.BuildingNumber);
+                userModel.Location.Country,
+                userModel.Location.Region,
+                userModel.Location.City,
+                userModel.Location.Street,
+                userModel.Location.BuildingNumber);
 
             if (locationEntity != null)
                 throw new DataException("Location already exist", ErrorStatus.AlreadyExist);
 
-            locationEntity = _mapper.Map<LocationEntity>(model.Location);
+            locationEntity = _mapper.Map<LocationEntity>(userModel.Location);
             // var createdLocation = await _locationRepo.CreateAsync(locationEntity);
-            var hotelEntity = _mapper.Map<HotelEntity>(model);
+            var hotelEntity = _mapper.Map<HotelEntity>(userModel);
 
             hotelEntity.Location = locationEntity;
 

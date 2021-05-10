@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Castle.Core.Internal;
-using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
-using HotelReservation.Data;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Serilog;
 
 namespace HotelReservation.Business.Services
 {
@@ -24,20 +21,20 @@ namespace HotelReservation.Business.Services
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
         private readonly IMapper _mapper;
         private readonly ITokenService _tokenService;
-        private readonly HotelContext _context;
+        private readonly ILogger _logger;
 
         public AccountService(
             UserManager<UserEntity> userManager,
             IPasswordHasher<UserEntity> passwordHasher,
             ITokenService tokenService,
             IMapper mapper,
-            HotelContext context)
+            ILogger logger)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _passwordHasher = passwordHasher;
             _mapper = mapper;
-            _context = context;
+            _logger = logger;
         }
 
         public async Task<UserModel> AuthenticateAsync(UserAuthenticationModel user)
@@ -57,11 +54,13 @@ namespace HotelReservation.Business.Services
             var encodedJwt = _tokenService.GenerateJwtToken(claims);
             var refreshToken = _tokenService.GenerateRefreshToken();
             var refreshTokenEntity = _mapper.Map<RefreshTokenEntity>(refreshToken);
-            userEntity.RefreshTokens.Add(refreshTokenEntity);
+            userEntity.RefreshToken = refreshTokenEntity;
             await _userManager.UpdateAsync(userEntity);
 
             var userModel = _mapper.Map<UserModel>(userEntity);
             userModel.JwtToken = encodedJwt;
+
+            await GetRolesForUserModelAsync(userModel);
 
             return userModel;
         }
@@ -93,12 +92,12 @@ namespace HotelReservation.Business.Services
 
         public async Task<UserModel> RefreshToken(string token)
         {
-            var userEntity = _userManager.Users.FirstOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+            var userEntity = _userManager.Users.FirstOrDefault(u => u.RefreshToken.Token == token);
 
             if (userEntity == null)
                 return null;
 
-            var refreshToken = userEntity.RefreshTokens.Single(t => t.Token == token);
+            var refreshToken = userEntity.RefreshToken;
 
             if (!refreshToken.IsActive)
                 return null;
@@ -106,7 +105,7 @@ namespace HotelReservation.Business.Services
             var newRefreshToken = _tokenService.GenerateRefreshToken();
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.ReplacedByToken = newRefreshToken.Token;
-            userEntity.RefreshTokens.Add(_mapper.Map<RefreshTokenEntity>(newRefreshToken));
+            userEntity.RefreshToken = _mapper.Map<RefreshTokenEntity>(newRefreshToken);
 
             await _userManager.UpdateAsync(userEntity);
 
@@ -118,19 +117,21 @@ namespace HotelReservation.Business.Services
             var userModel = _mapper.Map<UserModel>(user);
             userModel.JwtToken = jwtToken;
 
+            await GetRolesForUserModelAsync(userModel);
+
             return userModel;
         }
 
-        public bool RevokeToken(string token)
+        public async Task<bool> RevokeTokenAsync(string token)
         {
-            var user = _userManager.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken.Token == token);
             var userModel = _mapper.Map<UserModel>(user);
 
             // return false if no user found with token
             if (userModel == null)
                 return false;
 
-            var refreshToken = userModel.RefreshTokens.Single(x => x.Token == token);
+            var refreshToken = userModel.RefreshToken;
 
             // return false if token is not active
             if (!refreshToken.IsActive)
@@ -138,7 +139,8 @@ namespace HotelReservation.Business.Services
 
             // revoke token and save
             refreshToken.Revoked = DateTime.UtcNow;
-            _userManager.UpdateAsync(_mapper.Map<UserEntity>(userModel));
+
+            await _userManager.UpdateAsync(_mapper.Map<UserEntity>(userModel));
 
             return true;
         }
@@ -173,6 +175,12 @@ namespace HotelReservation.Business.Services
                 ClaimsIdentity.DefaultRoleClaimType);
 
             return claimsIdentity;
+        }
+
+        private async Task GetRolesForUserModelAsync(UserModel userModel)
+        {
+            var roles = await _userManager.GetRolesAsync(_mapper.Map<UserEntity>(userModel));
+            userModel.Roles = roles;
         }
     }
 }

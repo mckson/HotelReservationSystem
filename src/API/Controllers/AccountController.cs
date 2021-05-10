@@ -74,7 +74,7 @@ namespace HotelReservation.API.Controllers
         }
 
         [HttpPost("Revoke-token")]
-        public IActionResult RevokeToken([FromBody] RevokeTokenRequest model)
+        public async Task<IActionResult> RevokeTokenAsync([FromBody] RevokeTokenRequest model)
         {
             // accept token from request body or cookie
             var token = model.Token ?? Request.Cookies["refreshToken"];
@@ -82,7 +82,7 @@ namespace HotelReservation.API.Controllers
             if (string.IsNullOrEmpty(token))
                 return BadRequest(new { message = "Token is required" });
 
-            var response = _accountService.RevokeToken(token);
+            var response = await _accountService.RevokeTokenAsync(token);
 
             if (!response)
                 return NotFound(new { message = "Token not found" });

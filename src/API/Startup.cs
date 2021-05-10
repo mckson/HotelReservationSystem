@@ -38,8 +38,14 @@ namespace HotelReservation.API
                 opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
             });
 
-            services.AddIdentityCore<UserEntity>(options => { });
-            new IdentityBuilder(typeof(UserEntity), typeof(IdentityRole), services)
+            services.AddIdentity<UserEntity, IdentityRole>(options =>
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 4;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireLowercase = false;
+                })
                 .AddRoleManager<RoleManager<IdentityRole>>()
                 .AddSignInManager<SignInManager<UserEntity>>()
                 .AddUserManager<UserManager<UserEntity>>()
@@ -96,6 +102,14 @@ namespace HotelReservation.API
                         policy.RequireAuthenticatedUser();
                         policy.RequireRole("Admin", "Manager");
                     });
+
+                options.AddPolicy(
+                    "UserManagementPermission",
+                    policy =>
+                    {
+                        policy.RequireAuthenticatedUser();
+                        policy.RequireRole("Admin");
+                    });
             });
 
             services.AddScoped<IHotelRepository, HotelRepository>();
@@ -104,6 +118,7 @@ namespace HotelReservation.API
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IHotelsService, HotelsService>();
+            services.AddScoped<IUsersService, UsersService>();
 
             services.AddControllers();
         }

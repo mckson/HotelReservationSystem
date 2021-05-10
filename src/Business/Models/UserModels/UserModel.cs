@@ -31,8 +31,10 @@ namespace HotelReservation.Business.Models.UserModels
 
         public ReservationModel Reservation { get; set; }
 
-        public List<RefreshTokenModel> RefreshTokens { get; set; }
+        public RefreshTokenModel RefreshToken { get; set; }
 
         public string JwtToken { get; set; }
+
+        public IEnumerable<string> Roles { get; set; }
     }
 }

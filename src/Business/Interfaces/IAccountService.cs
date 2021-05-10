@@ -12,7 +12,7 @@ namespace HotelReservation.Business.Interfaces
 
         Task<UserModel> RefreshToken(string token);
 
-        bool RevokeToken(string token);
+        Task<bool> RevokeTokenAsync(string token);
 
         // Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel user);
     }

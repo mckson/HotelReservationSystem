@@ -10,6 +10,7 @@ namespace HotelReservation.Business.MappingProfiles
         public UserMappingProfile()
         {
             CreateMap<UserRegistrationModel, UserEntity>();
+            CreateMap<UserUpdateModel, UserEntity>();
             // CreateMap<UserAuthenticationModel, UserModel>();
             CreateMap<UserModel, UserEntity>()
                 .ReverseMap();

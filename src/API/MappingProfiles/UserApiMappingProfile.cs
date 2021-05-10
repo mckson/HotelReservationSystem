@@ -12,6 +12,8 @@ namespace HotelReservation.API.MappingProfiles
                 .ReverseMap();
             CreateMap<UserAuthenticationRequestModel, UserAuthenticationModel>()
                 .ReverseMap();
+            CreateMap<UserAdminCreationRequestModel, UserRegistrationModel>();
+            CreateMap<UserUpdateRequestModel, UserUpdateModel>();
         }
     }
 }

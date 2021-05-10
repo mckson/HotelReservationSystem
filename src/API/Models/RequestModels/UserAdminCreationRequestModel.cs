@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace HotelReservation.Business.Models.UserModels
+namespace HotelReservation.API.Models.RequestModels
 {
-    public class UserRegistrationModel
+    public class UserAdminCreationRequestModel
     {
         public string UserName { get; set; }
 
@@ -33,6 +33,7 @@ namespace HotelReservation.Business.Models.UserModels
         [Required(ErrorMessage = "Last name is required")]
         public string LastName { get; set; }
 
+        [Required(ErrorMessage = "One or more role is required")]
         public IEnumerable<string> Roles { get; set; }
     }
 }

@@ -4,7 +4,7 @@ namespace HotelReservation.Business.Interfaces
 {
     public interface IBaseService<TEntity, TModel>
     {
-        public Task<TModel> CreateAsync(TModel model);
+        public Task<TModel> CreateAsync(TModel userModel);
 
         public Task<TModel> GetAsync(int id);
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.API.Models.ResponseModels
 {
@@ -17,5 +18,7 @@ namespace HotelReservation.API.Models.ResponseModels
         public string JwtToken { get; set; }
 
         public string RefreshToken { get; set; }
+
+        public IEnumerable<string> Roles { get; set; }
     }
 }
