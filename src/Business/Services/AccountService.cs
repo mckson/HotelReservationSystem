@@ -40,14 +40,14 @@ namespace HotelReservation.Business.Services
         public async Task<UserModel> AuthenticateAsync(UserAuthenticationModel user)
         {
             if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password))
-                throw new DataException("Password and email cannot be empty", ErrorStatus.EmptyInput);
+                throw new BusinessException("Password and email cannot be empty", ErrorStatus.EmptyInput);
 
             var userEntity = await _userManager.FindByEmailAsync(user.Email) ??
-                             throw new DataException("User with such email does not exist", ErrorStatus.NotFound);
+                             throw new BusinessException("User with such email does not exist", ErrorStatus.NotFound);
 
             if (_passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, user.Password) ==
                 PasswordVerificationResult.Failed)
-                throw new DataException("Incorrect password", ErrorStatus.IncorrectInput);
+                throw new BusinessException("Incorrect password", ErrorStatus.IncorrectInput);
 
             var claims = await GetIdentityAsync(user);
 
@@ -68,12 +68,12 @@ namespace HotelReservation.Business.Services
         public async Task<UserAuthenticationModel> RegisterAsync(UserRegistrationModel userRegistration)
         {
             if (userRegistration == null)
-                throw new DataException("User cannot be empty", ErrorStatus.EmptyInput);
+                throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
             var existingUserEntity = await _userManager.FindByEmailAsync(userRegistration.Email);
 
             if (existingUserEntity != null)
-                throw new DataException("User with such email already exists", ErrorStatus.AlreadyExist);
+                throw new BusinessException("User with such email already exists", ErrorStatus.AlreadyExist);
 
             var userEntity = _mapper.Map<UserEntity>(userRegistration);
 
@@ -150,7 +150,7 @@ namespace HotelReservation.Business.Services
             var userEntity =
                 await _userManager.Users.FirstOrDefaultAsync(user =>
                     user.Email == userAuth.Email) ??
-                throw new DataException("There is no user with such email", ErrorStatus.NotFound);
+                throw new BusinessException("There is no user with such email", ErrorStatus.NotFound);
 
             // if (userAuth.Password == null ||
             //    _passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, userAuth.Password) !=
@@ -159,7 +159,8 @@ namespace HotelReservation.Business.Services
             var claims = new List<Claim>
             {
                 // this guarantees the token is unique
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("id", userEntity.Id)
             };
 
             // Adds all roles to claims

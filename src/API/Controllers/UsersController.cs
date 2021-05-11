@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
+    [Authorize(Policy = "UserManagementPermission")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -65,8 +67,9 @@ namespace HotelReservation.API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(string id, [FromBody] UserUpdateRequestModel user)
         {
+            var currentUserClaims = User.Claims;
             var userUpdateModel = _mapper.Map<UserUpdateModel>(user);
-            var updatedUserModel = await _usersService.UpdateAsync(id, userUpdateModel);
+            var updatedUserModel = await _usersService.UpdateAsync(id, userUpdateModel, currentUserClaims);
             var updatedUserResponseModel = _mapper.Map<UserResponseModel>(updatedUserModel);
 
             return Ok(updatedUserResponseModel);
@@ -74,8 +77,13 @@ namespace HotelReservation.API.Controllers
 
         // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(string id)
         {
+            var currentUserClaims = User.Claims;
+            var deletedUser = await _usersService.DeleteAsync(id, currentUserClaims);
+            var deletedUserResponse = _mapper.Map<UserResponseModel>(deletedUser);
+
+            return Ok(deletedUserResponse);
         }
     }
 }

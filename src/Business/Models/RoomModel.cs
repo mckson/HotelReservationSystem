@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using HotelReservation.Business.Models.UserModels;
-using HotelReservation.Data.Entities;
 
 namespace HotelReservation.Business.Models
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using HotelReservation.API.Middleware;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
@@ -38,14 +39,16 @@ namespace HotelReservation.API
                 opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
             });
 
-            services.AddIdentity<UserEntity, IdentityRole>(options =>
-                {
-                    options.Password.RequireDigit = false;
-                    options.Password.RequiredLength = 4;
-                    options.Password.RequireNonAlphanumeric = false;
-                    options.Password.RequireUppercase = false;
-                    options.Password.RequireLowercase = false;
-                })
+            services.AddIdentityCore<UserEntity>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 4;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+            });
+
+            new IdentityBuilder(typeof(UserEntity), typeof(IdentityRole), services)
                 .AddRoleManager<RoleManager<IdentityRole>>()
                 .AddSignInManager<SignInManager<UserEntity>>()
                 .AddUserManager<UserManager<UserEntity>>()
@@ -114,11 +117,13 @@ namespace HotelReservation.API
 
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IRepository<RoomEntity>, RoomRepository>();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IHotelsService, HotelsService>();
             services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IRoomsService, RoomsService>();
 
             services.AddControllers();
         }
@@ -142,6 +147,8 @@ namespace HotelReservation.API
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

@@ -10,6 +10,6 @@ namespace HotelReservation.Business.Interfaces
 
         public Task<TModel> DeleteAsync(int id);
 
-        public Task<TModel> UpdateAsync(int id, TModel model);
+        public Task<TModel> UpdateAsync(int id, TModel updatingRoomModel);
     }
 }

@@ -29,13 +29,13 @@ namespace HotelReservation.API.Controllers
         // [Authorize(Policy = "GetHotelsPermission")]
         [AllowAnonymous]
         [HttpGet]
-        public ActionResult<IEnumerable<HotelResponseModel>> GetHotels()
+        public IEnumerable<HotelResponseModel> GetHotels()
         {
             var hotelsResponse = _mapper.Map<IEnumerable<HotelResponseModel>>(_service.GetHotels());
-            if (hotelsResponse == null)
-                return NotFound("There is no hotels in system");
+            /*if (hotelsResponse == null)
+                return NotFound("There is no hotels in system");*/
 
-            return Ok(hotelsResponse);
+            return hotelsResponse;
         }
 
         // GET api/<HotelsController>/5
@@ -130,13 +130,12 @@ namespace HotelReservation.API.Controllers
 
                 return Ok(hotelResponse);
             }
-            catch (DataException ex)
+            catch (BusinessException ex)
             {
                 return ex.Status switch
                 {
                     ErrorStatus.AlreadyExist => NotFound($"{ex.Status}: {ex.Message}"),
                     ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
                     _ => BadRequest()
                 };
             }
@@ -153,12 +152,11 @@ namespace HotelReservation.API.Controllers
 
                 return Ok(hotelResponse);
             }
-            catch (DataException ex)
+            catch (BusinessException ex)
             {
                 return ex.Status switch
                 {
                     ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
                     _ => BadRequest()
                 };
             }
@@ -173,12 +171,11 @@ namespace HotelReservation.API.Controllers
                 await _service.DeleteAsync(id);
                 return Ok();
             }
-            catch (DataException ex)
+            catch (BusinessException ex)
             {
                 return ex.Status switch
                 {
                     ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
                     _ => BadRequest()
                 };
             }

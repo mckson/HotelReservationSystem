@@ -32,7 +32,7 @@ namespace HotelReservation.Business.Services
                 issuer: _configuration["AuthOptions:issuer"],
                 audience: _configuration["AuthOptions:audience"],
                 claims: claims.Claims,
-                expires: timeNow.AddSeconds(double.Parse(_configuration["AuthOptions:lifetime"] + 10)),
+                expires: timeNow.AddMinutes(double.Parse(_configuration["AuthOptions:lifetime"])),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
@@ -40,19 +40,17 @@ namespace HotelReservation.Business.Services
 
         public RefreshTokenModel GenerateRefreshToken()
         {
-            using (var rngCryptoServiceProvider = new RNGCryptoServiceProvider())
+            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            var randomBytes = new byte[64];
+
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+
+            return new RefreshTokenModel
             {
-                var randomBytes = new byte[64];
-
-                rngCryptoServiceProvider.GetBytes(randomBytes);
-
-                return new RefreshTokenModel
-                {
-                    Token = Convert.ToBase64String(randomBytes),
-                    Expires = DateTime.UtcNow.AddMinutes(5),
-                    Created = DateTime.UtcNow
-                };
-            }
+                Token = Convert.ToBase64String(randomBytes),
+                Expires = DateTime.UtcNow.AddHours(5),
+                Created = DateTime.UtcNow
+            };
         }
     }
 }

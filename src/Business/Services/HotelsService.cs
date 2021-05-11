@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
 {
@@ -36,7 +36,7 @@ namespace HotelReservation.Business.Services
                 userModel.Location.BuildingNumber);
 
             if (locationEntity != null)
-                throw new DataException("Location already exist", ErrorStatus.AlreadyExist);
+                throw new BusinessException("Location already exist", ErrorStatus.AlreadyExist);
 
             locationEntity = _mapper.Map<LocationEntity>(userModel.Location);
             // var createdLocation = await _locationRepo.CreateAsync(locationEntity);
@@ -57,7 +57,7 @@ namespace HotelReservation.Business.Services
 
         public async Task<HotelModel> DeleteAsync(int id)
         {
-            var unused = await _repo.GetAsync(id) ?? throw new DataException(
+            var unused = await _repo.GetAsync(id) ?? throw new BusinessException(
                 "Hotel with such id does not exist", ErrorStatus.NotFound);
 
             var deletedHotel = await _repo.DeleteAsync(id);
@@ -65,12 +65,12 @@ namespace HotelReservation.Business.Services
             return _mapper.Map<HotelModel>(deletedHotel);
         }
 
-        public async Task<HotelModel> UpdateAsync(int id, HotelModel model)
+        public async Task<HotelModel> UpdateAsync(int id, HotelModel updatingRoomModel)
         {
             var hotelEntity = await _repo.GetAsync(id) ??
-                              throw new DataException("Hotel with such id does not exist", ErrorStatus.NotFound);
+                              throw new BusinessException("Hotel with such id does not exist", ErrorStatus.NotFound);
 
-            hotelEntity.Name = model.Name;
+            hotelEntity.Name = updatingRoomModel.Name;
 
             var updatedHotel = await _repo.UpdateAsync(hotelEntity);
             return _mapper.Map<HotelModel>(updatedHotel);
@@ -79,8 +79,8 @@ namespace HotelReservation.Business.Services
         public IEnumerable<HotelModel> GetHotels()
         {
             var hotelEntities = _repo.GetAll();
-            var hotelResponseModels = _mapper.Map<IEnumerable<HotelModel>>(hotelEntities);
-            return hotelResponseModels;
+            var hotelModels = _mapper.Map<IEnumerable<HotelModel>>(hotelEntities);
+            return hotelModels;
         }
 
         // public async Task<IEnumerable<HotelModel>> GetHotelRooms(int id)
