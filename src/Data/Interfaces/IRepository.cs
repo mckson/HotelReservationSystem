@@ -7,11 +7,11 @@ namespace HotelReservation.Data.Interfaces
     public interface IRepository<TEntity>
         where TEntity : class
     {
-        IEnumerable<TEntity> GetAll();
+        IEnumerable<TEntity> GetAll(bool asNoTracking = false);
 
-        Task<TEntity> GetAsync(int id);
+        Task<TEntity> GetAsync(int id, bool asNoTracking = false);
 
-        IEnumerable<TEntity> Find(Func<TEntity, bool> predicate);
+        IEnumerable<TEntity> Find(Func<TEntity, bool> predicate, bool asNoTracking = false);
 
         Task<TEntity> CreateAsync(TEntity item);
 

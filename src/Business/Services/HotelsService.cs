@@ -4,6 +4,7 @@ using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
@@ -26,7 +27,7 @@ namespace HotelReservation.Business.Services
             _mapper = mapper;
         }
 
-        public async Task<HotelModel> CreateAsync(HotelModel userModel)
+        public async Task<HotelModel> CreateAsync(HotelModel userModel, IEnumerable<Claim> userClaims)
         {
             var locationEntity = await _locationRepo.GetAsync(
                 userModel.Location.Country,
@@ -55,7 +56,7 @@ namespace HotelReservation.Business.Services
             return _mapper.Map<HotelModel>(hotelEntity);
         }
 
-        public async Task<HotelModel> DeleteAsync(int id)
+        public async Task<HotelModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
         {
             var unused = await _repo.GetAsync(id) ?? throw new BusinessException(
                 "Hotel with such id does not exist", ErrorStatus.NotFound);
@@ -65,7 +66,7 @@ namespace HotelReservation.Business.Services
             return _mapper.Map<HotelModel>(deletedHotel);
         }
 
-        public async Task<HotelModel> UpdateAsync(int id, HotelModel updatingRoomModel)
+        public async Task<HotelModel> UpdateAsync(int id, HotelModel updatingRoomModel, IEnumerable<Claim> userClaims)
         {
             var hotelEntity = await _repo.GetAsync(id) ??
                               throw new BusinessException("Hotel with such id does not exist", ErrorStatus.NotFound);

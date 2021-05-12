@@ -9,7 +9,8 @@ namespace HotelReservation.Business
         NotFound,
         EmptyInput,
         IncorrectInput,
-        AlreadyExist
+        AlreadyExist,
+        AccessDenied
     }
 
     public class BusinessException : Exception

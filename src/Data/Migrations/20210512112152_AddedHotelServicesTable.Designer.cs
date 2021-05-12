@@ -4,14 +4,16 @@ using HotelReservation.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HotelReservation.Data.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    partial class HotelContextModelSnapshot : ModelSnapshot
+    [Migration("20210512112152_AddedHotelServicesTable")]
+    partial class AddedHotelServicesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,15 +33,12 @@ namespace HotelReservation.Data.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<int>("NumberFloors")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Hotels");
                 });
 
-            modelBuilder.Entity("HotelReservation.Data.Entities.HotelServiceEntity", b =>
+            modelBuilder.Entity("HotelReservation.Data.Entities.HotelService", b =>
                 {
                     b.Property<int>("HotelId")
                         .HasColumnType("int");
@@ -111,10 +110,7 @@ namespace HotelReservation.Data.Migrations
                     b.Property<double>("Deposit")
                         .HasColumnType("float");
 
-                    b.Property<int>("HotelId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReservedTime")
+                    b.Property<DateTime>("ReservationDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("TotalDays")
@@ -123,51 +119,16 @@ namespace HotelReservation.Data.Migrations
                     b.Property<double>("TotalPrice")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("UpdatedTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("HotelId");
 
                     b.HasIndex("UserId")
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Reservations");
-                });
-
-            modelBuilder.Entity("HotelReservation.Data.Entities.ReservationRoomEntity", b =>
-                {
-                    b.Property<int>("ReservationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ReservationId", "RoomId");
-
-                    b.HasIndex("RoomId");
-
-                    b.ToTable("ReservationRooms");
-                });
-
-            modelBuilder.Entity("HotelReservation.Data.Entities.ReservationServiceEntity", b =>
-                {
-                    b.Property<int>("ReservationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ReservationId", "ServiceId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("ReservationServices");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoomEntity", b =>
@@ -191,12 +152,17 @@ namespace HotelReservation.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<int?>("ReservationId")
+                        .HasColumnType("int");
+
                     b.Property<int>("RoomNumber")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("HotelId");
+
+                    b.HasIndex("ReservationId");
 
                     b.ToTable("Rooms");
                 });
@@ -210,9 +176,6 @@ namespace HotelReservation.Data.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -438,7 +401,7 @@ namespace HotelReservation.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("HotelReservation.Data.Entities.HotelServiceEntity", b =>
+            modelBuilder.Entity("HotelReservation.Data.Entities.HotelService", b =>
                 {
                     b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
                         .WithMany("HotelServices")
@@ -464,46 +427,10 @@ namespace HotelReservation.Data.Migrations
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationEntity", b =>
                 {
-                    b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
-                        .WithMany("Reservations")
-                        .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("HotelReservation.Data.Entities.UserEntity", "User")
                         .WithOne("Reservation")
                         .HasForeignKey("HotelReservation.Data.Entities.ReservationEntity", "UserId")
                         .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("HotelReservation.Data.Entities.ReservationRoomEntity", b =>
-                {
-                    b.HasOne("HotelReservation.Data.Entities.ReservationEntity", "Reservation")
-                        .WithMany("ReservationRooms")
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
-                        .WithMany("ReservationRooms")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("HotelReservation.Data.Entities.ReservationServiceEntity", b =>
-                {
-                    b.HasOne("HotelReservation.Data.Entities.ReservationEntity", "Reservation")
-                        .WithMany("ReservationServices")
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HotelReservation.Data.Entities.ServiceEntity", "Service")
-                        .WithMany("ReservationServices")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoomEntity", b =>
@@ -513,6 +440,11 @@ namespace HotelReservation.Data.Migrations
                         .HasForeignKey("HotelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("HotelReservation.Data.Entities.ReservationEntity", "Reservation")
+                        .WithMany("Rooms")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.UserEntity", b =>
@@ -523,8 +455,9 @@ namespace HotelReservation.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
-                        .WithMany()
-                        .HasForeignKey("RoomId");
+                        .WithMany("Users")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.OwnsOne("HotelReservation.Data.Entities.RefreshTokenEntity", "RefreshToken", b1 =>
                         {

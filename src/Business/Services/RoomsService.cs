@@ -1,13 +1,12 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using Serilog;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
@@ -31,12 +30,14 @@ namespace HotelReservation.Business.Services
             _logger = logger;
         }
 
-        public async Task<RoomModel> CreateAsync(RoomModel roomModel)
+        public async Task<RoomModel> CreateAsync(RoomModel roomModel, IEnumerable<Claim> userClaims)
         {
             var roomEntity = _mapper.Map<RoomEntity>(roomModel);
 
             var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId) ??
                               throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
+
+            await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
 
             if (hotelEntity.Rooms.Any(room => room.RoomNumber == roomEntity.RoomNumber))
                 throw new BusinessException("Hotel already has room with such number", ErrorStatus.AlreadyExist);
@@ -57,19 +58,25 @@ namespace HotelReservation.Business.Services
             return roomModel;
         }
 
-        public async Task<RoomModel> DeleteAsync(int id)
+        public async Task<RoomModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
         {
-            var deletedRoomEntity = await _roomsRepository.DeleteAsync(id) ??
-                                    throw new BusinessException("No room with such id", ErrorStatus.NotFound);
+            var roomEntity = await _roomsRepository.GetAsync(id, true) ??
+                             throw new BusinessException("No room with such id", ErrorStatus.NotFound);
+
+            await CheckHotelManagementPermissionAsync(roomEntity.HotelId, userClaims);
+
+            var deletedRoomEntity = await _roomsRepository.DeleteAsync(id);
             var deletedRoomModel = _mapper.Map<RoomModel>(deletedRoomEntity);
 
             return deletedRoomModel;
         }
 
-        public async Task<RoomModel> UpdateAsync(int id, RoomModel updatingRoomModel)
+        public async Task<RoomModel> UpdateAsync(int id, RoomModel updatingRoomModel, IEnumerable<Claim> userClaims)
         {
-            /*var roomEntity = await _roomsRepository.GetAsync(id) ??
-                             throw new BusinessException("No room with such id", ErrorStatus.NotFound);*/
+            var roomEntity = await _roomsRepository.GetAsync(id, true) ??
+                             throw new BusinessException("No room with such id", ErrorStatus.NotFound);
+
+            await CheckHotelManagementPermissionAsync(roomEntity.HotelId, userClaims);
 
             var updatingRoomEntity = _mapper.Map<RoomEntity>(updatingRoomModel);
             updatingRoomEntity.Id = id;
@@ -124,6 +131,32 @@ namespace HotelReservation.Business.Services
             var roomModels = _mapper.Map<IEnumerable<RoomModel>>(roomsEntities);
 
             return roomModels;
+        }
+
+        private async Task CheckHotelManagementPermissionAsync(int id, IEnumerable<Claim> userClaims)
+        {
+            if (userClaims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
+                return;
+
+            var hotelEntity = await _hotelRepository.GetAsync(id, true) ??
+                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
+
+            var hotelIdString = userClaims.FirstOrDefault(claim => claim.Type == "hotelId")?.Value;
+            int.TryParse(hotelIdString, out var hotelId);
+
+            if (hotelId == 0)
+            {
+                throw new BusinessException(
+                    "You have no permissions to manage hotels. Ask application admin to take that permission",
+                    ErrorStatus.AccessDenied);
+            }
+
+            if (hotelId != hotelEntity.Id)
+            {
+                throw new BusinessException(
+                    $"You have no permission to manage hotel {hotelEntity.Name}. Ask application admin about permissions",
+                    ErrorStatus.AccessDenied);
+            }
         }
     }
 }

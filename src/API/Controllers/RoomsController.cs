@@ -3,6 +3,7 @@ using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
+    [Authorize(Policy = "UpdateHotelPermission")]
     [Route("api/[controller]")]
     [ApiController]
     public class RoomsController : ControllerBase
@@ -29,6 +31,7 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET: api/<RoomsController>
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult<IEnumerable<RoomResponseModel>> GetAllRooms()
         {
@@ -39,6 +42,7 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET api/<RoomsController>/5
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<RoomResponseModel>> GetRoomById(int id)
         {
@@ -52,8 +56,9 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<RoomResponseModel>> CreateRoom([FromBody] RoomRequestModel roomRequestModel)
         {
+            var userClaims = User.Claims;
             var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
-            var createdRoom = await _roomsService.CreateAsync(roomModel);
+            var createdRoom = await _roomsService.CreateAsync(roomModel, userClaims);
             var createdRoomResponseModel = _mapper.Map<RoomResponseModel>(createdRoom);
 
             return Ok(createdRoomResponseModel);
@@ -63,8 +68,9 @@ namespace HotelReservation.API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<RoomResponseModel>> UpdateRoom(int id, [FromBody] RoomRequestModel roomRequestModel)
         {
+            var userClaims = User.Claims;
             var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
-            var createdRoom = await _roomsService.UpdateAsync(id, roomModel);
+            var createdRoom = await _roomsService.UpdateAsync(id, roomModel, userClaims);
             var createdRoomResponseModel = _mapper.Map<RoomResponseModel>(createdRoom);
 
             return Ok(createdRoomResponseModel);
@@ -74,7 +80,8 @@ namespace HotelReservation.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<RoomResponseModel>> DeleteRoom(int id)
         {
-            var deletedRoomModel = await _roomsService.DeleteAsync(id);
+            var userClaims = User.Claims;
+            var deletedRoomModel = await _roomsService.DeleteAsync(id, userClaims);
             var deletedRoomResponseModel = _mapper.Map<RoomResponseModel>(deletedRoomModel);
 
             return Ok(deletedRoomResponseModel);

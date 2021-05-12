@@ -1,5 +1,5 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 
 namespace HotelReservation.Business.Interfaces

@@ -24,6 +24,11 @@ namespace HotelReservation.Data.Configurations
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasMany(h => h.Reservations)
+                .WithOne(res => res.Hotel)
+                .HasForeignKey(res => res.HotelId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.Property(h => h.Name)
                 .HasMaxLength(100)
                 .IsRequired();

@@ -84,22 +84,15 @@ namespace HotelReservation.API
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(
-                    "GetHotelsPermission",
-                    policy =>
-                    {
-                        policy.RequireAuthenticatedUser();
-                    });
-
-                options.AddPolicy(
                     "PostHotelsPermission",
                     policy =>
                 {
                     policy.RequireAuthenticatedUser();
-                    policy.RequireRole("Admin", "Manager");
+                    policy.RequireRole("Admin");
                 });
 
                 options.AddPolicy(
-                    "UpdateHotelsPermission",
+                    "UpdateHotelPermission",
                     policy =>
                     {
                         policy.RequireAuthenticatedUser();

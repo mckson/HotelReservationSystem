@@ -1,35 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 
-namespace HotelReservation.Business.Models
+namespace HotelReservation.API.Models.RequestModels
 {
-    public class ReservationModel
+    public class ReservationRequestModel
     {
-        public int Id { get; set; }
-
-        public int HotelId { get; set; }
-
-        public HotelModel Hotel { get; set; }
-
+        [Required]
         public string UserId { get; set; }
 
-        public UserModel User { get; set; }
+        [Required]
+        public int HotelId { get; set; }
 
-        public IEnumerable<ReservationRoomModel> ReservationRooms { get; set; }
-
-        public IEnumerable<ReservationServiceModel> ReservationServices { get; set; }
+        [Required]
+        public IEnumerable<int> RoomIds { get; set; }
 
         public DateTime ReservedTime { get; set; }
 
         public DateTime UpdatedTime { get; set; }
 
+        [Required]
         public DateTime DateIn { get; set; }
 
+        [Required]
         public DateTime DateOut { get; set; }
 
         public int TotalDays { get; set; }
 
+        [Required]
+        [Range(0, double.MaxValue)]
         public double Deposit { get; set; }
 
         public double TotalPrice { get; set; }

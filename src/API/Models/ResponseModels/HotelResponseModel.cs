@@ -8,6 +8,8 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public string Name { get; set; }
 
+        public int NumberFloors { get; set; }
+
         public int LocationId { get; set; }
 
         public LocationResponseModel Location { get; set; }
@@ -15,5 +17,7 @@ namespace HotelReservation.API.Models.ResponseModels
         public IEnumerable<RoomResponseModel> Rooms { get; set; }
 
         public IEnumerable<UserResponseModel> Users { get; set; }
+
+        public IEnumerable<ServiceInHotelResponseModel> HotelServices { get; set; }
     }
 }

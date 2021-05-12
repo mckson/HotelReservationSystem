@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using HotelReservation.Business.Models;
+using HotelReservation.Business.Models.UserModels;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using HotelReservation.Business.Models.UserModels;
-using HotelReservation.Data.Entities;
 
 namespace HotelReservation.Business.Interfaces
 {

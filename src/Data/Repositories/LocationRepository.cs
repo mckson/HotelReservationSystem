@@ -1,10 +1,10 @@
 ﻿using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Repositories
 {
@@ -19,28 +19,45 @@ namespace HotelReservation.Data.Repositories
             _locations = context.Locations;
         }
 
-        public IEnumerable<LocationEntity> GetAll() => _locations;
+        public IEnumerable<LocationEntity> GetAll(bool asNoTracking = false)
+        {
+            return asNoTracking ? _locations.AsNoTracking() : _locations;
+        }
 
-        public async Task<LocationEntity> GetAsync(int id) =>
-            await _locations.FirstOrDefaultAsync(location => location.Id == id);
+        public async Task<LocationEntity> GetAsync(int id, bool asNoTracking = false)
+        {
+            return asNoTracking
+                ? await _locations.AsNoTracking().FirstOrDefaultAsync(location => location.Id == id)
+                : await _locations.FirstOrDefaultAsync(location => location.Id == id);
+        }
 
         public async Task<LocationEntity> GetAsync(
             string country,
             string region,
             string city,
             string street,
-            int building)
+            int building,
+            bool asNoTracking = false)
         {
-            return await _locations.FirstOrDefaultAsync(location =>
-                location.Country == country &&
-                location.Region == region &&
-                location.City == city &&
-                location.Street == street &&
-                location.BuildingNumber == building);
+            return asNoTracking
+                ? await _locations.AsNoTracking().FirstOrDefaultAsync(location =>
+                    location.Country == country &&
+                    location.Region == region &&
+                    location.City == city &&
+                    location.Street == street &&
+                    location.BuildingNumber == building)
+                : await _locations.FirstOrDefaultAsync(location =>
+                    location.Country == country &&
+                    location.Region == region &&
+                    location.City == city &&
+                    location.Street == street &&
+                    location.BuildingNumber == building);
         }
 
-        public IEnumerable<LocationEntity> Find(Func<LocationEntity, bool> predicate) =>
-            _locations.Where(predicate);
+        public IEnumerable<LocationEntity> Find(Func<LocationEntity, bool> predicate, bool asNoTracking = false)
+        {
+            return asNoTracking ? _locations.AsNoTracking().Where(predicate) : _locations.Where(predicate);
+        }
 
         public async Task<LocationEntity> CreateAsync(LocationEntity location)
         {

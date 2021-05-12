@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Castle.Core.Internal;
 using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
 {
@@ -160,7 +161,8 @@ namespace HotelReservation.Business.Services
             {
                 // this guarantees the token is unique
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("id", userEntity.Id)
+                new Claim("id", userEntity.Id),
+                new Claim("hotelId", userEntity.HotelId.HasValue ? userEntity.HotelId.Value.ToString() : "0")
             };
 
             // Adds all roles to claims

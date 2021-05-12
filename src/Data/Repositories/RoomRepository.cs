@@ -1,10 +1,10 @@
-﻿using System;
+﻿using HotelReservation.Data.Entities;
+using HotelReservation.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HotelReservation.Data.Entities;
-using HotelReservation.Data.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Repositories
 {
@@ -19,13 +19,22 @@ namespace HotelReservation.Data.Repositories
             _rooms = context.Rooms;
         }
 
-        public IEnumerable<RoomEntity> GetAll() => _rooms;
+        public IEnumerable<RoomEntity> GetAll(bool asNoTracking = false)
+        {
+            return asNoTracking ? _rooms.AsNoTracking() : _rooms;
+        }
 
-        public async Task<RoomEntity> GetAsync(int id) =>
-            await _rooms.FirstOrDefaultAsync(room => room.Id == id);
+        public async Task<RoomEntity> GetAsync(int id, bool asNoTracking = false)
+        {
+            return asNoTracking
+                ? await _rooms.AsNoTracking().FirstOrDefaultAsync(room => room.Id == id)
+                : await _rooms.FirstOrDefaultAsync(room => room.Id == id);
+        }
 
-        public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate) =>
-            _rooms.Where(predicate);
+        public IEnumerable<RoomEntity> Find(Func<RoomEntity, bool> predicate, bool asNoTracking = false)
+        {
+            return asNoTracking ? _rooms.AsNoTracking().Where(predicate) : _rooms.Where(predicate);
+        }
 
         public async Task<RoomEntity> CreateAsync(RoomEntity room)
         {

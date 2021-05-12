@@ -38,6 +38,7 @@ namespace HotelReservation.API.Middleware
                             ErrorStatus.AlreadyExist => (int)HttpStatusCode.Conflict,
                             ErrorStatus.IncorrectInput => (int)HttpStatusCode.UnprocessableEntity,
                             ErrorStatus.EmptyInput => (int)HttpStatusCode.UnsupportedMediaType,
+                            ErrorStatus.AccessDenied => (int)HttpStatusCode.Forbidden,
                             _ => (int)HttpStatusCode.BadRequest
                         };
                         break;

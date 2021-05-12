@@ -123,62 +123,37 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotel([FromBody] HotelRequestModel hotelRequest)
         {
-            try
-            {
-                var hotelResponse =
-                    _mapper.Map<HotelResponseModel>(await _service.CreateAsync(_mapper.Map<HotelModel>(hotelRequest)));
+            var userClaims = User.Claims;
+            var hotelResponse =
+                _mapper.Map<HotelResponseModel>(await _service.CreateAsync(
+                    _mapper.Map<HotelModel>(hotelRequest),
+                    userClaims));
 
-                return Ok(hotelResponse);
-            }
-            catch (BusinessException ex)
-            {
-                return ex.Status switch
-                {
-                    ErrorStatus.AlreadyExist => NotFound($"{ex.Status}: {ex.Message}"),
-                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    _ => BadRequest()
-                };
-            }
+            return Ok(hotelResponse);
         }
 
         // PUT api/<HotelsController>/5
-        [Authorize(Policy = "UpdateHotelsPermission")]
+        [Authorize(Policy = "UpdateHotelPermission")]
         [HttpPut("{id:int}")]
         public async Task<ActionResult<HotelResponseModel>> PutAsync(int id, [FromBody] HotelRequestModel hotelRequest)
         {
-            try
-            {
-                var hotelResponse = _mapper.Map<HotelResponseModel>(await _service.UpdateAsync(id, _mapper.Map<HotelModel>(hotelRequest)));
+            var userClaims = User.Claims;
+            var hotelResponse =
+                _mapper.Map<HotelResponseModel>(await _service.UpdateAsync(
+                    id,
+                    _mapper.Map<HotelModel>(hotelRequest),
+                    userClaims));
 
-                return Ok(hotelResponse);
-            }
-            catch (BusinessException ex)
-            {
-                return ex.Status switch
-                {
-                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    _ => BadRequest()
-                };
-            }
+            return Ok(hotelResponse);
         }
 
         // DELETE api/<HotelsController>/5
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
-            try
-            {
-                await _service.DeleteAsync(id);
-                return Ok();
-            }
-            catch (BusinessException ex)
-            {
-                return ex.Status switch
-                {
-                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    _ => BadRequest()
-                };
-            }
+            var userClaims = User.Claims;
+            await _service.DeleteAsync(id, userClaims);
+            return Ok();
         }
     }
 }

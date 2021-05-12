@@ -19,6 +19,7 @@ namespace HotelReservation.API.Models.RequestModels
         public bool IsEmpty { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue)]
         public int HotelId { get; set; }
     }
 }

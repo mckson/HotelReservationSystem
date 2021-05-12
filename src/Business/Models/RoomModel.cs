@@ -17,10 +17,8 @@ namespace HotelReservation.Business.Models
 
         public int HotelId { get; set; }
 
-        public virtual HotelModel Hotel { get; set; }
+        public HotelModel Hotel { get; set; }
 
-        public virtual ReservationModel Reservation { get; set; }
-
-        public virtual IEnumerable<UserModel> Users { get; set; }
+        public IEnumerable<ReservationRoomModel> ReservationRoom { get; set; }
     }
 }

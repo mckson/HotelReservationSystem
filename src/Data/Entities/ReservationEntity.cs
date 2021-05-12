@@ -7,13 +7,21 @@ namespace HotelReservation.Data.Entities
     {
         public int Id { get; set; }
 
+        public int HotelId { get; set; }
+
+        public virtual HotelEntity Hotel { get; set; }
+
         public string UserId { get; set; }
 
         public virtual UserEntity User { get; set; }
 
-        public virtual IEnumerable<RoomEntity> Rooms { get; set; }
+        public virtual IEnumerable<ReservationRoomEntity> ReservationRooms { get; set; }
 
-        public DateTime ReservationDate { get; set; }
+        public virtual IEnumerable<ReservationServiceEntity> ReservationServices { get; set; }
+
+        public DateTime ReservedTime { get; set; }
+
+        public DateTime UpdatedTime { get; set; }
 
         public DateTime DateIn { get; set; }
 

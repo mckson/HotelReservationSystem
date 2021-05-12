@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace HotelReservation.Business.Models.UserModels
+namespace HotelReservation.Business.Models
 {
     public class UserModel
     {

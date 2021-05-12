@@ -1,16 +1,16 @@
-﻿using System;
+﻿using AutoMapper;
+using Castle.Core.Internal;
+using HotelReservation.Business.Interfaces;
+using HotelReservation.Business.Models;
+using HotelReservation.Business.Models.UserModels;
+using HotelReservation.Data.Entities;
+using HotelReservation.Data.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AutoMapper;
-using Castle.Core.Internal;
-using Castle.DynamicProxy.Contributors;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.UserModels;
-using HotelReservation.Data.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 
 namespace HotelReservation.Business.Services
 {
@@ -19,14 +19,17 @@ namespace HotelReservation.Business.Services
         private readonly UserManager<UserEntity> _userManager;
         private readonly IMapper _mapper;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
+        private readonly IHotelRepository _hotelRepo;
 
         public UsersService(
             UserManager<UserEntity> userManager,
             IPasswordHasher<UserEntity> passwordHasher,
+            IHotelRepository hotelRepo,
             IMapper mapper)
         {
             _userManager = userManager;
             _passwordHasher = passwordHasher;
+            _hotelRepo = hotelRepo;
             _mapper = mapper;
         }
 
@@ -130,6 +133,13 @@ namespace HotelReservation.Business.Services
 
             if (userUpdateModel.UserName != null)
                 userEntity.UserName = userUpdateModel.UserName;
+
+            if (userUpdateModel.HotelId != null)
+            {
+                var hotelEntity = _hotelRepo.GetAsync(userUpdateModel.HotelId.Value, true) ??
+                                  throw new BusinessException("There is no hotel with such id", ErrorStatus.NotFound);
+                userEntity.HotelId = userUpdateModel.HotelId;
+            }
 
             userEntity.UserName ??= userUpdateModel.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
 

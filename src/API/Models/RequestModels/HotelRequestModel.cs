@@ -12,6 +12,12 @@ namespace HotelReservation.API.Models.RequestModels
         public string Name { get; set; }
 
         [Required]
+        [Range(1, 500)]
+        public int NumberFloors { get; set; }
+
+        [Required]
         public LocationRequestModel Location { get; set; }
+
+        public ServiceRequestModel Services { get; set; }
     }
 }
