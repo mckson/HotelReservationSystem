@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HotelReservation.API.Models.RequestModels
 {
@@ -9,6 +8,12 @@ namespace HotelReservation.API.Models.RequestModels
         [MaxLength(200)]
         public string Name { get; set; }
 
-        public IEnumerable<int> HotelIds { get; set; }
+        [Required]
+        [Range(1, double.MaxValue)]
+        public double Price { get; set; }
+
+        [Required]
+        [Range(1, int.MaxValue)]
+        public int HotelId { get; set; }
     }
 }

@@ -16,8 +16,10 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public IEnumerable<RoomResponseModel> Rooms { get; set; }
 
-        public IEnumerable<UserResponseModel> Users { get; set; }
+        public IEnumerable<UserResponseModel> Managers { get; set; }
 
-        public IEnumerable<ServiceInHotelResponseModel> HotelServices { get; set; }
+        public IEnumerable<ServiceResponseModel> Services { get; set; }
+
+        public IEnumerable<ReservationResponseModel> Reservations { get; set; }
     }
 }

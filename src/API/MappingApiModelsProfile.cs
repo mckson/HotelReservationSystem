@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
+using System.Linq;
 
 namespace HotelReservation.API
 {
@@ -12,13 +12,13 @@ namespace HotelReservation.API
         public MappingApiModelsProfile()
         {
             CreateMap<HotelRequestModel, HotelModel>();
-            CreateMap<HotelModel, HotelResponseModel>()
-                .ForMember(
-                    hotel => hotel.HotelServices,
-                    opt => opt.MapFrom(hotel => hotel.HotelServices.Select(hs => hs.Service)));
+            CreateMap<HotelModel, HotelResponseModel>();
 
             CreateMap<ServiceRequestModel, ServiceModel>();
-            CreateMap<ServiceModel, ServiceInHotelResponseModel>();
+            CreateMap<ServiceModel, ServiceResponseModel>()
+                .ForMember(
+                response => response.HotelName,
+                opt => opt.MapFrom(model => model.Hotel.Name));
 
             CreateMap<RoomRequestModel, RoomModel>();
             CreateMap<RoomModel, RoomResponseModel>()
@@ -28,6 +28,21 @@ namespace HotelReservation.API
 
             CreateMap<LocationModel, LocationResponseModel>();
             CreateMap<LocationRequestModel, LocationModel>();
+
+            CreateMap<ReservationModel, ReservationResponseModel>()
+                .ForMember(
+                    response => response.HotelName,
+                    opt => opt.MapFrom(model => model.Hotel.Name))
+                .ForMember(
+                    response => response.UserName,
+                    opt => opt.MapFrom(model => model.User.UserName))
+                .ForMember(
+                    response => response.Rooms,
+                    opt => opt.MapFrom(model => model.ReservationRooms.Select(rr => rr.Room)))
+                .ForMember(
+                    response => response.Services,
+                    opt => opt.MapFrom(model => model.ReservationServices.Select(rs => rs.Service)));
+            CreateMap<ReservationRequestModel, ReservationModel>();
 
             CreateMap<UserRegistrationRequestModel, UserRegistrationModel>()
                 .ReverseMap();

@@ -17,7 +17,5 @@ namespace HotelReservation.API.Models.RequestModels
 
         [Required]
         public LocationRequestModel Location { get; set; }
-
-        public ServiceRequestModel Services { get; set; }
     }
 }

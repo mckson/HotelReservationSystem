@@ -10,7 +10,9 @@ namespace HotelReservation.Business.Models
 
         public double Price { get; set; }
 
-        public IEnumerable<HotelServiceModel> HotelServices { get; set; }
+        public int HotelId { get; set; }
+
+        public HotelModel Hotel { get; set; }
 
         public IEnumerable<ReservationServiceModel> ReservationServices { get; set; }
     }

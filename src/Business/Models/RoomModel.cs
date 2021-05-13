@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using HotelReservation.Business.Models.UserModels;
 
 namespace HotelReservation.Business.Models
 {

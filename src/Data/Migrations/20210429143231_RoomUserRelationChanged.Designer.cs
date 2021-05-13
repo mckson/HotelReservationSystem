@@ -436,13 +436,13 @@ namespace HotelReservation.Data.Migrations
             modelBuilder.Entity("HotelReservation.Data.Entities.UserEntity", b =>
                 {
                     b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
-                        .WithMany("Users")
+                        .WithMany("Managers")
                         .HasForeignKey("HotelId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
-                        .WithMany("Users")
+                        .WithMany("Managers")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });

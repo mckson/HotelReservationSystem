@@ -14,10 +14,10 @@ namespace HotelReservation.Data.Entities
 
         public virtual IEnumerable<RoomEntity> Rooms { get; set; }
 
-        public virtual IEnumerable<UserEntity> Users { get; set; }
+        public virtual IEnumerable<UserEntity> Managers { get; set; }
 
         public virtual IEnumerable<ReservationEntity> Reservations { get; set; }
 
-        public virtual IEnumerable<HotelServiceEntity> HotelServices { get; set; }
+        public virtual IEnumerable<ServiceEntity> Services { get; set; }
     }
 }

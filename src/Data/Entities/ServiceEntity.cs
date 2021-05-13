@@ -10,7 +10,9 @@ namespace HotelReservation.Data.Entities
 
         public double Price { get; set; }
 
-        public virtual IEnumerable<HotelServiceEntity> HotelServices { get; set; }
+        public int HotelId { get; set; }
+
+        public virtual HotelEntity Hotel { get; set; }
 
         public virtual IEnumerable<ReservationServiceEntity> ReservationServices { get; set; }
     }
