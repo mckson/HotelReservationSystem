@@ -111,12 +111,16 @@ namespace HotelReservation.API
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
             services.AddScoped<IRepository<RoomEntity>, RoomRepository>();
+            services.AddScoped<IRepository<ReservationEntity>, ReservationRepository>();
+            services.AddScoped<IRepository<ServiceEntity>, ServiceRepository>();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IHotelsService, HotelsService>();
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IRoomsService, RoomsService>();
+            services.AddScoped<IServicesService, ServicesService>();
+            services.AddScoped<IReservationsService, ReservationsService>();
 
             services.AddControllers();
         }

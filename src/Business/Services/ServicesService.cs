@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
@@ -35,8 +36,8 @@ namespace HotelReservation.Business.Services
 
             await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
 
-            if (hotelEntity.Services.Any(service => service.Name.ToUpper() == serviceEntity.Name.ToUpper()))
-                throw new BusinessException("Service with such name already exist", ErrorStatus.AlreadyExist);
+            if (hotelEntity.Services.Any(service => string.Equals(service.Name, serviceEntity.Name, StringComparison.CurrentCultureIgnoreCase)))
+                throw new BusinessException($"Service with such name already exist in {hotelEntity.Name}", ErrorStatus.AlreadyExist);
 
             var createdServiceEntity = await _serviceRepository.CreateAsync(serviceEntity);
             var createdServiceModel = _mapper.Map<ServiceModel>(createdServiceEntity);
@@ -74,7 +75,20 @@ namespace HotelReservation.Business.Services
             var serviceEntity = await _serviceRepository.GetAsync(id, true) ??
                              throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(serviceEntity.HotelId, userClaims);
+            var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId) ??
+                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
+
+            await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
+
+            if (_serviceRepository.GetAll(true).Any(service =>
+                string.Equals(service.Name, updatingServiceModel.Name, StringComparison.CurrentCultureIgnoreCase) &&
+                service.HotelId == serviceEntity.HotelId &&
+                serviceEntity.Id != service.Id))
+            {
+                throw new BusinessException(
+                    $"Service with such name already exist in {hotelEntity.Name}",
+                    ErrorStatus.AlreadyExist);
+            }
 
             var updatingServiceEntity = _mapper.Map<ServiceEntity>(updatingServiceModel);
             updatingServiceEntity.Id = id;

@@ -7,24 +7,25 @@ namespace HotelReservation.API.Models.RequestModels
     public class ReservationRequestModel
     {
         [Required]
-        public string UserId { get; set; }
-
-        [Required]
+        [Range(1, int.MaxValue)]
         public int HotelId { get; set; }
 
         [Required]
-        public IEnumerable<int> RoomIds { get; set; }
+        public IEnumerable<int> Rooms { get; set; }
 
-        public IEnumerable<int> ServiceIds { get; set; }
+        [Required]
+        public IEnumerable<int> Services { get; set; }
 
         public DateTime ReservedTime { get; set; }
 
         public DateTime UpdatedTime { get; set; }
 
         [Required]
+        [Range(typeof(DateTime), "1/1/2021", "1/1/2999")]
         public DateTime DateIn { get; set; }
 
         [Required]
+        [Range(typeof(DateTime), "1/1/2021", "1/1/2999")]
         public DateTime DateOut { get; set; }
 
         public int TotalDays { get; set; }

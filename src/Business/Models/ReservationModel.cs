@@ -15,9 +15,9 @@ namespace HotelReservation.Business.Models
 
         public UserModel User { get; set; }
 
-        public IEnumerable<ReservationRoomModel> ReservationRooms { get; set; }
+        public List<ReservationRoomModel> ReservationRooms { get; set; }
 
-        public IEnumerable<ReservationServiceModel> ReservationServices { get; set; }
+        public List<ReservationServiceModel> ReservationServices { get; set; }
 
         public DateTime ReservedTime { get; set; }
 
