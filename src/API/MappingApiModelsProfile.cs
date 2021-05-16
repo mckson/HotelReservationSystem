@@ -15,27 +15,18 @@ namespace HotelReservation.API
             CreateMap<HotelModel, HotelResponseModel>();
 
             CreateMap<ServiceRequestModel, ServiceModel>();
-            CreateMap<ServiceModel, ServiceResponseModel>()
-                .ForMember(
-                response => response.HotelName,
-                opt => opt.MapFrom(model => model.Hotel.Name));
+            CreateMap<ServiceModel, ServiceResponseModel>();
 
             CreateMap<RoomRequestModel, RoomModel>();
             CreateMap<RoomModel, RoomResponseModel>()
                 .ForMember(
-                    response => response.HotelName,
-                    opt => opt.MapFrom(model => model.Hotel.Name));
+                    response => response.Reservations,
+                    opt => opt.MapFrom(model => model.ReservationRooms.Select(rr => rr.ReservationId)));
 
             CreateMap<LocationModel, LocationResponseModel>();
             CreateMap<LocationRequestModel, LocationModel>();
 
             CreateMap<ReservationModel, ReservationResponseModel>()
-                .ForMember(
-                    response => response.HotelName,
-                    opt => opt.MapFrom(model => model.Hotel.Name))
-                .ForMember(
-                    response => response.UserName,
-                    opt => opt.MapFrom(model => model.User.UserName))
                 .ForMember(
                     response => response.Rooms,
                     opt => opt.MapFrom(model => model.ReservationRooms.Select(rr => rr.Room)))
@@ -50,10 +41,12 @@ namespace HotelReservation.API
                 .ReverseMap();
             CreateMap<UserAdminCreationRequestModel, UserRegistrationModel>();
             CreateMap<UserUpdateRequestModel, UserUpdateModel>();
-            CreateMap<UserModel, UserResponseModel>()
+            CreateMap<UserModel, UserPrivateResponseModel>()
                 .ForMember(
                     response => response.RefreshToken,
                     opt => opt.MapFrom(model => model.RefreshToken.Token));
+            CreateMap<UserModel, UserBriefResponseModel>();
+            CreateMap<UserModel, UserResponseModel>();
         }
     }
 }

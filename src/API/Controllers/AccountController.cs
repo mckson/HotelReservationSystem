@@ -28,7 +28,7 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public async Task<ActionResult<UserResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
+        public async Task<ActionResult<UserPrivateResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
         {
             var userAuthModel = _mapper.Map<UserAuthenticationModel>(userAuthRequestModel);
             var loggedUser = await _accountService.AuthenticateAsync(userAuthModel);
@@ -36,7 +36,7 @@ namespace HotelReservation.API.Controllers
             if (loggedUser == null)
                 return BadRequest(new { errorText = "Invalid email or password" });
 
-            var responseUser = _mapper.Map<UserResponseModel>(loggedUser);
+            var responseUser = _mapper.Map<UserPrivateResponseModel>(loggedUser);
             SetTokenCookie(responseUser.RefreshToken);
 
             return Ok(responseUser);
@@ -44,7 +44,7 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<ActionResult<UserResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
+        public async Task<ActionResult<UserPrivateResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
         {
             var userModel = _mapper.Map<UserRegistrationModel>(userRequestModel);
             var registeredUserAuth = await _accountService.RegisterAsync(userModel);
@@ -65,7 +65,7 @@ namespace HotelReservation.API.Controllers
             if (response == null)
                 return Unauthorized(new { message = "Invalid token" });
 
-            var responseUser = _mapper.Map<UserResponseModel>(response);
+            var responseUser = _mapper.Map<UserPrivateResponseModel>(response);
             SetTokenCookie(responseUser.RefreshToken);
 
             return Ok(responseUser);

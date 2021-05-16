@@ -21,16 +21,8 @@ namespace HotelReservation.Data.Entities
 
         public DateTime ReservedTime { get; set; }
 
-        public DateTime UpdatedTime { get; set; }
-
         public DateTime DateIn { get; set; }
 
         public DateTime DateOut { get; set; }
-
-        public int TotalDays { get; set; }
-
-        public double Deposit { get; set; }
-
-        public double TotalPrice { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HotelReservation.Business.Models
 {
@@ -21,16 +22,16 @@ namespace HotelReservation.Business.Models
 
         public DateTime ReservedTime { get; set; }
 
-        public DateTime UpdatedTime { get; set; }
-
         public DateTime DateIn { get; set; }
 
         public DateTime DateOut { get; set; }
 
-        public int TotalDays { get; set; }
+        public int TotalDays => (DateOut - DateIn).Days;
 
-        public double Deposit { get; set; }
+        public double? Deposit => Hotel?.Deposit;
 
-        public double TotalPrice { get; set; }
+        public double? TotalPrice => Hotel?.Deposit +
+                                    ReservationRooms?.Select(rr => rr.Room?.Price).Sum() +
+                                    ReservationServices?.Select(rs => rs.Service?.Price).Sum();
     }
 }

@@ -13,6 +13,6 @@ namespace HotelReservation.Business.Interfaces
 
         Task<ReservationModel> DeleteAsync(int id, IEnumerable<Claim> userClaims);
 
-        Task<IEnumerable<ReservationModel>> GetAllReservationsAsync(IEnumerable<Claim> userClaims);
+        IEnumerable<ReservationModel> GetAllReservations(IEnumerable<Claim> userClaims);
     }
 }

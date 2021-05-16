@@ -31,7 +31,7 @@ namespace HotelReservation.API.Controllers
         {
             var userClaims = User.Claims;
 
-            var reservationModels = await _reservationsService.GetAllReservationsAsync(userClaims);
+            var reservationModels = _reservationsService.GetAllReservations(userClaims);
             var reservationResponseModels = _mapper.Map<IEnumerable<ReservationResponseModel>>(reservationModels);
 
             return Ok(reservationResponseModels);

@@ -47,7 +47,7 @@ namespace HotelReservation.Business.Services
             var reservationEntity = await _reservationRepository.GetAsync(id) ??
                                     throw new BusinessException($"No reservation with such id: {id}", ErrorStatus.NotFound);
 
-            await CheckReservationManagementPermission(reservationEntity.UserId, userClaims);
+            CheckReservationManagementPermission(reservationEntity.UserId, userClaims);
 
             var reservationModel = _mapper.Map<ReservationModel>(reservationEntity);
 
@@ -61,7 +61,7 @@ namespace HotelReservation.Business.Services
                                              $"No reservation with such id: {id}",
                                              ErrorStatus.NotFound);
 
-            await CheckReservationManagementPermission(checkReservationEntity.UserId, userClaims);
+            CheckReservationManagementPermission(checkReservationEntity.UserId, userClaims);
 
             var deletedReservationEntity = await _reservationRepository.DeleteAsync(id);
             var deletedReservationModel = _mapper.Map<ReservationModel>(deletedReservationEntity);
@@ -69,9 +69,9 @@ namespace HotelReservation.Business.Services
             return deletedReservationModel;
         }
 
-        public async Task<IEnumerable<ReservationModel>> GetAllReservationsAsync(IEnumerable<Claim> userClaims)
+        public IEnumerable<ReservationModel> GetAllReservations(IEnumerable<Claim> userClaims)
         {
-            await CheckReservationManagementPermission(null, userClaims);   // admin only, change
+            CheckReservationManagementPermission(null, userClaims);   // admin only, change
 
             var reservationEntities = _reservationRepository.GetAll();
             var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
@@ -88,6 +88,18 @@ namespace HotelReservation.Business.Services
             {
                 var checkRoomEntity = checkHotelEntity.Rooms.FirstOrDefault(r => r.Id == room.RoomId) ??
                                       throw new BusinessException($"No room with such id: {room.RoomId}", ErrorStatus.NotFound);
+
+                var checkReservation = checkRoomEntity.ReservationRooms.Select(rr => rr.Reservation).FirstOrDefault(
+                    reservation =>
+                        (reservation.DateIn >= reservationModel.DateIn && reservation.DateIn <= reservationModel.DateOut) ||
+                        (reservation.DateOut >= reservationModel.DateIn && reservation.DateOut <= reservationModel.DateOut));
+
+                if (checkReservation != null)
+                {
+                    throw new BusinessException(
+                        $"Room with id {checkRoomEntity.Id} has been already reserved from {checkReservation.DateIn} to {checkReservation.DateOut}",
+                        ErrorStatus.IncorrectInput);
+                }
             }
 
             foreach (var service in reservationModel.ReservationServices)
@@ -97,7 +109,7 @@ namespace HotelReservation.Business.Services
             }
         }
 
-        private async Task CheckReservationManagementPermission(string reservationUserId, IEnumerable<Claim> userClaims)
+        private void CheckReservationManagementPermission(string reservationUserId, IEnumerable<Claim> userClaims)
         {
             var claims = userClaims.ToList();
             if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))

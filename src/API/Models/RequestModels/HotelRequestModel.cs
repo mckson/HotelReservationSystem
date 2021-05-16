@@ -16,6 +16,10 @@ namespace HotelReservation.API.Models.RequestModels
         public int NumberFloors { get; set; }
 
         [Required]
+        [Range(0, double.MaxValue)]
+        public double Deposit { get; set; }
+
+        [Required]
         public LocationRequestModel Location { get; set; }
     }
 }

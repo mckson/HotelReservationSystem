@@ -2,6 +2,10 @@
 {
     public class LocationResponseModel
     {
+        public int Id { get; set; }
+
+        public int HotelId { get; set; }
+
         public string Country { get; set; }
 
         public string Region { get; set; }

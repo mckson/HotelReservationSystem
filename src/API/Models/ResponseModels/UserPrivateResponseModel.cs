@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HotelReservation.API.Models.ResponseModels
 {
-    public class UserResponseModel
+    public class UserPrivateResponseModel
     {
         public Guid Id { get; set; }
 
@@ -15,9 +15,9 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public string Email { get; set; }
 
-        public DateTime? DateOfBirth { get; set; }
+        public string JwtToken { get; set; }
 
-        public string PhoneNumber { get; set; }
+        public string RefreshToken { get; set; }
 
         public IEnumerable<string> Roles { get; set; }
     }

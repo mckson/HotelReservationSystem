@@ -12,12 +12,12 @@ namespace HotelReservation.Business.Models
 
         public int Capacity { get; set; }
 
-        public bool IsEmpty { get; set; }
+        public double Price { get; set; }
 
         public int HotelId { get; set; }
 
         public HotelModel Hotel { get; set; }
 
-        public IEnumerable<ReservationRoomModel> ReservationRoom { get; set; }
+        public IEnumerable<ReservationRoomModel> ReservationRooms { get; set; }
     }
 }

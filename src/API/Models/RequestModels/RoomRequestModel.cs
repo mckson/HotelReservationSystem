@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace HotelReservation.API.Models.RequestModels
 {
@@ -16,7 +17,9 @@ namespace HotelReservation.API.Models.RequestModels
         [Range(1, 10)]
         public int Capacity { get; set; }
 
-        public bool IsEmpty { get; set; }
+        [Required]
+        [Range(1, double.MaxValue)]
+        public double Price { get; set; }
 
         [Required]
         [Range(1, int.MaxValue)]

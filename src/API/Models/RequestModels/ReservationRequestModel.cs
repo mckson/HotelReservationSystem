@@ -16,10 +16,6 @@ namespace HotelReservation.API.Models.RequestModels
         [Required]
         public IEnumerable<int> Services { get; set; }
 
-        public DateTime ReservedTime { get; set; }
-
-        public DateTime UpdatedTime { get; set; }
-
         [Required]
         [Range(typeof(DateTime), "1/1/2021", "1/1/2999")]
         public DateTime DateIn { get; set; }

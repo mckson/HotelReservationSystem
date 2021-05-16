@@ -10,6 +10,8 @@ namespace HotelReservation.Data.Entities
 
         public int NumberFloors { get; set; }
 
+        public double Deposit { get; set; }
+
         public virtual LocationEntity Location { get; set; }
 
         public virtual IEnumerable<RoomEntity> Rooms { get; set; }

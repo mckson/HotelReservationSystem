@@ -16,10 +16,6 @@ namespace HotelReservation.Data.Configurations
 
             builder.Property(r => r.Capacity)
                 .IsRequired();
-
-            builder.Property(r => r.IsEmpty)
-                .HasDefaultValue(true)
-                .IsRequired();
         }
     }
 }

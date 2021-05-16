@@ -9,19 +9,13 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public int HotelId { get; set; }
 
-        public string HotelName { get; set; }
-
         public string UserId { get; set; }
-
-        public string UserName { get; set; }
 
         public IEnumerable<RoomResponseModel> Rooms { get; set; }
 
         public IEnumerable<ServiceResponseModel> Services { get; set; }
 
         public DateTime ReservedTime { get; set; }
-
-        public DateTime UpdatedTime { get; set; }
 
         public DateTime DateIn { get; set; }
 

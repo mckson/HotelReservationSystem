@@ -10,6 +10,8 @@ namespace HotelReservation.Business.Models
 
         public int NumberFloors { get; set; }
 
+        public double Deposit { get; set; }
+
         public LocationModel Location { get; set; }
 
         public IEnumerable<RoomModel> Rooms { get; set; }
