@@ -40,6 +40,8 @@ namespace HotelReservation.Business.Services
 
         public async Task<UserModel> AuthenticateAsync(UserAuthenticationModel user)
         {
+            _logger.Debug($"User {user.Email} is signing in");
+
             if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password))
                 throw new BusinessException("Password and email cannot be empty", ErrorStatus.EmptyInput);
 
@@ -63,11 +65,15 @@ namespace HotelReservation.Business.Services
 
             await GetRolesForUserModelAsync(userModel);
 
+            _logger.Debug($"User {user.Email} signed in");
+
             return userModel;
         }
 
         public async Task<UserAuthenticationModel> RegisterAsync(UserRegistrationModel userRegistration)
         {
+            _logger.Debug($"User {userRegistration.Email} is signing up");
+
             if (userRegistration == null)
                 throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
@@ -86,64 +92,100 @@ namespace HotelReservation.Business.Services
             var addedUserRoles = await _userManager.GetRolesAsync(addedUserEntity);
 
             if (result == IdentityResult.Success && addedUserRoles.IsNullOrEmpty())
+            {
                 await _userManager.AddToRoleAsync(addedUserEntity, "User");
+            }
+            else if (result != IdentityResult.Success)
+            {
+                throw new BusinessException($"Creating error", ErrorStatus.IncorrectInput, result.Errors);
+            }
+
+            _logger.Debug($"User {userRegistration.Email} signed up");
 
             return _mapper.Map<UserAuthenticationModel>(userRegistration);
         }
 
         public async Task<UserModel> RefreshToken(string token)
         {
+            _logger.Debug($"New JWT token is requesting by {token} refresh token");
+
             var userEntity = _userManager.Users.FirstOrDefault(u => u.RefreshToken.Token == token);
 
             if (userEntity == null)
-                return null;
+            {
+                throw new BusinessException(
+                    "Invalid refresh token. User for such refresh token does not exist",
+                    ErrorStatus.NotFound);
+            }
 
             var refreshToken = userEntity.RefreshToken;
 
             if (!refreshToken.IsActive)
-                return null;
+            {
+                throw new BusinessException(
+                    "Invalid refresh token. Current refresh token is unavailable now",
+                    ErrorStatus.NotFound);
+            }
 
             var newRefreshToken = _tokenService.GenerateRefreshToken();
+
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.ReplacedByToken = newRefreshToken.Token;
+
             userEntity.RefreshToken = _mapper.Map<RefreshTokenEntity>(newRefreshToken);
 
             await _userManager.UpdateAsync(userEntity);
 
-            var user = _mapper.Map<UserModel>(userEntity);
+            var userModel = _mapper.Map<UserModel>(userEntity);
 
-            var claims = await GetIdentityAsync(_mapper.Map<UserAuthenticationModel>(user));
+            var claims = await GetIdentityAsync(_mapper.Map<UserAuthenticationModel>(userModel));
             var jwtToken = _tokenService.GenerateJwtToken(claims);
 
-            var userModel = _mapper.Map<UserModel>(user);
             userModel.JwtToken = jwtToken;
 
             await GetRolesForUserModelAsync(userModel);
 
+            _logger.Debug("New JWT token requested");
+
             return userModel;
         }
 
-        public async Task<bool> RevokeTokenAsync(string token)
+        public async Task RevokeTokenAsync(string token)
         {
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new BusinessException(
+                    "User with such refresh token is already logged out",
+                    ErrorStatus.IncorrectInput);
+            }
+
+            _logger.Debug($"Refresh token {token} is revoking");
+
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken.Token == token);
             var userModel = _mapper.Map<UserModel>(user);
 
-            // return false if no user found with token
             if (userModel == null)
-                return false;
+            {
+                throw new BusinessException(
+                    "Invalid refresh token. User for such refresh token does not exist",
+                    ErrorStatus.NotFound);
+            }
 
             var refreshToken = userModel.RefreshToken;
 
-            // return false if token is not active
             if (!refreshToken.IsActive)
-                return false;
+            {
+                throw new BusinessException(
+                    "Invalid refresh token. Current refresh token is already expired",
+                    ErrorStatus.NotFound);
+            }
 
             // revoke token and save
             refreshToken.Revoked = DateTime.UtcNow;
 
-            await _userManager.UpdateAsync(_mapper.Map<UserEntity>(userModel));
+            _logger.Debug($"Refresh token {token} revoked");
 
-            return true;
+            await _userManager.UpdateAsync(_mapper.Map<UserEntity>(userModel));
         }
 
         private async Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel userAuth)
@@ -153,10 +195,6 @@ namespace HotelReservation.Business.Services
                     user.Email == userAuth.Email) ??
                 throw new BusinessException("There is no user with such email", ErrorStatus.NotFound);
 
-            // if (userAuth.Password == null ||
-            //    _passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, userAuth.Password) !=
-            //    PasswordVerificationResult.Success)
-            //    throw new DataException("Wrong password", ErrorStatus.IncorrectInput);
             var claims = new List<Claim>
             {
                 // this guarantees the token is unique
@@ -171,7 +209,7 @@ namespace HotelReservation.Business.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(
+            var claimsIdentity = new ClaimsIdentity(
                 claims,
                 "Token",
                 ClaimsIdentity.DefaultNameClaimType,
@@ -182,8 +220,12 @@ namespace HotelReservation.Business.Services
 
         private async Task GetRolesForUserModelAsync(UserModel userModel)
         {
+            _logger.Debug("User roles is requesting");
+
             var roles = await _userManager.GetRolesAsync(_mapper.Map<UserEntity>(userModel));
             userModel.Roles = roles;
+
+            _logger.Debug("User roles requested");
         }
     }
 }

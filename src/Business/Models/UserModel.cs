@@ -29,7 +29,7 @@ namespace HotelReservation.Business.Models
 
         public HotelModel Hotel { get; set; }
 
-        public ReservationModel Reservation { get; set; }
+        public IEnumerable<ReservationModel> Reservations { get; set; }
 
         public RefreshTokenModel RefreshToken { get; set; }
 

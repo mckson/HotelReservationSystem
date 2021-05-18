@@ -20,5 +20,7 @@ namespace HotelReservation.API.Models.ResponseModels
         public string PhoneNumber { get; set; }
 
         public IEnumerable<string> Roles { get; set; }
+
+        public IEnumerable<ReservationResponseModel> Reservations { get; set; }
     }
 }

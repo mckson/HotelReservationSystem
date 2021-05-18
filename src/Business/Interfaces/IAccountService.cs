@@ -12,8 +12,6 @@ namespace HotelReservation.Business.Interfaces
 
         Task<UserModel> RefreshToken(string token);
 
-        Task<bool> RevokeTokenAsync(string token);
-
-        // Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel user);
+        Task RevokeTokenAsync(string token);
     }
 }

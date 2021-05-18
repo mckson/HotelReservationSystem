@@ -3,6 +3,7 @@ using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET: api/<ServicesController>
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult<IEnumerable<ServiceResponseModel>> GetAllServices()
         {
@@ -35,7 +37,8 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET api/<ServicesController>/5
-        [HttpGet("{id}")]
+        [AllowAnonymous]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> GetServiceAsync(int id)
         {
             var serviceModel = await _servicesService.GetAsync(id);
@@ -45,6 +48,7 @@ namespace HotelReservation.API.Controllers
         }
 
         // POST api/<ServicesController>
+        [Authorize(Policy = "AdminManagerPermission")]
         [HttpPost]
         public async Task<ActionResult<ServiceResponseModel>> CreateServiceAsync([FromBody] ServiceRequestModel serviceRequestModel)
         {
@@ -58,7 +62,8 @@ namespace HotelReservation.API.Controllers
         }
 
         // PUT api/<ServicesController>/5
-        [HttpPut("{id}")]
+        [Authorize(Policy = "AdminManagerPermission")]
+        [HttpPut("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> UpdateServiceAsync(int id, [FromBody] ServiceRequestModel serviceRequestModel)
         {
             var userClaims = User.Claims;
@@ -71,7 +76,8 @@ namespace HotelReservation.API.Controllers
         }
 
         // DELETE api/<ServicesController>/5
-        [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminManagerPermission")]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> DeleteServiceAsync(int id)
         {
             var userClaims = User.Claims;

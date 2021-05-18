@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using HotelReservation.Business;
+using Microsoft.AspNetCore.Http;
+using Serilog;
+using System;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
-using HotelReservation.Business;
-using Microsoft.AspNetCore.Http;
 
 namespace HotelReservation.API.Middleware
 {
@@ -18,7 +17,7 @@ namespace HotelReservation.API.Middleware
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, ILogger logger)
         {
             try
             {
@@ -29,25 +28,23 @@ namespace HotelReservation.API.Middleware
                 var response = context.Response;
                 response.ContentType = "application/json";
 
-                switch (error)
+                response.StatusCode = error switch
                 {
-                    case BusinessException exception:
-                        response.StatusCode = exception.Status switch
-                        {
-                            ErrorStatus.NotFound => (int)HttpStatusCode.NotFound,
-                            ErrorStatus.AlreadyExist => (int)HttpStatusCode.Conflict,
-                            ErrorStatus.IncorrectInput => (int)HttpStatusCode.UnprocessableEntity,
-                            ErrorStatus.EmptyInput => (int)HttpStatusCode.UnsupportedMediaType,
-                            ErrorStatus.AccessDenied => (int)HttpStatusCode.Forbidden,
-                            _ => (int)HttpStatusCode.BadRequest
-                        };
-                        break;
-                    default:
-                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        break;
-                }
+                    BusinessException exception => exception.Status switch
+                    {
+                        ErrorStatus.NotFound => (int)HttpStatusCode.NotFound,
+                        ErrorStatus.AlreadyExist => (int)HttpStatusCode.Conflict,
+                        ErrorStatus.IncorrectInput => (int)HttpStatusCode.UnprocessableEntity,
+                        ErrorStatus.EmptyInput => (int)HttpStatusCode.UnsupportedMediaType,
+                        ErrorStatus.AccessDenied => (int)HttpStatusCode.Forbidden,
+                        _ => (int)HttpStatusCode.BadRequest
+                    },
+                    _ => (int)HttpStatusCode.InternalServerError
+                };
 
-                var result = JsonSerializer.Serialize(new { message = error?.Message });
+                logger.Error(error, error.Message);
+
+                var result = JsonSerializer.Serialize(new { message = error.Message });
                 await response.WriteAsync(result);
             }
         }

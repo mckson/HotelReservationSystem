@@ -3,6 +3,7 @@ using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ReservationsController : ControllerBase
@@ -26,8 +28,9 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET: api/<ReservationsController>
+        [Authorize(Policy = "AdminPermission")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReservationResponseModel>>> GetAllReservations()
+        public ActionResult<IEnumerable<ReservationResponseModel>> GetAllReservations()
         {
             var userClaims = User.Claims;
 
@@ -38,8 +41,9 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET api/<ReservationsController>/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ReservationResponseModel>> GetReservation(int id)
+        [Authorize(Policy = "UserPermission")]
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ReservationResponseModel>> GetReservationByIdAsync(int id)
         {
             var userClaims = User.Claims;
 
@@ -50,8 +54,9 @@ namespace HotelReservation.API.Controllers
         }
 
         // POST api/<ReservationsController>
+        [Authorize(Policy = "UserPermission")]
         [HttpPost]
-        public async Task<ActionResult<ReservationResponseModel>> CreateReservation([FromBody] ReservationRequestModel reservationRequestModel)
+        public async Task<ActionResult<ReservationResponseModel>> CreateReservatioAsyncn([FromBody] ReservationRequestModel reservationRequestModel)
         {
             var userClaims = User.Claims;
 
@@ -72,7 +77,8 @@ namespace HotelReservation.API.Controllers
         }
 
         // DELETE api/<ReservationsController>/5
-        [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminPermission")]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult<ReservationResponseModel>> DeleteReservation(int id)
         {
             var userClaims = User.Claims;

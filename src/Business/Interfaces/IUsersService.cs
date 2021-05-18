@@ -16,6 +16,6 @@ namespace HotelReservation.Business.Interfaces
 
         Task<UserModel> DeleteAsync(string id, IEnumerable<Claim> currentUserClaims);
 
-        Task<UserModel> UpdateAsync(string id, UserUpdateModel model, IEnumerable<Claim> currentUserClaims);
+        Task<UserModel> UpdateAsync(string id, UserUpdateModel updatingUserUpdateModel, IEnumerable<Claim> currentUserClaims);
     }
 }

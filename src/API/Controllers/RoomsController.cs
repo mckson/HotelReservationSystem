@@ -5,29 +5,25 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize(Policy = "UpdateHotelPermission")]
+    [Authorize(Policy = "AdminManagerPermission")]
     [Route("api/[controller]")]
     [ApiController]
     public class RoomsController : ControllerBase
     {
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private readonly IRoomsService _roomsService;
 
         public RoomsController(
             IRoomsService roomsService,
-            IMapper mapper,
-            ILogger logger)
+            IMapper mapper)
         {
             _roomsService = roomsService;
             _mapper = mapper;
-            _logger = logger;
         }
 
         // GET: api/<RoomsController>
@@ -43,8 +39,8 @@ namespace HotelReservation.API.Controllers
 
         // GET api/<RoomsController>/5
         [AllowAnonymous]
-        [HttpGet("{id}")]
-        public async Task<ActionResult<RoomResponseModel>> GetRoomById(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<RoomResponseModel>> GetRoomByIdAsync(int id)
         {
             var roomModel = await _roomsService.GetAsync(id);
             var roomResponseModel = _mapper.Map<RoomResponseModel>(roomModel);
@@ -54,7 +50,7 @@ namespace HotelReservation.API.Controllers
 
         // POST api/<RoomsController>
         [HttpPost]
-        public async Task<ActionResult<RoomResponseModel>> CreateRoom([FromBody] RoomRequestModel roomRequestModel)
+        public async Task<ActionResult<RoomResponseModel>> CreateRoomAsync([FromBody] RoomRequestModel roomRequestModel)
         {
             var userClaims = User.Claims;
             var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
@@ -65,8 +61,8 @@ namespace HotelReservation.API.Controllers
         }
 
         // PUT api/<RoomsController>/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult<RoomResponseModel>> UpdateRoom(int id, [FromBody] RoomRequestModel roomRequestModel)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<RoomResponseModel>> UpdateRoomAsync(int id, [FromBody] RoomRequestModel roomRequestModel)
         {
             var userClaims = User.Claims;
             var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
@@ -77,8 +73,8 @@ namespace HotelReservation.API.Controllers
         }
 
         // DELETE api/<RoomsController>/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<RoomResponseModel>> DeleteRoom(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<RoomResponseModel>> DeleteRoomAsync(int id)
         {
             var userClaims = User.Claims;
             var deletedRoomModel = await _roomsService.DeleteAsync(id, userClaims);

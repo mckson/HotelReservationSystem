@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using HotelReservation.API.Middleware;
+﻿using HotelReservation.API.Middleware;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
@@ -17,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System;
+using System.Text;
 
 namespace HotelReservation.API
 {
@@ -34,7 +34,6 @@ namespace HotelReservation.API
         {
             services.AddDbContext<HotelContext>(opt =>
             {
-                opt.EnableSensitiveDataLogging();
                 opt.UseLazyLoadingProxies();
                 opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
             });
@@ -50,7 +49,6 @@ namespace HotelReservation.API
 
             new IdentityBuilder(typeof(UserEntity), typeof(IdentityRole), services)
                 .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddSignInManager<SignInManager<UserEntity>>()
                 .AddUserManager<UserManager<UserEntity>>()
                 .AddEntityFrameworkStores<HotelContext>();
 
@@ -84,7 +82,7 @@ namespace HotelReservation.API
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(
-                    "PostHotelsPermission",
+                    "AdminPermission",
                     policy =>
                 {
                     policy.RequireAuthenticatedUser();
@@ -92,7 +90,7 @@ namespace HotelReservation.API
                 });
 
                 options.AddPolicy(
-                    "UpdateHotelPermission",
+                    "AdminManagerPermission",
                     policy =>
                     {
                         policy.RequireAuthenticatedUser();
@@ -100,11 +98,11 @@ namespace HotelReservation.API
                     });
 
                 options.AddPolicy(
-                    "UserManagementPermission",
+                    "UserPermission",
                     policy =>
                     {
                         policy.RequireAuthenticatedUser();
-                        policy.RequireRole("Admin");
+                        policy.RequireRole("Admin", "User");
                     });
             });
 

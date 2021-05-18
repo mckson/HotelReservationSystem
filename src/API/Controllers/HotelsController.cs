@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
-using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +25,6 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET: api/<HotelsController>
-        // [Authorize(Policy = "GetHotelsPermission")]
         [AllowAnonymous]
         [HttpGet]
         public IEnumerable<HotelResponseModel> GetHotels()
@@ -39,89 +37,33 @@ namespace HotelReservation.API.Controllers
         }
 
         // GET api/<HotelsController>/5
-        // [Authorize(Policy = "GetHotelsPermission")]
         [AllowAnonymous]
-        [HttpGet("{id}")]
-        public async Task<ActionResult<HotelResponseModel>> GetHotel(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(int id)
         {
-            var hotelResponse = _mapper.Map<HotelResponseModel>(await _service.GetAsync(id));
+            var hotelModel = await _service.GetAsync(id);
+            var hotelResponse = _mapper.Map<HotelResponseModel>(hotelModel);
+
             if (hotelResponse == null)
                 return NotFound();
 
             return Ok(hotelResponse);
         }
 
-        /*// GET api/<HotelsController>/5/Rooms
-        [Authorize(Policy = "GetHotelsPermission")]
-        [HttpGet("{id:int}/Rooms")]
-        public async Task<ActionResult<IEnumerable<RoomResponseModel>>> GetHotelRooms([FromRoute] int id)
+        // GET api/<HotelsController>/5
+        [AllowAnonymous]
+        [HttpGet("{name}")]
+        public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(string name)
         {
-            try
-            {
-                var roomsResponse = await _service.GetHotelRooms(id);
+            var hotelResponse = _mapper.Map<HotelResponseModel>(await _service.GetHotelByNameAsync(name));
 
-                return Ok(roomsResponse);
-            }
-            catch (DataException ex)
-            {
-                return ex.Status switch
-                {
-                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
-                    _ => BadRequest()
-                };
-            }
+            return Ok(hotelResponse);
         }
-
-        // GET api/<HotelsController>/5/Location
-        [Authorize(Policy = "GetHotelsPermission")]
-        [HttpGet("{id:int}/Location")]
-        public async Task<ActionResult<LocationResponseModel>> GetHotelLocation([FromRoute] int id)
-        {
-            try
-            {
-                var locationResponse = await _service.GetHotelLocation(id);
-
-                return Ok(locationResponse);
-            }
-            catch (DataException ex)
-            {
-                return ex.Status switch
-                {
-                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
-                    _ => BadRequest()
-                };
-            }
-        }
-
-        // GET api/<HotelsController>/5/Company
-        [Authorize(Policy = "GetHotelsPermission")]
-        [HttpGet("{id:int}/Company")]
-        public async Task<ActionResult<CompanyResponseModel>> GetHotelCompany([FromRoute] int id)
-        {
-            try
-            {
-                var companyResponse = await _service.GetHotelCompany(id);
-
-                return Ok(companyResponse);
-            }
-            catch (DataException ex)
-            {
-                return ex.Status switch
-                {
-                    ErrorStatus.NotFound => NotFound($"{ex.Status}: {ex.Message}"),
-                    ErrorStatus.HasLinkedEntity => BadRequest($"{ex.Status}: {ex.Message}"),
-                    _ => BadRequest()
-                };
-            }
-        }*/
 
         // POST api/<HotelsController>
-        [Authorize(Policy = "PostHotelsPermission")]
-        // [AllowAnonymous]
+        [Authorize(Policy = "AdminPermission")]
         [HttpPost]
-        public async Task<ActionResult<HotelResponseModel>> CreateHotel([FromBody] HotelRequestModel hotelRequest)
+        public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] HotelRequestModel hotelRequest)
         {
             var userClaims = User.Claims;
             var hotelResponse =
@@ -133,9 +75,9 @@ namespace HotelReservation.API.Controllers
         }
 
         // PUT api/<HotelsController>/5
-        [Authorize(Policy = "UpdateHotelPermission")]
+        [Authorize(Policy = "AdminManagerPermission")]
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<HotelResponseModel>> PutAsync(int id, [FromBody] HotelRequestModel hotelRequest)
+        public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(int id, [FromBody] HotelRequestModel hotelRequest)
         {
             var userClaims = User.Claims;
             var hotelResponse =
@@ -149,7 +91,8 @@ namespace HotelReservation.API.Controllers
 
         // DELETE api/<HotelsController>/5
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete(int id)
+        [Authorize(Policy = "AdminManagerPermission")]
+        public async Task<ActionResult> DeleteHotelAsync(int id)
         {
             var userClaims = User.Claims;
             await _service.DeleteAsync(id, userClaims);

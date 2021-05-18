@@ -1,9 +1,10 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -16,34 +17,46 @@ namespace HotelReservation.Business.Services
         private readonly IRepository<ReservationEntity> _reservationRepository;
         private readonly IMapper _mapper;
         private readonly IHotelRepository _hotelRepository;
+        private readonly ILogger _logger;
 
         public ReservationsService(
             IRepository<ReservationEntity> reservationRepository,
             IHotelRepository hotelRepository,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger logger)
         {
             _reservationRepository = reservationRepository;
             _hotelRepository = hotelRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<ReservationModel> CreateAsync(ReservationModel reservationModel, IEnumerable<Claim> userClaims)
         {
+            _logger.Debug("Reservation is creating");
+
             await CheckHotelRoomsServicesExistenceAsync(reservationModel);
 
             reservationModel.ReservedTime = DateTime.Now;
-            reservationModel.UserId = userClaims.FirstOrDefault(claim => claim.Type == "id")?.Value;    // add exception
+            reservationModel.UserId = userClaims.FirstOrDefault(claim => claim.Type == "id")?.Value ??
+                                      throw new BusinessException(
+                                          "Cannot maker reservation when user is not authorized",
+                                          ErrorStatus.AccessDenied);
 
             var reservationEntity = _mapper.Map<ReservationEntity>(reservationModel);
 
             var createdReservationEntity = await _reservationRepository.CreateAsync(reservationEntity);
             var createdReservationModel = _mapper.Map<ReservationModel>(createdReservationEntity);
 
+            _logger.Debug($"Reservation {createdReservationModel.Id} created");
+
             return createdReservationModel;
         }
 
         public async Task<ReservationModel> GetAsync(int id, IEnumerable<Claim> userClaims)
         {
+            _logger.Debug($"Reservation {id} is requesting");
+
             var reservationEntity = await _reservationRepository.GetAsync(id) ??
                                     throw new BusinessException($"No reservation with such id: {id}", ErrorStatus.NotFound);
 
@@ -51,11 +64,15 @@ namespace HotelReservation.Business.Services
 
             var reservationModel = _mapper.Map<ReservationModel>(reservationEntity);
 
+            _logger.Debug($"Reservation {id} requested");
+
             return reservationModel;
         }
 
         public async Task<ReservationModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
         {
+            _logger.Debug($"Reservation {id} is deleting");
+
             var checkReservationEntity = await _reservationRepository.GetAsync(id, true) ??
                                          throw new BusinessException(
                                              $"No reservation with such id: {id}",
@@ -66,15 +83,21 @@ namespace HotelReservation.Business.Services
             var deletedReservationEntity = await _reservationRepository.DeleteAsync(id);
             var deletedReservationModel = _mapper.Map<ReservationModel>(deletedReservationEntity);
 
+            _logger.Debug($"Reservation {id} deleted");
+
             return deletedReservationModel;
         }
 
         public IEnumerable<ReservationModel> GetAllReservations(IEnumerable<Claim> userClaims)
         {
+            _logger.Debug("Reservations is requesting");
+
             CheckReservationManagementPermission(null, userClaims);   // admin only, change
 
             var reservationEntities = _reservationRepository.GetAll();
             var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
+
+            _logger.Debug("Reservations requested");
 
             return reservationModels;
         }
@@ -104,13 +127,17 @@ namespace HotelReservation.Business.Services
 
             foreach (var service in reservationModel.ReservationServices)
             {
-                var checkServiceEntity = checkHotelEntity.Services.FirstOrDefault(s => s.Id == service.ServiceId) ??
-                                         throw new BusinessException($"No service with such id: {service.ServiceId}", ErrorStatus.NotFound);
+                var unused = checkHotelEntity.Services.FirstOrDefault(s => s.Id == service.ServiceId) ??
+                             throw new BusinessException(
+                                 $"No service with such id: {service.ServiceId}",
+                                 ErrorStatus.NotFound);
             }
         }
 
         private void CheckReservationManagementPermission(string reservationUserId, IEnumerable<Claim> userClaims)
         {
+            _logger.Debug("Permissions is checking");
+
             var claims = userClaims.ToList();
             if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
                 return;
@@ -123,6 +150,8 @@ namespace HotelReservation.Business.Services
                     "You have no permissions to manage this reservation",
                     ErrorStatus.AccessDenied);
             }
+
+            _logger.Debug("Permissions checked");
         }
     }
 }

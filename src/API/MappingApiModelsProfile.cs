@@ -45,6 +45,12 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.RefreshToken,
                     opt => opt.MapFrom(model => model.RefreshToken.Token));
+
+            CreateMap<UserModel, UserTokenAndIdResponseModel>()
+                .ForMember(
+                    response => response.RefreshToken,
+                    opt => opt.MapFrom(model => model.RefreshToken.Token));
+
             CreateMap<UserModel, UserBriefResponseModel>();
             CreateMap<UserModel, UserResponseModel>();
         }

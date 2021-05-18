@@ -6,6 +6,7 @@ using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,32 +21,43 @@ namespace HotelReservation.Business.Services
         private readonly IMapper _mapper;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
         private readonly IHotelRepository _hotelRepo;
+        private readonly ILogger _logger;
 
         public UsersService(
             UserManager<UserEntity> userManager,
             IPasswordHasher<UserEntity> passwordHasher,
             IHotelRepository hotelRepo,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger logger)
         {
             _userManager = userManager;
             _passwordHasher = passwordHasher;
             _hotelRepo = hotelRepo;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<UserModel>> GetAllUsersAsync()
         {
+            _logger.Debug("Users are requesting");
+
             var userModels = _mapper.Map<IEnumerable<UserModel>>(_userManager.Users);
-            foreach (var userModel in userModels)
+
+            var users = userModels.ToList();
+            foreach (var userModel in users)
             {
                 await GetRolesForUserModelAsync(userModel);
             }
 
-            return userModels;
+            _logger.Debug("Users requested");
+
+            return users;
         }
 
         public async Task<UserModel> CreateAsync(UserRegistrationModel userRegistration)
         {
+            _logger.Debug($"User {userRegistration?.Email} is creating");
+
             if (userRegistration == null)
                 throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
@@ -69,28 +81,47 @@ namespace HotelReservation.Business.Services
                 foreach (var role in userRegistration.Roles)
                 {
                     if (role.ToUpper() == "ADMIN" || role.ToUpper() == "MANAGER")
-                        await _userManager.AddToRoleAsync(addedUserEntity, role);
+                    {
+                        try
+                        {
+                            await _userManager.AddToRoleAsync(addedUserEntity, role);
+                        }
+                        catch
+                        {
+                            throw new BusinessException(
+                                $"Cannot add user to unknown role {role}",
+                                ErrorStatus.IncorrectInput);
+                        }
+                    }
                 }
             }
 
             var addedUserModel = _mapper.Map<UserModel>(addedUserEntity);
             await GetRolesForUserModelAsync(addedUserModel);
 
+            _logger.Debug($"Users {userRegistration.Email} created");
+
             return addedUserModel;
         }
 
         public async Task<UserModel> GetAsync(string id)
         {
+            _logger.Debug($"User {id} is requesting");
+
             var userEntity = await _userManager.FindByIdAsync(id);
             var userModel = _mapper.Map<UserModel>(userEntity);
             await GetRolesForUserModelAsync(userModel);
+
+            _logger.Debug($"User {id} requested");
+
             return userModel;
         }
 
         public async Task<UserModel> DeleteAsync(string id, IEnumerable<Claim> currentUserClaims)
         {
-            // could be removed
-            if (currentUserClaims.FirstOrDefault(cl => cl.Type == "id").Value == id)
+            _logger.Debug($"User {id} is deleting");
+
+            if (currentUserClaims.FirstOrDefault(cl => cl.Type == "id")?.Value == id)
                 throw new BusinessException("You cannot delete yourself", ErrorStatus.IncorrectInput);
 
             var deletedUserEntity = await _userManager.FindByIdAsync(id);
@@ -101,14 +132,18 @@ namespace HotelReservation.Business.Services
             var result = await _userManager.DeleteAsync(deletedUserEntity);
 
             if (result != IdentityResult.Success)
-                throw new BusinessException("No user with such id", ErrorStatus.NotFound);
+                throw new BusinessException("No user with such id", ErrorStatus.NotFound, result.Errors);
+
+            _logger.Debug($"User {id} deleted");
 
             return deletedUserModel;
         }
 
-        public async Task<UserModel> UpdateAsync(string id, UserUpdateModel userUpdateModel, IEnumerable<Claim> currentUserClaims)
+        public async Task<UserModel> UpdateAsync(string id, UserUpdateModel updatingUserUpdateModel, IEnumerable<Claim> currentUserClaims)
         {
-            if (userUpdateModel == null)
+            _logger.Debug($"User {id} is updating");
+
+            if (updatingUserUpdateModel == null)
                 throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
             var userEntity = await _userManager.FindByIdAsync(id);
@@ -116,42 +151,44 @@ namespace HotelReservation.Business.Services
             if (userEntity == null)
                 throw new BusinessException("User with such id does not exist", ErrorStatus.NotFound);
 
-            if (userUpdateModel.Email != null)
-                userEntity.Email = userUpdateModel.Email;
+            if (updatingUserUpdateModel.Email != null)
+                userEntity.Email = updatingUserUpdateModel.Email;
 
-            if (userUpdateModel.PhoneNumber != null)
-                userEntity.PhoneNumber = userUpdateModel.PhoneNumber;
+            if (updatingUserUpdateModel.PhoneNumber != null)
+                userEntity.PhoneNumber = updatingUserUpdateModel.PhoneNumber;
 
-            if (userUpdateModel.DateOfBirth != null)
-                userEntity.DateOfBirth = userUpdateModel.DateOfBirth.Value;
+            if (updatingUserUpdateModel.DateOfBirth != null)
+                userEntity.DateOfBirth = updatingUserUpdateModel.DateOfBirth.Value;
 
-            if (userUpdateModel.FirstName != null)
-                userEntity.FirstName = userUpdateModel.FirstName;
+            if (updatingUserUpdateModel.FirstName != null)
+                userEntity.FirstName = updatingUserUpdateModel.FirstName;
 
-            if (userUpdateModel.LastName != null)
-                userEntity.LastName = userUpdateModel.LastName;
+            if (updatingUserUpdateModel.LastName != null)
+                userEntity.LastName = updatingUserUpdateModel.LastName;
 
-            if (userUpdateModel.UserName != null)
-                userEntity.UserName = userUpdateModel.UserName;
+            if (updatingUserUpdateModel.UserName != null)
+                userEntity.UserName = updatingUserUpdateModel.UserName;
 
-            if (userUpdateModel.HotelId != null)
+            if (updatingUserUpdateModel.HotelId != null)
             {
-                var hotelEntity = _hotelRepo.GetAsync(userUpdateModel.HotelId.Value, true) ??
+                var unused = _hotelRepo.GetAsync(updatingUserUpdateModel.HotelId.Value, true) ??
                                   throw new BusinessException("There is no hotel with such id", ErrorStatus.NotFound);
-                userEntity.HotelId = userUpdateModel.HotelId;
+
+                userEntity.HotelId = updatingUserUpdateModel.HotelId;
             }
 
-            userEntity.UserName ??= userUpdateModel.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
+            if (updatingUserUpdateModel.Email != null)
+                userEntity.UserName ??= updatingUserUpdateModel.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
 
-            if (userUpdateModel.NewPassword != null)
+            if (updatingUserUpdateModel.NewPassword != null)
             {
                 var changePasswordResult = await _userManager.ChangePasswordAsync(
                     userEntity,
-                    userUpdateModel.OldPassword,
-                    userUpdateModel.NewPassword);
+                    updatingUserUpdateModel.OldPassword,
+                    updatingUserUpdateModel.NewPassword);
 
                 if (changePasswordResult != IdentityResult.Success)
-                    throw new BusinessException("Incorrect previous password", ErrorStatus.IncorrectInput);
+                    throw new BusinessException("Incorrect previous password", ErrorStatus.IncorrectInput, changePasswordResult.Errors);
             }
 
             var result = await _userManager.UpdateAsync(userEntity);
@@ -160,21 +197,21 @@ namespace HotelReservation.Business.Services
 
             if (result == IdentityResult.Success)
             {
-                if (userUpdateModel.Roles != null)
+                if (updatingUserUpdateModel.Roles != null)
                 {
                     var addedUserRoles = await _userManager.GetRolesAsync(updatedUserEntity);
 
                     if (!addedUserRoles.Contains("User"))
                         await _userManager.AddToRoleAsync(updatedUserEntity, "User");
 
-                    for (int i = 0; i < userUpdateModel.Roles.Count(); ++i)
+                    for (var i = 0; i < updatingUserUpdateModel.Roles.Count; ++i)
                     {
-                        userUpdateModel.Roles[i] = userUpdateModel.Roles[i].ToUpper();
+                        updatingUserUpdateModel.Roles[i] = updatingUserUpdateModel.Roles[i].ToUpper();
                     }
 
                     foreach (var role in addedUserRoles)
                     {
-                        if (!userUpdateModel.Roles.Contains(role.ToUpper()))
+                        if (!updatingUserUpdateModel.Roles.Contains(role.ToUpper()))
                         {
                             if (role.ToUpper() == "ADMIN" &&
                                 updatedUserEntity.Id == currentUserClaims.FirstOrDefault(cl => cl.Type == "id").Value)
@@ -184,14 +221,27 @@ namespace HotelReservation.Business.Services
                                     ErrorStatus.IncorrectInput);
                             }
 
+                            if (role.ToUpper() == "USER")
+                            {
+                                continue;
+                            }
+
                             await _userManager.RemoveFromRoleAsync(updatedUserEntity, role.ToUpper());
                         }
                     }
 
-                    foreach (var role in userUpdateModel.Roles)
+                    foreach (var role in updatingUserUpdateModel.Roles)
                     {
-                        // if (role.ToUpper() == "ADMIN" || role.ToUpper() == "MANAGER")
+                        try
+                        {
                             await _userManager.AddToRoleAsync(updatedUserEntity, role);
+                        }
+                        catch
+                        {
+                            throw new BusinessException(
+                                $"Unable to add user to role {role}",
+                                ErrorStatus.IncorrectInput);
+                        }
                     }
                 }
             }
@@ -199,13 +249,19 @@ namespace HotelReservation.Business.Services
             var addedUserModel = _mapper.Map<UserModel>(updatedUserEntity);
             await GetRolesForUserModelAsync(addedUserModel);
 
+            _logger.Debug($"User {id} updated");
+
             return addedUserModel;
         }
 
         private async Task GetRolesForUserModelAsync(UserModel userModel)
         {
+            _logger.Debug($"User {userModel.Id} roles are requesting");
+
             var roles = await _userManager.GetRolesAsync(_mapper.Map<UserEntity>(userModel));
             userModel.Roles = roles;
+
+            _logger.Debug($"User {userModel.Id} roles requested");
         }
     }
 }
