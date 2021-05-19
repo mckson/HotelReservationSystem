@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace HotelReservation.Business.Models.UserModels
@@ -31,5 +32,7 @@ namespace HotelReservation.Business.Models.UserModels
 
         [Required(ErrorMessage = "Last name is required")]
         public string LastName { get; set; }
+
+        public IEnumerable<string> Roles { get; set; }
     }
 }

@@ -20,6 +20,12 @@ namespace HotelReservation.Data
 
         public DbSet<ReservationEntity> Reservations { get; set; }
 
+        public DbSet<ServiceEntity> Services { get; set; }
+
+        public DbSet<ReservationRoomEntity> ReservationRooms { get; set; }
+
+        public DbSet<ReservationServiceEntity> ReservationServices { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -28,6 +34,8 @@ namespace HotelReservation.Data
             modelBuilder.ApplyConfiguration(new RoomEntityConfiguration());
             modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
             modelBuilder.ApplyConfiguration(new LocationEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new ReservationRoomEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new ReservationServiceEntityConfiguration());
         }
     }
 }

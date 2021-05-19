@@ -20,8 +20,8 @@ namespace HotelReservation.Data.Entities
 
         public virtual HotelEntity Hotel { get; set; }
 
-        public virtual ReservationEntity Reservation { get; set; }
+        public virtual IEnumerable<ReservationEntity> Reservations { get; set; }
 
-        public virtual List<RefreshTokenEntity> RefreshTokens { get; set; }
+        public virtual RefreshTokenEntity RefreshToken { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using HotelReservation.API.Middleware;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
@@ -16,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System;
+using System.Text;
 
 namespace HotelReservation.API
 {
@@ -33,15 +34,21 @@ namespace HotelReservation.API
         {
             services.AddDbContext<HotelContext>(opt =>
             {
-                opt.EnableSensitiveDataLogging();
                 opt.UseLazyLoadingProxies();
                 opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
             });
 
-            services.AddIdentityCore<UserEntity>(options => { });
+            services.AddIdentityCore<UserEntity>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 4;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+            });
+
             new IdentityBuilder(typeof(UserEntity), typeof(IdentityRole), services)
                 .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddSignInManager<SignInManager<UserEntity>>()
                 .AddUserManager<UserManager<UserEntity>>()
                 .AddEntityFrameworkStores<HotelContext>();
 
@@ -75,35 +82,43 @@ namespace HotelReservation.API
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(
-                    "GetHotelsPermission",
-                    policy =>
-                    {
-                        policy.RequireAuthenticatedUser();
-                    });
-
-                options.AddPolicy(
-                    "PostHotelsPermission",
+                    "AdminPermission",
                     policy =>
                 {
                     policy.RequireAuthenticatedUser();
-                    policy.RequireRole("Admin", "Manager");
+                    policy.RequireRole("Admin");
                 });
 
                 options.AddPolicy(
-                    "UpdateHotelsPermission",
+                    "AdminManagerPermission",
                     policy =>
                     {
                         policy.RequireAuthenticatedUser();
                         policy.RequireRole("Admin", "Manager");
                     });
+
+                options.AddPolicy(
+                    "UserPermission",
+                    policy =>
+                    {
+                        policy.RequireAuthenticatedUser();
+                        policy.RequireRole("Admin", "User");
+                    });
             });
 
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IRepository<RoomEntity>, RoomRepository>();
+            services.AddScoped<IRepository<ReservationEntity>, ReservationRepository>();
+            services.AddScoped<IRepository<ServiceEntity>, ServiceRepository>();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IHotelsService, HotelsService>();
+            services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IRoomsService, RoomsService>();
+            services.AddScoped<IServicesService, ServicesService>();
+            services.AddScoped<IReservationsService, ReservationsService>();
 
             services.AddControllers();
         }
@@ -127,6 +142,8 @@ namespace HotelReservation.API
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

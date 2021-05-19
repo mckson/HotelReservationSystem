@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using HotelReservation.Business.Models.UserModels;
 
 namespace HotelReservation.Business.Models
 {
@@ -9,10 +8,18 @@ namespace HotelReservation.Business.Models
 
         public string Name { get; set; }
 
+        public int NumberFloors { get; set; }
+
+        public double Deposit { get; set; }
+
         public LocationModel Location { get; set; }
 
         public IEnumerable<RoomModel> Rooms { get; set; }
 
-        public IEnumerable<UserModel> Users { get; set; }
+        public IEnumerable<UserModel> Managers { get; set; }
+
+        public IEnumerable<ReservationModel> Reservations { get; set; }
+
+        public IEnumerable<ServiceModel> Services { get; set; }
     }
 }

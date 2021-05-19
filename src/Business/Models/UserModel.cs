@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace HotelReservation.Business.Models.UserModels
+namespace HotelReservation.Business.Models
 {
     public class UserModel
     {
@@ -29,10 +29,12 @@ namespace HotelReservation.Business.Models.UserModels
 
         public HotelModel Hotel { get; set; }
 
-        public ReservationModel Reservation { get; set; }
+        public IEnumerable<ReservationModel> Reservations { get; set; }
 
-        public List<RefreshTokenModel> RefreshTokens { get; set; }
+        public RefreshTokenModel RefreshToken { get; set; }
 
         public string JwtToken { get; set; }
+
+        public IEnumerable<string> Roles { get; set; }
     }
 }

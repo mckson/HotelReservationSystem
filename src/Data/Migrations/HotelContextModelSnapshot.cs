@@ -26,10 +26,16 @@ namespace HotelReservation.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<double>("Deposit")
+                        .HasColumnType("float");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
+
+                    b.Property<int>("NumberFloors")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -90,28 +96,52 @@ namespace HotelReservation.Data.Migrations
                     b.Property<DateTime>("DateOut")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("Deposit")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("ReservationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TotalDays")
+                    b.Property<int>("HotelId")
                         .HasColumnType("int");
 
-                    b.Property<double>("TotalPrice")
-                        .HasColumnType("float");
+                    b.Property<DateTime>("ReservedTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Reservations");
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.ReservationRoomEntity", b =>
+                {
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReservationId", "RoomId");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("ReservationRooms");
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.ReservationServiceEntity", b =>
+                {
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReservationId", "ServiceId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ReservationServices");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoomEntity", b =>
@@ -130,13 +160,8 @@ namespace HotelReservation.Data.Migrations
                     b.Property<int>("HotelId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsEmpty")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<int?>("ReservationId")
-                        .HasColumnType("int");
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
 
                     b.Property<int>("RoomNumber")
                         .HasColumnType("int");
@@ -145,9 +170,30 @@ namespace HotelReservation.Data.Migrations
 
                     b.HasIndex("HotelId");
 
-                    b.HasIndex("ReservationId");
-
                     b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.ServiceEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelId");
+
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.UserEntity", b =>
@@ -374,16 +420,52 @@ namespace HotelReservation.Data.Migrations
                     b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
                         .WithOne("Location")
                         .HasForeignKey("HotelReservation.Data.Entities.LocationEntity", "HotelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationEntity", b =>
                 {
+                    b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
+                        .WithMany("Reservations")
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("HotelReservation.Data.Entities.UserEntity", "User")
-                        .WithOne("Reservation")
-                        .HasForeignKey("HotelReservation.Data.Entities.ReservationEntity", "UserId")
+                        .WithMany("Reservations")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.ReservationRoomEntity", b =>
+                {
+                    b.HasOne("HotelReservation.Data.Entities.ReservationEntity", "Reservation")
+                        .WithMany("ReservationRooms")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
+                        .WithMany("ReservationRooms")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.ReservationServiceEntity", b =>
+                {
+                    b.HasOne("HotelReservation.Data.Entities.ReservationEntity", "Reservation")
+                        .WithMany("ReservationServices")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HotelReservation.Data.Entities.ServiceEntity", "Service")
+                        .WithMany("ReservationServices")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoomEntity", b =>
@@ -391,42 +473,43 @@ namespace HotelReservation.Data.Migrations
                     b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
                         .WithMany("Rooms")
                         .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
 
-                    b.HasOne("HotelReservation.Data.Entities.ReservationEntity", "Reservation")
-                        .WithMany("Rooms")
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity("HotelReservation.Data.Entities.ServiceEntity", b =>
+                {
+                    b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
+                        .WithMany("Services")
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.UserEntity", b =>
                 {
                     b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
-                        .WithMany("Users")
+                        .WithMany("Managers")
                         .HasForeignKey("HotelId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("HotelReservation.Data.Entities.RoomEntity", "Room")
-                        .WithMany("Users")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany()
+                        .HasForeignKey("RoomId");
 
-                    b.OwnsMany("HotelReservation.Data.Entities.RefreshTokenEntity", "RefreshTokens", b1 =>
+                    b.OwnsOne("HotelReservation.Data.Entities.RefreshTokenEntity", "RefreshToken", b1 =>
                         {
                             b1.Property<string>("UserEntityId")
                                 .HasColumnType("nvarchar(450)");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<DateTime>("Created")
                                 .HasColumnType("datetime2");
 
                             b1.Property<DateTime>("Expires")
                                 .HasColumnType("datetime2");
+
+                            b1.Property<int>("Id")
+                                .HasColumnType("int");
 
                             b1.Property<string>("ReplacedByToken")
                                 .HasColumnType("nvarchar(max)");
@@ -437,9 +520,9 @@ namespace HotelReservation.Data.Migrations
                             b1.Property<string>("Token")
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.HasKey("UserEntityId", "Id");
+                            b1.HasKey("UserEntityId");
 
-                            b1.ToTable("RefreshTokenEntity");
+                            b1.ToTable("AspNetUsers");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserEntityId");

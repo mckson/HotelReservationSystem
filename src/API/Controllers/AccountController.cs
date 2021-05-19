@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
@@ -8,11 +6,11 @@ using HotelReservation.Business.Models.UserModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
+using System;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -29,37 +27,31 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("Login")]
-        public async Task<ActionResult<UserResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
+        [HttpPost("SignIn")]
+        public async Task<ActionResult<UserTokenAndIdResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
         {
             var userAuthModel = _mapper.Map<UserAuthenticationModel>(userAuthRequestModel);
             var loggedUser = await _accountService.AuthenticateAsync(userAuthModel);
 
-            if (loggedUser == null)
-                return BadRequest(new { errorText = "Invalid email or password" });
-
-            var responseUser = _mapper.Map<UserResponseModel>(loggedUser);
+            var responseUser = _mapper.Map<UserTokenAndIdResponseModel>(loggedUser);
             SetTokenCookie(responseUser.RefreshToken);
 
             return Ok(responseUser);
         }
 
         [AllowAnonymous]
-        [HttpPost("Register")]
-        public async Task<ActionResult<UserResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
+        [HttpPost("SignUp")]
+        public async Task<ActionResult<UserTokenAndIdResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
         {
             var userModel = _mapper.Map<UserRegistrationModel>(userRequestModel);
             var registeredUserAuth = await _accountService.RegisterAsync(userModel);
-
-            if (registeredUserAuth == null)
-                return BadRequest(new { errorText = "User with such email exists" });
 
             return await Authenticate(_mapper.Map<UserAuthenticationRequestModel>(registeredUserAuth));
         }
 
         [AllowAnonymous]
-        [HttpPost("Refresh-token")]
-        public async Task<IActionResult> RefreshToken()
+        [HttpPost("RefreshToken")]
+        public async Task<ActionResult<UserTokenAndIdResponseModel>> RefreshToken()
         {
             var refreshToken = Request.Cookies["RefreshToken"];
             var response = await _accountService.RefreshToken(refreshToken);
@@ -67,25 +59,19 @@ namespace HotelReservation.API.Controllers
             if (response == null)
                 return Unauthorized(new { message = "Invalid token" });
 
-            var responseUser = _mapper.Map<UserResponseModel>(response);
+            var responseUser = _mapper.Map<UserTokenAndIdResponseModel>(response);
             SetTokenCookie(responseUser.RefreshToken);
 
             return Ok(responseUser);
         }
 
-        [HttpPost("Revoke-token")]
-        public IActionResult RevokeToken([FromBody] RevokeTokenRequest model)
+        [HttpPost("LogOut")]
+        public async Task<IActionResult> RevokeTokenAsync()
         {
             // accept token from request body or cookie
-            var token = model.Token ?? Request.Cookies["refreshToken"];
+            var token = Request.Cookies["refreshToken"];
 
-            if (string.IsNullOrEmpty(token))
-                return BadRequest(new { message = "Token is required" });
-
-            var response = _accountService.RevokeToken(token);
-
-            if (!response)
-                return NotFound(new { message = "Token not found" });
+            await _accountService.RevokeTokenAsync(token);
 
             return Ok(new { message = "Token revoked" });
         }

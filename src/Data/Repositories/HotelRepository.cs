@@ -1,10 +1,10 @@
-﻿using System;
+﻿using HotelReservation.Data.Entities;
+using HotelReservation.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HotelReservation.Data.Entities;
-using HotelReservation.Data.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Repositories
 {
@@ -19,16 +19,29 @@ namespace HotelReservation.Data.Repositories
             _hotels = context.Hotels;
         }
 
-        public IEnumerable<HotelEntity> GetAll() => _hotels;
+        public IEnumerable<HotelEntity> GetAll(bool asNoTracking = false)
+        {
+            return asNoTracking ? _hotels.AsNoTracking() : _hotels;
+        }
 
-        public async Task<HotelEntity> GetAsync(int id) =>
-            await _hotels.FirstOrDefaultAsync(hotel => hotel.Id == id);
+        public async Task<HotelEntity> GetAsync(int id, bool asNoTracking = false)
+        {
+            return asNoTracking
+                ? await _hotels.AsNoTracking().FirstOrDefaultAsync(hotel => hotel.Id == id)
+                : await _hotels.FirstOrDefaultAsync(hotel => hotel.Id == id);
+        }
 
-        public async Task<HotelEntity> GetAsync(string name) =>
-            await _hotels.FirstOrDefaultAsync(hotel => hotel.Name == name);
+        public async Task<HotelEntity> GetAsync(string name, bool asNoTracking = false)
+        {
+            return asNoTracking
+                ? await _hotels.AsNoTracking().FirstOrDefaultAsync(hotel => hotel.Name == name)
+                : await _hotels.FirstOrDefaultAsync(hotel => hotel.Name == name);
+        }
 
-        public IEnumerable<HotelEntity> Find(Func<HotelEntity, bool> predicate) =>
-            _hotels.Where(predicate);
+        public IEnumerable<HotelEntity> Find(Func<HotelEntity, bool> predicate, bool asNoTracking = false)
+        {
+            return asNoTracking ? _hotels.AsNoTracking().Where(predicate) : _hotels.Where(predicate);
+        }
 
         public async Task<HotelEntity> CreateAsync(HotelEntity hotel)
         {

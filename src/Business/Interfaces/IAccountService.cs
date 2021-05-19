@@ -1,5 +1,5 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 
 namespace HotelReservation.Business.Interfaces
@@ -12,8 +12,6 @@ namespace HotelReservation.Business.Interfaces
 
         Task<UserModel> RefreshToken(string token);
 
-        bool RevokeToken(string token);
-
-        // Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel user);
+        Task RevokeTokenAsync(string token);
     }
 }
