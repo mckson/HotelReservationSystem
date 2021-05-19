@@ -7,21 +7,40 @@ const SignUp = () => {
         initialValues: {
             userName: '',
             email: '',
-            firstMame: '',
+            firstName: '',
             lastName: '',
-            phoneNumber: ''
+            phoneNumber: '',
+            password: '',
+            passwordConfirm: '',
+            dateOfBirth: ''
         },
-        onSubmit: values => {
-            axiosInstance.post(
-                '/Account/SignUp',
-                {
-                    "email": values.email,
-                    "firstName": values.firstMame,
-                    "lastName": values.lastName
-                }
-            )
+        onSubmit: async values => {
+            let request = {
+                Email: values.email,
+                FirstName: values.firstName,
+                LastName: values.lastName,
+                UserName: values.userName,
+                PhoneNumber: values.phoneNumber,
+                Password: values.password,
+                PasswordConfirm: values.passwordConfirm,
+                DateOfBirth: values.dateOfBirth
+            }
+
+            console.log(request);
+
+            await axiosInstance
+                .post(
+                    '/Account/SignUp',
+                    request
+                )
+                .then(response => {
+                    console.log(response);
+                })
+                .catch(error => {
+                    console.log(error);
+                })
         }
-    });
+    })
 
     return(
         <form onSubmit={formik.handleSubmit}>
@@ -40,7 +59,7 @@ const SignUp = () => {
                 name='firstName'
                 type='text'
                 onChange={formik.handleChange}
-                value={formik.values.firstMame}
+                value={formik.values.firstName}
             />
 
             <label htmlFor="lastName">Last Name</label>
@@ -50,6 +69,51 @@ const SignUp = () => {
                 type='text'
                 onChange={formik.handleChange}
                 value={formik.values.lastName}
+            />
+
+            <label htmlFor="userName">User Name</label>
+            <input
+                id='userName'
+                name='userName'
+                type='text'
+                onChange={formik.handleChange}
+                value={formik.values.userName}
+            />
+
+            <label htmlFor="phoneNumber">Phone</label>
+            <input
+                id='phoneNumber'
+                name='phoneNumber'
+                type='text'
+                onChange={formik.handleChange}
+                value={formik.values.phoneNumber}
+            />
+
+            <label htmlFor="password">Password</label>
+            <input
+                id='password'
+                name='password'
+                type='password'
+                onChange={formik.handleChange}
+                value={formik.values.password}
+            />
+
+            <label htmlFor="passwordConfirm">Password Confirm</label>
+            <input
+                id='passwordConfirm'
+                name='passwordConfirm'
+                type='password'
+                onChange={formik.handleChange}
+                value={formik.values.passwordConfirm}
+            />
+
+            <label htmlFor="dateOfBirth">Date of Birth</label>
+            <input
+                id='dateOfBirth'
+                name='dateOfBirth'
+                type='date'
+                onChange={formik.handleChange}
+                value={formik.values.dateOfBirth}
             />
 
             <button type='submit'>Sign Up</button>

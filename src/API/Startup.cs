@@ -52,6 +52,18 @@ namespace HotelReservation.API
                 .AddUserManager<UserManager<UserEntity>>()
                 .AddEntityFrameworkStores<HotelContext>();
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    "ApiCorsPolicy",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                    });
+            });
+
             services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
 
             services.AddScoped<ITokenService, TokenService>();
@@ -139,6 +151,8 @@ namespace HotelReservation.API
             app.UseSerilogRequestLogging();
 
             app.UseRouting();
+
+            app.UseCors("ApiCorsPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();
