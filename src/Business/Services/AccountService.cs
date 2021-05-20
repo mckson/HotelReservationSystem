@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
@@ -88,16 +89,26 @@ namespace HotelReservation.Business.Services
             userEntity.PasswordHash = _passwordHasher.HashPassword(userEntity, userRegistration.Password);
 
             var result = await _userManager.CreateAsync(userEntity);
-            var addedUserEntity = await _userManager.FindByEmailAsync(userRegistration.Email);
-            var addedUserRoles = await _userManager.GetRolesAsync(addedUserEntity);
 
-            if (result == IdentityResult.Success && addedUserRoles.IsNullOrEmpty())
+            if (result == IdentityResult.Success)
             {
-                await _userManager.AddToRoleAsync(addedUserEntity, "User");
+                var addedUserEntity = await _userManager.FindByEmailAsync(userRegistration.Email);
+                var addedUserRoles = await _userManager.GetRolesAsync(addedUserEntity);
+
+                if (addedUserRoles.IsNullOrEmpty())
+                {
+                    await _userManager.AddToRoleAsync(addedUserEntity, "User");
+                }
             }
             else if (result != IdentityResult.Success)
             {
-                throw new BusinessException($"Creating error", ErrorStatus.IncorrectInput, result.Errors);
+                var sb = new StringBuilder();
+                foreach (var error in result.Errors)
+                {
+                    sb.Append(error.Description + ' ');
+                }
+
+                throw new BusinessException(sb.ToString(), ErrorStatus.IncorrectInput);
             }
 
             _logger.Debug($"User {userRegistration.Email} signed up");
