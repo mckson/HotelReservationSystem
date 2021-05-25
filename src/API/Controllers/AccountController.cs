@@ -51,10 +51,10 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("RefreshToken")]
-        public async Task<ActionResult<UserTokenAndIdResponseModel>> RefreshToken()
+        public async Task<ActionResult<UserTokenAndIdResponseModel>> RefreshToken([FromBody] RefreshTokenRequestModel refreshToken)
         {
-            var refreshToken = Request.Cookies["RefreshToken"];
-            var response = await _accountService.RefreshToken(refreshToken);
+            // var refreshToken = Request.Cookies["RefreshToken"];
+            var response = await _accountService.RefreshToken(refreshToken.Token);
 
             if (response == null)
                 return Unauthorized(new { message = "Invalid token" });
