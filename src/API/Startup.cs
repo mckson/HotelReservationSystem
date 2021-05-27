@@ -1,6 +1,7 @@
 ﻿using HotelReservation.API.Extensions;
 using HotelReservation.API.Helpers;
 using HotelReservation.API.Middleware;
+using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
@@ -13,11 +14,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace HotelReservation.API
 {
@@ -50,7 +51,7 @@ namespace HotelReservation.API
             // services.AddIdentityCore<UserEntity>(options =>
             // {
             //     options.Password.RequireDigit = false;
-            //     options.Password.RequiredLength = 4;
+            //     options.Password.RequiredLength = 8;
             //     options.Password.RequireNonAlphanumeric = false;
             //     options.Password.RequireUppercase = false;
             //     options.Password.RequireLowercase = false;
@@ -75,20 +76,24 @@ namespace HotelReservation.API
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
+                    var authOptions = services.BuildServiceProvider()
+                        .GetRequiredService<IOptions<AuthenticationOptions>>()
+                        .Value;
+
                     options.RequireHttpsMetadata = false;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
-                        ValidIssuer = Configuration["AuthOptions:issuer"],
+                        ValidIssuer = authOptions.Issuer,
 
                         ValidateAudience = true,
-                        ValidAudience = Configuration["AuthOptions:audience"],
+                        ValidAudience = authOptions.Audience,
 
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.FromSeconds(30),
 
                         IssuerSigningKey =
-                            new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["AuthOptions:key"])),
+                            new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authOptions.Key)),
                         ValidateIssuerSigningKey = true
                     };
                 });
@@ -125,13 +130,16 @@ namespace HotelReservation.API
             services.AddDataAndBusiness();
 
             services.AddScoped<ApplicationAdminSeeder>();
-            SeedAdminCredentials(services);
+
+            // SeedAdminCredentials(services);
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApplicationAdminSeeder applicationAdminSeeder)
         {
+            applicationAdminSeeder.SeedCredentialsAsync().GetAwaiter().GetResult();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -159,11 +167,11 @@ namespace HotelReservation.API
             });
         }
 
-        private void SeedAdminCredentials(IServiceCollection services)
-        {
-            var serviceProvider = services.BuildServiceProvider();
-            var applicationAdminSeeder = serviceProvider.GetRequiredService<ApplicationAdminSeeder>();
-            applicationAdminSeeder.SeedCredentials();
-        }
+        // private void SeedAdminCredentials(IServiceCollection services)
+        // {
+        //     using var serviceProvider = services.BuildServiceProvider();
+        //     var applicationAdminSeeder = serviceProvider.GetRequiredService<ApplicationAdminSeeder>();
+        //     applicationAdminSeeder.SeedCredentials();
+        // }
     }
 }

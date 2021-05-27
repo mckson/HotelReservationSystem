@@ -1,4 +1,4 @@
-﻿namespace HotelReservation.API.Helpers
+﻿namespace HotelReservation.Business
 {
     public class AuthenticationOptions
     {

@@ -27,7 +27,7 @@ namespace HotelReservation.API.Helpers
             _roleManager = roleManager;
         }
 
-        public void SeedCredentials()
+        public async Task SeedCredentialsAsync()
         {
             // startup migration - extract into separate method?
             _hotelContext.Database.Migrate();
@@ -42,18 +42,18 @@ namespace HotelReservation.API.Helpers
 
             if (!_hotelContext.Roles.Any())
             {
-                _roleManager.CreateAsync(adminRole).GetAwaiter();
-                _roleManager.CreateAsync(managerRole).GetAwaiter();
-                _roleManager.CreateAsync(userRole).GetAwaiter();
+                await _roleManager.CreateAsync(adminRole);
+                await _roleManager.CreateAsync(managerRole);
+                await _roleManager.CreateAsync(userRole);
             }
             else
             {
                 if (!_hotelContext.Roles.Any(r => r.Name == adminRole.Name))
-                    _roleManager.CreateAsync(adminRole).GetAwaiter().GetResult();
+                    await _roleManager.CreateAsync(adminRole);
                 if (!_hotelContext.Roles.Any(r => r.Name == managerRole.Name))
-                    _roleManager.CreateAsync(managerRole).GetAwaiter().GetResult();
+                    await _roleManager.CreateAsync(managerRole);
                 if (!_hotelContext.Roles.Any(r => r.Name == userRole.Name))
-                    _roleManager.CreateAsync(userRole).GetAwaiter().GetResult();
+                    await _roleManager.CreateAsync(userRole);
             }
 
             if (!_hotelContext.Users.Any(u => u.UserName == adminLogin))
@@ -65,8 +65,8 @@ namespace HotelReservation.API.Helpers
                     FirstName = adminName,
                     LastName = adminName
                 };
-                _userManager.CreateAsync(admin, adminPassword).GetAwaiter().GetResult();
-                _userManager.AddToRoleAsync(admin, adminRole.Name).GetAwaiter().GetResult();
+                await _userManager.CreateAsync(admin, adminPassword);
+                await _userManager.AddToRoleAsync(admin, adminRole.Name);
             }
         }
     }
