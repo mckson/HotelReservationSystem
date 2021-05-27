@@ -60,7 +60,7 @@ namespace HotelReservation.Business.Services
             var reservationEntity = await _reservationRepository.GetAsync(id) ??
                                     throw new BusinessException($"No reservation with such id: {id}", ErrorStatus.NotFound);
 
-            CheckReservationManagementPermission(reservationEntity.UserId, userClaims);
+            CheckReservationManagementPermission(reservationEntity.User.Id, userClaims);
 
             var reservationModel = _mapper.Map<ReservationModel>(reservationEntity);
 
@@ -78,7 +78,7 @@ namespace HotelReservation.Business.Services
                                              $"No reservation with such id: {id}",
                                              ErrorStatus.NotFound);
 
-            CheckReservationManagementPermission(checkReservationEntity.UserId, userClaims);
+            CheckReservationManagementPermission(checkReservationEntity.User.Id, userClaims);
 
             var deletedReservationEntity = await _reservationRepository.DeleteAsync(id);
             var deletedReservationModel = _mapper.Map<ReservationModel>(deletedReservationEntity);
@@ -92,7 +92,7 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug("Reservations is requesting");
 
-            CheckReservationManagementPermission(null, userClaims);   // admin only, change
+            CheckReservationManagementPermission(Guid.Empty, userClaims);   // admin only, change
 
             var reservationEntities = _reservationRepository.GetAll();
             var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
@@ -134,7 +134,7 @@ namespace HotelReservation.Business.Services
             }
         }
 
-        private void CheckReservationManagementPermission(string reservationUserId, IEnumerable<Claim> userClaims)
+        private void CheckReservationManagementPermission(Guid reservationUserId, IEnumerable<Claim> userClaims)
         {
             _logger.Debug("Permissions is checking");
 
@@ -144,7 +144,7 @@ namespace HotelReservation.Business.Services
 
             var userClaimId = claims.FirstOrDefault(claim => claim.Type == "id")?.Value;
 
-            if (reservationUserId != userClaimId)
+            if (reservationUserId.Equals(userClaimId))
             {
                 throw new BusinessException(
                     "You have no permissions to manage this reservation",

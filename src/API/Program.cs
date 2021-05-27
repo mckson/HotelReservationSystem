@@ -31,7 +31,7 @@ namespace HotelReservation.API
                 {
                     var context = services.ServiceProvider.GetRequiredService<HotelContext>();
                     var userManger = services.ServiceProvider.GetRequiredService<UserManager<UserEntity>>();
-                    var roleManager = services.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                    var roleManager = services.ServiceProvider.GetRequiredService<RoleManager<RoleEntity>>();
                     var configuration = services.ServiceProvider.GetRequiredService<IConfiguration>();
 
                     await context.Database.MigrateAsync();
@@ -40,9 +40,9 @@ namespace HotelReservation.API
                     var adminPassword = configuration["AdminLogin:Password"];
                     var adminName = configuration["AdminLogin:FirstName"];
 
-                    var adminRole = new IdentityRole("Admin");
-                    var managerRole = new IdentityRole("Manager");
-                    var userRole = new IdentityRole("User");
+                    var adminRole = new RoleEntity { Name = "Admin" };
+                    var managerRole = new RoleEntity { Name = "Manager" };
+                    var userRole = new RoleEntity { Name = "User" };
 
                     if (!context.Roles.Any())
                     {

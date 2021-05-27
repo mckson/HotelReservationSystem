@@ -10,8 +10,7 @@ namespace HotelReservation.Data.Configurations
         {
             builder.HasMany(g => g.Reservations)
                 .WithOne(r => r.User)
-                .HasForeignKey(r => r.UserId)
-                .IsRequired(false)
+                .IsRequired(true)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(g => g.FirstName)

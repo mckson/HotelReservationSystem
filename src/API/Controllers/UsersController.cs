@@ -26,7 +26,6 @@ namespace HotelReservation.API.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/<UsersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserResponseModel>>> GetAllUsersAsync()
         {
@@ -37,7 +36,6 @@ namespace HotelReservation.API.Controllers
             return Ok(userResponseModels);
         }
 
-        // GET api/<UsersController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(string id)
         {
@@ -46,7 +44,6 @@ namespace HotelReservation.API.Controllers
             return Ok(_mapper.Map<UserResponseModel>(userModel));
         }
 
-        // POST api/<UsersController>
         [HttpPost]
         public async Task<ActionResult<UserResponseModel>> CreateUserAsync([FromBody] UserAdminCreationRequestModel creatingUser)
         {
@@ -56,7 +53,6 @@ namespace HotelReservation.API.Controllers
             return Ok(_mapper.Map<UserResponseModel>(addedUser));
         }
 
-        // PUT api/<UsersController>/5
         [HttpPut("{id}")]
         public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(string id, [FromBody] UserUpdateRequestModel user)
         {
@@ -69,7 +65,6 @@ namespace HotelReservation.API.Controllers
             return Ok(updatedUserResponseModel);
         }
 
-        // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(string id)
         {

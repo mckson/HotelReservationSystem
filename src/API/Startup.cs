@@ -38,20 +38,22 @@ namespace HotelReservation.API
                 opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
             });
 
-            services.AddIdentityCore<UserEntity>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 4;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireLowercase = false;
-            });
-
-            new IdentityBuilder(typeof(UserEntity), typeof(IdentityRole), services)
-                .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddUserManager<UserManager<UserEntity>>()
+            services.AddIdentity<UserEntity, RoleEntity>()
                 .AddEntityFrameworkStores<HotelContext>();
 
+            // services.AddIdentityCore<UserEntity>(options =>
+            // {
+            //     options.Password.RequireDigit = false;
+            //     options.Password.RequiredLength = 4;
+            //     options.Password.RequireNonAlphanumeric = false;
+            //     options.Password.RequireUppercase = false;
+            //     options.Password.RequireLowercase = false;
+            // });
+
+            // new IdentityBuilder(typeof(UserEntity), typeof(IdentityRole), services)
+            //     .AddRoleManager<RoleManager<IdentityRole>>()
+            //     .AddUserManager<UserManager<UserEntity>>()
+            //     .AddEntityFrameworkStores<HotelContext>();
             services.AddCors(options =>
             {
                 options.AddPolicy(

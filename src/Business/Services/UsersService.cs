@@ -214,7 +214,7 @@ namespace HotelReservation.Business.Services
                         if (!updatingUserUpdateModel.Roles.Contains(role.ToUpper()))
                         {
                             if (role.ToUpper() == "ADMIN" &&
-                                updatedUserEntity.Id == currentUserClaims.FirstOrDefault(cl => cl.Type == "id").Value)
+                                updatedUserEntity.Id.Equals(currentUserClaims.FirstOrDefault(cl => cl.Type == "id").Value))
                             {
                                 throw new BusinessException(
                                     "You cannot change your own admin role",

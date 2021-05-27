@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace HotelReservation.Data.Entities
 {
-    public class UserEntity : IdentityUser
+    public class UserEntity : IdentityUser<Guid>
     {
         public string FirstName { get; set; }
 

@@ -210,7 +210,7 @@ namespace HotelReservation.Business.Services
             {
                 // this guarantees the token is unique
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("id", userEntity.Id),
+                new Claim("id", userEntity.Id.ToString()),
                 new Claim("hotelId", userEntity.HotelId.HasValue ? userEntity.HotelId.Value.ToString() : "0")
             };
 
