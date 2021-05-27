@@ -1,10 +1,10 @@
-﻿using HotelReservation.API.Middleware;
+﻿using HotelReservation.API.Extensions;
+using HotelReservation.API.Helpers;
+using HotelReservation.API.Middleware;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
 using HotelReservation.Data.Entities;
-using HotelReservation.Data.Interfaces;
-using HotelReservation.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API
 {
@@ -39,7 +40,12 @@ namespace HotelReservation.API
             });
 
             services.AddIdentity<UserEntity, RoleEntity>()
-                .AddEntityFrameworkStores<HotelContext>();
+                .AddEntityFrameworkStores<HotelContext>()
+                .AddUserManager<UserManager<UserEntity>>()
+                .AddRoleManager<RoleManager<RoleEntity>>();
+
+            services.Configure<AuthenticationOptions>(Configuration.GetSection(AuthenticationOptions.Authentication));
+            services.Configure<AdminOptions>(Configuration.GetSection(AdminOptions.AdminCredentials));
 
             // services.AddIdentityCore<UserEntity>(options =>
             // {
@@ -49,11 +55,6 @@ namespace HotelReservation.API
             //     options.Password.RequireUppercase = false;
             //     options.Password.RequireLowercase = false;
             // });
-
-            // new IdentityBuilder(typeof(UserEntity), typeof(IdentityRole), services)
-            //     .AddRoleManager<RoleManager<IdentityRole>>()
-            //     .AddUserManager<UserManager<UserEntity>>()
-            //     .AddEntityFrameworkStores<HotelContext>();
             services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -84,8 +85,7 @@ namespace HotelReservation.API
                         ValidAudience = Configuration["AuthOptions:audience"],
 
                         ValidateLifetime = true,
-                        // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-                        ClockSkew = TimeSpan.Zero,
+                        ClockSkew = TimeSpan.FromSeconds(30),
 
                         IssuerSigningKey =
                             new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["AuthOptions:key"])),
@@ -120,20 +120,12 @@ namespace HotelReservation.API
                     });
             });
 
-            services.AddScoped<IHotelRepository, HotelRepository>();
-            services.AddScoped<ILocationRepository, LocationRepository>();
-            services.AddScoped<IRepository<RoomEntity>, RoomRepository>();
-            services.AddScoped<IRepository<ReservationEntity>, ReservationRepository>();
-            services.AddScoped<IRepository<ServiceEntity>, ServiceRepository>();
-
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            services.AddScoped<IHotelsService, HotelsService>();
-            services.AddScoped<IUsersService, UsersService>();
-            services.AddScoped<IRoomsService, RoomsService>();
-            services.AddScoped<IServicesService, ServicesService>();
-            services.AddScoped<IReservationsService, ReservationsService>();
+            services.AddDataAndBusiness();
 
+            services.AddScoped<ApplicationAdminSeeder>();
+            SeedAdminCredentials(services);
             services.AddControllers();
         }
 
@@ -165,6 +157,13 @@ namespace HotelReservation.API
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void SeedAdminCredentials(IServiceCollection services)
+        {
+            var serviceProvider = services.BuildServiceProvider();
+            var applicationAdminSeeder = serviceProvider.GetRequiredService<ApplicationAdminSeeder>();
+            applicationAdminSeeder.SeedCredentials();
         }
     }
 }

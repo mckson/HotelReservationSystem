@@ -23,10 +23,6 @@ namespace HotelReservation.Data
 
         public DbSet<ServiceEntity> Services { get; set; }
 
-        public DbSet<ReservationRoomEntity> ReservationRooms { get; set; }
-
-        public DbSet<ReservationServiceEntity> ReservationServices { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -12,8 +12,6 @@ namespace HotelReservation.Business.Models
 
         public HotelModel Hotel { get; set; }
 
-        public string UserId { get; set; }
-
         public UserModel User { get; set; }
 
         public List<ReservationRoomModel> ReservationRooms { get; set; }

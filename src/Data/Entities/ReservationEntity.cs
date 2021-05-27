@@ -11,6 +11,8 @@ namespace HotelReservation.Data.Entities
 
         public virtual HotelEntity Hotel { get; set; }
 
+        public Guid UserId { get; set; }
+
         public virtual UserEntity User { get; set; }
 
         public virtual IEnumerable<ReservationRoomEntity> ReservationRooms { get; set; }

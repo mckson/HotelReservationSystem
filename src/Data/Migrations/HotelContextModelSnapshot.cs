@@ -126,7 +126,7 @@ namespace HotelReservation.Data.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("ReservationRooms");
+                    b.ToTable("ReservationRoomEntity");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationServiceEntity", b =>
@@ -141,7 +141,7 @@ namespace HotelReservation.Data.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("ReservationServices");
+                    b.ToTable("ReservationServiceEntity");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoleEntity", b =>

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Data.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    [Migration("20210526224143_UserAndRoleModified")]
-    partial class UserAndRoleModified
+    [Migration("20210527103927_GuidInsteadStringUserId")]
+    partial class GuidInsteadStringUserId
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -128,7 +128,7 @@ namespace HotelReservation.Data.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("ReservationRooms");
+                    b.ToTable("ReservationRoomEntity");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationServiceEntity", b =>
@@ -143,7 +143,7 @@ namespace HotelReservation.Data.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("ReservationServices");
+                    b.ToTable("ReservationServiceEntity");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoleEntity", b =>

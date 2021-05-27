@@ -38,10 +38,16 @@ namespace HotelReservation.Business.Services
             await CheckHotelRoomsServicesExistenceAsync(reservationModel);
 
             reservationModel.ReservedTime = DateTime.Now;
-            reservationModel.UserId = userClaims.FirstOrDefault(claim => claim.Type == "id")?.Value ??
-                                      throw new BusinessException(
-                                          "Cannot maker reservation when user is not authorized",
-                                          ErrorStatus.AccessDenied);
+            var parsedId = Guid.Parse(userClaims.FirstOrDefault(claim => claim.Type == "id")?.Value);
+
+            if (parsedId.Equals(Guid.Empty))
+            {
+                throw new BusinessException(
+                    "Cannot maker reservation when user is not authorized",
+                    ErrorStatus.AccessDenied);
+            }
+
+            reservationModel.User.Id = parsedId;
 
             var reservationEntity = _mapper.Map<ReservationEntity>(reservationModel);
 
