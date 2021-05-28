@@ -79,7 +79,7 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug($"Reservation {id} is deleting");
 
-            var checkReservationEntity = await _reservationRepository.GetAsync(id, true) ??
+            var checkReservationEntity = await _reservationRepository.GetAsync(id) ??
                                          throw new BusinessException(
                                              $"No reservation with such id: {id}",
                                              ErrorStatus.NotFound);

@@ -73,7 +73,8 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug($"Service {id} is deleting");
 
-            var serviceEntity = await _serviceRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var serviceEntity = await _serviceRepository.GetAsync(id) ??
                                 throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
             await CheckHotelManagementPermissionAsync(serviceEntity.HotelId, userClaims);
@@ -90,7 +91,8 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug($"Service {id} is updating");
 
-            var serviceEntity = await _serviceRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var serviceEntity = await _serviceRepository.GetAsync(id) ??
                              throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
             var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId) ??
@@ -98,7 +100,8 @@ namespace HotelReservation.Business.Services
 
             await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
 
-            if (_serviceRepository.GetAll(true).Any(service =>
+            // was as no tracking
+            if (_serviceRepository.GetAll().Any(service =>
                 string.Equals(service.Name, updatingServiceModel.Name, StringComparison.CurrentCultureIgnoreCase) &&
                 service.HotelId == serviceEntity.HotelId &&
                 serviceEntity.Id != service.Id))
@@ -150,7 +153,8 @@ namespace HotelReservation.Business.Services
             if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
                 return;
 
-            var hotelEntity = await _hotelRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var hotelEntity = await _hotelRepository.GetAsync(id) ??
                               throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
             var hotelIdString = claims.FirstOrDefault(claim => claim.Type == "hotelId")?.Value;

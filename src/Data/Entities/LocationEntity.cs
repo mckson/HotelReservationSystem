@@ -1,9 +1,7 @@
 ﻿namespace HotelReservation.Data.Entities
 {
-    public class LocationEntity
+    public class LocationEntity : Entity
     {
-        public int Id { get; set; }
-
         public string Country { get; set; }
 
         public string Region { get; set; }

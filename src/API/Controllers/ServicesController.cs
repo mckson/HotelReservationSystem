@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -25,7 +26,6 @@ namespace HotelReservation.API.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/<ServicesController>
         [AllowAnonymous]
         [HttpGet]
         public ActionResult<IEnumerable<ServiceResponseModel>> GetAllServices()
@@ -36,7 +36,6 @@ namespace HotelReservation.API.Controllers
             return Ok(servicesResponseModels);
         }
 
-        // GET api/<ServicesController>/5
         [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> GetServiceAsync(int id)
@@ -47,8 +46,7 @@ namespace HotelReservation.API.Controllers
             return Ok(serviceResponseModel);
         }
 
-        // POST api/<ServicesController>
-        [Authorize(Policy = "AdminManagerPermission")]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         [HttpPost]
         public async Task<ActionResult<ServiceResponseModel>> CreateServiceAsync([FromBody] ServiceRequestModel serviceRequestModel)
         {
@@ -61,8 +59,7 @@ namespace HotelReservation.API.Controllers
             return Ok(createdServiceResponseModel);
         }
 
-        // PUT api/<ServicesController>/5
-        [Authorize(Policy = "AdminManagerPermission")]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> UpdateServiceAsync(int id, [FromBody] ServiceRequestModel serviceRequestModel)
         {
@@ -75,8 +72,7 @@ namespace HotelReservation.API.Controllers
             return Ok(updatedServiceResponseModel);
         }
 
-        // DELETE api/<ServicesController>/5
-        [Authorize(Policy = "AdminManagerPermission")]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> DeleteServiceAsync(int id)
         {

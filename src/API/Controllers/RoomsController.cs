@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize(Policy = "AdminManagerPermission")]
     [Route("api/[controller]")]
     [ApiController]
     public class RoomsController : ControllerBase
@@ -26,7 +26,6 @@ namespace HotelReservation.API.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/<RoomsController>
         [AllowAnonymous]
         [HttpGet]
         public ActionResult<IEnumerable<RoomResponseModel>> GetAllRooms()
@@ -37,7 +36,6 @@ namespace HotelReservation.API.Controllers
             return Ok(roomResponseModels);
         }
 
-        // GET api/<RoomsController>/5
         [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<RoomResponseModel>> GetRoomByIdAsync(int id)
@@ -48,7 +46,7 @@ namespace HotelReservation.API.Controllers
             return Ok(roomResponseModel);
         }
 
-        // POST api/<RoomsController>
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         [HttpPost]
         public async Task<ActionResult<RoomResponseModel>> CreateRoomAsync([FromBody] RoomRequestModel roomRequestModel)
         {
@@ -60,7 +58,7 @@ namespace HotelReservation.API.Controllers
             return Ok(createdRoomResponseModel);
         }
 
-        // PUT api/<RoomsController>/5
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult<RoomResponseModel>> UpdateRoomAsync(int id, [FromBody] RoomRequestModel roomRequestModel)
         {
@@ -72,7 +70,7 @@ namespace HotelReservation.API.Controllers
             return Ok(createdRoomResponseModel);
         }
 
-        // DELETE api/<RoomsController>/5
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<RoomResponseModel>> DeleteRoomAsync(int id)
         {

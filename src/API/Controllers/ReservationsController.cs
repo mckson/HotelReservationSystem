@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ReservationsController : ControllerBase
@@ -27,8 +27,7 @@ namespace HotelReservation.API.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/<ReservationsController>
-        [Authorize(Policy = "AdminPermission")]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
         [HttpGet]
         public ActionResult<IEnumerable<ReservationResponseModel>> GetAllReservations()
         {
@@ -40,8 +39,7 @@ namespace HotelReservation.API.Controllers
             return Ok(reservationResponseModels);
         }
 
-        // GET api/<ReservationsController>/5
-        [Authorize(Policy = "UserPermission")]
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ReservationResponseModel>> GetReservationByIdAsync(int id)
         {
@@ -53,10 +51,9 @@ namespace HotelReservation.API.Controllers
             return Ok(reservationResponseModel);
         }
 
-        // POST api/<ReservationsController>
-        [Authorize(Policy = "UserPermission")]
+        [AllowAnonymous]
         [HttpPost]
-        public async Task<ActionResult<ReservationResponseModel>> CreateReservatioAsyncn([FromBody] ReservationRequestModel reservationRequestModel)
+        public async Task<ActionResult<ReservationResponseModel>> CreateReservationAsync([FromBody] ReservationRequestModel reservationRequestModel)
         {
             var userClaims = User.Claims;
 
@@ -76,8 +73,7 @@ namespace HotelReservation.API.Controllers
             return Ok(createdReservationResponseModel);
         }
 
-        // DELETE api/<ReservationsController>/5
-        [Authorize(Policy = "AdminPermission")]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ReservationResponseModel>> DeleteReservation(int id)
         {

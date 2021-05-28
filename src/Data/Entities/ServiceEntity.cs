@@ -2,10 +2,8 @@
 
 namespace HotelReservation.Data.Entities
 {
-    public class ServiceEntity
+    public class ServiceEntity : Entity
     {
-        public int Id { get; set; }
-
         public string Name { get; set; }
 
         public double Price { get; set; }

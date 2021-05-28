@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HotelsController : ControllerBase
@@ -24,14 +24,11 @@ namespace HotelReservation.API.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/<HotelsController>
         [AllowAnonymous]
         [HttpGet]
         public IEnumerable<HotelResponseModel> GetHotels()
         {
             var hotelsResponse = _mapper.Map<IEnumerable<HotelResponseModel>>(_service.GetHotels());
-            /*if (hotelsResponse == null)
-                return NotFound("There is no hotels in system");*/
 
             return hotelsResponse;
         }
@@ -50,7 +47,7 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        // GET api/<HotelsController>/5
+        // GET api/<HotelsController>/hotelName
         [AllowAnonymous]
         [HttpGet("{name}")]
         public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(string name)
@@ -60,8 +57,7 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        // POST api/<HotelsController>
-        [Authorize(Policy = "AdminPermission")]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] HotelRequestModel hotelRequest)
         {
@@ -74,8 +70,7 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        // PUT api/<HotelsController>/5
-        [Authorize(Policy = "AdminManagerPermission")]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(int id, [FromBody] HotelRequestModel hotelRequest)
         {
@@ -89,9 +84,8 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        // DELETE api/<HotelsController>/5
         [HttpDelete("{id:int}")]
-        [Authorize(Policy = "AdminManagerPermission")]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
         public async Task<ActionResult> DeleteHotelAsync(int id)
         {
             var userClaims = User.Claims;

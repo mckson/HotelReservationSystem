@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Castle.Core.Internal;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -208,23 +208,21 @@ namespace HotelReservation.Business.Services
 
             var claims = new List<Claim>
             {
-                // this guarantees the token is unique
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("id", userEntity.Id.ToString()),
-                new Claim("hotelId", userEntity.HotelId.HasValue ? userEntity.HotelId.Value.ToString() : "0")
+                new Claim(ClaimNames.Id, userEntity.Id.ToString()),
+                new Claim(ClaimNames.HotelId, userEntity.HotelId.HasValue ? userEntity.HotelId.Value.ToString() : "0"),
+                new Claim(ClaimNames.Name, userEntity.UserName),
+                new Claim(ClaimNames.Email, userEntity.Email)
             };
 
             // Adds all roles to claims
             foreach (var role in await _userManager.GetRolesAsync(userEntity))
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(ClaimNames.Role, role));
             }
 
             var claimsIdentity = new ClaimsIdentity(
                 claims,
-                "Token",
-                ClaimsIdentity.DefaultNameClaimType,
-                ClaimsIdentity.DefaultRoleClaimType);
+                "Token");
 
             return claimsIdentity;
         }

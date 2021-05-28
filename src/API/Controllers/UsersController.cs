@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models.UserModels;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize(Policy = "AdminPermission")]
+    [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase

@@ -74,7 +74,8 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug($"Room {id} is deleting");
 
-            var roomEntity = await _roomsRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var roomEntity = await _roomsRepository.GetAsync(id) ??
                              throw new BusinessException("No room with such id", ErrorStatus.NotFound);
 
             await CheckHotelManagementPermissionAsync(roomEntity.HotelId, userClaims);
@@ -91,12 +92,14 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug($"Room {id} is updating");
 
-            var roomEntity = await _roomsRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var roomEntity = await _roomsRepository.GetAsync(id) ??
                              throw new BusinessException("No room with such id", ErrorStatus.NotFound);
 
             await CheckHotelManagementPermissionAsync(roomEntity.HotelId, userClaims);
 
-            var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId, true);
+            // was as no tracking
+            var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId);
 
             if (updatingRoomModel.FloorNumber > hotelEntity.NumberFloors)
                 throw new BusinessException($"There are only {hotelEntity.NumberFloors} floors in {hotelEntity.Name}", ErrorStatus.IncorrectInput);
@@ -142,7 +145,8 @@ namespace HotelReservation.Business.Services
             if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
                 return;
 
-            var hotelEntity = await _hotelRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var hotelEntity = await _hotelRepository.GetAsync(id) ??
                               throw new BusinessException($"No hotel with such id {id}", ErrorStatus.NotFound);
 
             var hotelIdString = claims.FirstOrDefault(claim => claim.Type == "hotelId")?.Value;

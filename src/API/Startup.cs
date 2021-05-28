@@ -2,23 +2,17 @@
 using HotelReservation.API.Helpers;
 using HotelReservation.API.Middleware;
 using HotelReservation.Business;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Services;
+using HotelReservation.Business.Constants;
 using HotelReservation.Data;
-using HotelReservation.Data.Entities;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
-using System.Text;
+using PasswordOptions = HotelReservation.API.Helpers.PasswordOptions;
 
 namespace HotelReservation.API
 {
@@ -40,105 +34,41 @@ namespace HotelReservation.API
                 opt.UseSqlServer(Configuration.GetConnectionString("HotelContextConnection"));
             });
 
-            services.AddIdentity<UserEntity, RoleEntity>()
-                .AddEntityFrameworkStores<HotelContext>()
-                .AddUserManager<UserManager<UserEntity>>()
-                .AddRoleManager<RoleManager<RoleEntity>>();
-
+            // used in token service
             services.Configure<AuthenticationOptions>(Configuration.GetSection(AuthenticationOptions.Authentication));
             services.Configure<AdminOptions>(Configuration.GetSection(AdminOptions.AdminCredentials));
 
-            // services.AddIdentityCore<UserEntity>(options =>
-            // {
-            //     options.Password.RequireDigit = false;
-            //     options.Password.RequiredLength = 8;
-            //     options.Password.RequireNonAlphanumeric = false;
-            //     options.Password.RequireUppercase = false;
-            //     options.Password.RequireLowercase = false;
-            // });
+            services.AddAndConfigureIdentity(Configuration.GetSection(PasswordOptions.PasswordSettings).Get<PasswordOptions>());
+
             services.AddCors(options =>
             {
+                var corsOptions = Configuration.GetSection(CorsOptions.CorsSettings).Get<CorsOptions>();
+
                 options.AddPolicy(
-                    "ApiCorsPolicy",
+                    CorsPolicies.ApiCorsPolicy,
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:3000")
+                        builder.WithOrigins(corsOptions.AllowedHosts)
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                     });
             });
 
-            services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
-
-            services.AddScoped<ITokenService, TokenService>();
-            services.AddScoped<IAccountService, AccountService>();
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    var authOptions = services.BuildServiceProvider()
-                        .GetRequiredService<IOptions<AuthenticationOptions>>()
-                        .Value;
-
-                    options.RequireHttpsMetadata = false;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = authOptions.Issuer,
-
-                        ValidateAudience = true,
-                        ValidAudience = authOptions.Audience,
-
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.FromSeconds(30),
-
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authOptions.Key)),
-                        ValidateIssuerSigningKey = true
-                    };
-                });
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy(
-                    "AdminPermission",
-                    policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireRole("Admin");
-                });
-
-                options.AddPolicy(
-                    "AdminManagerPermission",
-                    policy =>
-                    {
-                        policy.RequireAuthenticatedUser();
-                        policy.RequireRole("Admin", "Manager");
-                    });
-
-                options.AddPolicy(
-                    "UserPermission",
-                    policy =>
-                    {
-                        policy.RequireAuthenticatedUser();
-                        policy.RequireRole("Admin", "User");
-                    });
-            });
+            services.AddAuthenticationAndAuthorization(Configuration.GetSection(AuthenticationOptions.Authentication).Get<AuthenticationOptions>());
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddDataAndBusiness();
 
-            services.AddScoped<ApplicationAdminSeeder>();
+            services.AddScoped<DatabaseSeeder>();
 
-            // SeedAdminCredentials(services);
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApplicationAdminSeeder applicationAdminSeeder)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseSeeder databaseSeeder)
         {
-            applicationAdminSeeder.SeedCredentialsAsync().GetAwaiter().GetResult();
+            databaseSeeder.SetupDatabaseAsync().GetAwaiter().GetResult();
 
             if (env.IsDevelopment())
             {
@@ -154,7 +84,7 @@ namespace HotelReservation.API
 
             app.UseRouting();
 
-            app.UseCors("ApiCorsPolicy");
+            app.UseCors(CorsPolicies.ApiCorsPolicy);
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -166,12 +96,5 @@ namespace HotelReservation.API
                 endpoints.MapControllers();
             });
         }
-
-        // private void SeedAdminCredentials(IServiceCollection services)
-        // {
-        //     using var serviceProvider = services.BuildServiceProvider();
-        //     var applicationAdminSeeder = serviceProvider.GetRequiredService<ApplicationAdminSeeder>();
-        //     applicationAdminSeeder.SeedCredentials();
-        // }
     }
 }

@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using HotelReservation.Data.Entities;
 
 namespace HotelReservation.Data.Interfaces
 {
     public interface IRepository<TEntity>
-        where TEntity : class
+        where TEntity : Entity
     {
-        IEnumerable<TEntity> GetAll(bool asNoTracking = false);
+        IEnumerable<TEntity> GetAll();
 
-        Task<TEntity> GetAsync(int id, bool asNoTracking = false);
+        Task<TEntity> GetAsync(int id);
 
-        IEnumerable<TEntity> Find(Func<TEntity, bool> predicate, bool asNoTracking = false);
+        IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
 
-        Task<TEntity> CreateAsync(TEntity item);
+        Task<TEntity> CreateAsync(TEntity entity);
 
-        Task<TEntity> UpdateAsync(TEntity newItem);
+        Task<TEntity> UpdateAsync(TEntity newEntity);
 
         Task<TEntity> DeleteAsync(int id);
     }

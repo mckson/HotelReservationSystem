@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Castle.Core.Internal;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
@@ -77,10 +79,11 @@ namespace HotelReservation.Business.Services
 
             if (result == IdentityResult.Success && addedUserRoles.IsNullOrEmpty())
             {
-                await _userManager.AddToRoleAsync(addedUserEntity, "User");
+                await _userManager.AddToRoleAsync(addedUserEntity, Roles.User);
                 foreach (var role in userRegistration.Roles)
                 {
-                    if (role.ToUpper() == "ADMIN" || role.ToUpper() == "MANAGER")
+                    if (string.Equals(role, Roles.Admin, StringComparison.CurrentCultureIgnoreCase) ||
+                        string.Equals(role, Roles.Manager, StringComparison.InvariantCultureIgnoreCase))
                     {
                         try
                         {
@@ -146,10 +149,7 @@ namespace HotelReservation.Business.Services
             if (updatingUserUpdateModel == null)
                 throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
-            var userEntity = await _userManager.FindByIdAsync(id);
-
-            if (userEntity == null)
-                throw new BusinessException("User with such id does not exist", ErrorStatus.NotFound);
+            var userEntity = await GetUserByIdAsync(id);
 
             if (updatingUserUpdateModel.Email != null)
                 userEntity.Email = updatingUserUpdateModel.Email;
@@ -171,7 +171,8 @@ namespace HotelReservation.Business.Services
 
             if (updatingUserUpdateModel.HotelId != null)
             {
-                var unused = _hotelRepo.GetAsync(updatingUserUpdateModel.HotelId.Value, true) ??
+                // was as no tracking
+                var unused = _hotelRepo.GetAsync(updatingUserUpdateModel.HotelId.Value) ??
                                   throw new BusinessException("There is no hotel with such id", ErrorStatus.NotFound);
 
                 userEntity.HotelId = updatingUserUpdateModel.HotelId;
@@ -188,7 +189,15 @@ namespace HotelReservation.Business.Services
                     updatingUserUpdateModel.NewPassword);
 
                 if (changePasswordResult != IdentityResult.Success)
-                    throw new BusinessException("Incorrect previous password", ErrorStatus.IncorrectInput, changePasswordResult.Errors);
+                {
+                    var sb = new StringBuilder();
+                    foreach (var error in changePasswordResult.Errors)
+                    {
+                        sb.Append(error.Description + ' ');
+                    }
+
+                    throw new BusinessException(sb.ToString(), ErrorStatus.IncorrectInput, changePasswordResult.Errors);
+                }
             }
 
             var result = await _userManager.UpdateAsync(userEntity);
@@ -201,8 +210,8 @@ namespace HotelReservation.Business.Services
                 {
                     var addedUserRoles = await _userManager.GetRolesAsync(updatedUserEntity);
 
-                    if (!addedUserRoles.Contains("User"))
-                        await _userManager.AddToRoleAsync(updatedUserEntity, "User");
+                    if (!addedUserRoles.Contains(Roles.User))
+                        await _userManager.AddToRoleAsync(updatedUserEntity, Roles.User);
 
                     for (var i = 0; i < updatingUserUpdateModel.Roles.Count; ++i)
                     {
@@ -213,7 +222,7 @@ namespace HotelReservation.Business.Services
                     {
                         if (!updatingUserUpdateModel.Roles.Contains(role.ToUpper()))
                         {
-                            if (role.ToUpper() == "ADMIN" &&
+                            if (string.Equals(role, Roles.Admin, StringComparison.InvariantCultureIgnoreCase) &&
                                 updatedUserEntity.Id.Equals(currentUserClaims.FirstOrDefault(cl => cl.Type == "id").Value))
                             {
                                 throw new BusinessException(
@@ -221,7 +230,7 @@ namespace HotelReservation.Business.Services
                                     ErrorStatus.IncorrectInput);
                             }
 
-                            if (role.ToUpper() == "USER")
+                            if (string.Equals(role, Roles.User, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 continue;
                             }
@@ -252,6 +261,16 @@ namespace HotelReservation.Business.Services
             _logger.Debug($"User {id} updated");
 
             return addedUserModel;
+        }
+
+        private async Task<UserEntity> GetUserByIdAsync(string id)
+        {
+            var userEntity = await _userManager.FindByIdAsync(id);
+
+            if (userEntity == null)
+                throw new BusinessException("User with such id does not exist", ErrorStatus.NotFound);
+
+            return userEntity;
         }
 
         private async Task GetRolesForUserModelAsync(UserModel userModel)

@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace HotelReservation.Data.Entities
 {
-    public class ReservationEntity
+    public class ReservationEntity : Entity
     {
-        public int Id { get; set; }
-
         public int HotelId { get; set; }
 
         public virtual HotelEntity Hotel { get; set; }

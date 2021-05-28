@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore;
 namespace HotelReservation.Data.Entities
 {
     [Owned]
-    public class RefreshTokenEntity
+    public class RefreshTokenEntity : Entity
     {
-        public int Id { get; set; }
-
         public string Token { get; set; }
 
         public DateTime Expires { get; set; }
