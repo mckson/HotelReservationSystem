@@ -7,6 +7,7 @@ using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using HotelReservation.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -33,6 +34,16 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IRoomsService, RoomsService>();
             services.AddScoped<IServicesService, ServicesService>();
             services.AddScoped<IReservationsService, ReservationsService>();
+
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IUriService, UriService>(options =>
+            {
+                var accessor = options.GetRequiredService<IHttpContextAccessor>();
+                var request = accessor.HttpContext.Request;
+                var uri = string.Concat(request.Scheme, "://", request.Host.ToUriComponent());
+
+                return new UriService(uri);
+            });
 
             return services;
         }

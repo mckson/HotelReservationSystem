@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using HotelReservation.Data.Entities;
 
 namespace HotelReservation.Data.Interfaces

@@ -38,8 +38,8 @@ namespace HotelReservation.API.Middleware
                         ErrorStatus.EmptyInput => (int)HttpStatusCode.UnsupportedMediaType,
                         ErrorStatus.AccessDenied => (int)HttpStatusCode.Forbidden,
                         _ => (int)HttpStatusCode.BadRequest
-                    },
-                    _ => (int)HttpStatusCode.InternalServerError
+                    }/*,
+                    _ => (int)HttpStatusCode.InternalServerError*/
                 };
 
                 logger.Error(error, error.Message);

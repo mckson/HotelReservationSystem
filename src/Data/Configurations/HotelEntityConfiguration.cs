@@ -11,7 +11,7 @@ namespace HotelReservation.Data.Configurations
             builder.HasOne(h => h.Location)
                 .WithOne(l => l.Hotel)
                 .HasForeignKey<LocationEntity>(l => l.HotelId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(h => h.Rooms)
                 .WithOne(r => r.Hotel)
