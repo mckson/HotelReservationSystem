@@ -5,7 +5,7 @@ using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
-using LinqKit;
+using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -19,9 +19,7 @@ namespace HotelReservation.Business.Services
     public class HotelsService : IHotelsService
     {
         private readonly IHotelRepository _hotelRepository;
-
         private readonly ILocationRepository _locationRepository;
-
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
@@ -126,11 +124,7 @@ namespace HotelReservation.Business.Services
             _logger.Debug($"Paged hotels are requesting. Page: {paginationFilter.PageNumber}, Size: {paginationFilter.PageSize}");
 
             var hotelEntities = _hotelRepository.Find(
-                hotel =>
-                    (filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name)) &&
-                    (filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City)) &&
-                    (filter.Services.IsNullOrEmpty() || filter.Services.Any(serv =>
-                        hotel.Services.Any(service => service.Name.StartsWith(serv)))),
+                FilterExpression(filter),
                 paginationFilter);
             var hotelModels = _mapper.Map<IEnumerable<HotelModel>>(hotelEntities);
 
@@ -142,11 +136,7 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug("Hotels count are requesting");
 
-            var count = await _hotelRepository.GetCountAsync(hotel =>
-                (filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name)) &&
-                (filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City)) &&
-                (filter.Services.IsNullOrEmpty() || filter.Services.Any(serv =>
-                    hotel.Services.Any(service => service.Name.StartsWith(serv)))));
+            var count = await _hotelRepository.GetCountAsync(FilterExpression(filter));
 
             _logger.Debug("Hotels count are requested");
             return count;
@@ -190,26 +180,32 @@ namespace HotelReservation.Business.Services
             locationToUpdate.BuildingNumber = locationModel.BuildingNumber;
         }
 
-        private Expression<Func<HotelEntity, bool>> FilterHotelExpression(HotelsFilter filter)
+        private Expression<Func<HotelEntity, bool>> FilterExpression(HotelsFilter filter)
         {
-            // // var hotelArgument = Expression.Parameter(typeof(HotelEntity), "hotel");
-            // // var result = Expression.Variable(typeof(bool), "result");
-            // Expression<Func<HotelEntity, bool>> isStartedName = hotel => filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name);
-            // Expression<Func<HotelEntity, bool>> isStartedCity = hotel =>
-            //     filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City);
-            // Func<HotelEntity, bool> isContainServices = hotel =>
-            //     filter.Services.IsNullOrEmpty() || filter.Services.Any(serv =>
-            //         hotel.Services.Any(service => service.Name.StartsWith(serv)));
-            // Func<HotelEntity, bool> isFilter = hotel => isStartedName(hotel) && isContainServices(hotel) && isStartedCity(hotel);
-            var predicate = PredicateBuilder.True<HotelEntity>();
-
-            predicate.And(hotel => filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name));
-            predicate.And(hotel => filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City));
-            predicate.And(hotel =>
-                filter.Services.IsNullOrEmpty() || filter.Services.Any(serv =>
-                    hotel.Services.Any(service => service.Name.StartsWith(serv))));
-
-            return predicate;
+            return hotel =>
+                (filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name)) &&
+                (filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City)) &&
+                (filter.Services.IsNullOrEmpty() || hotel.Services.Any(service => filter.Services.First().IsNullOrEmpty() || service.Name.StartsWith(filter.Services.First())));
         }
+
+        // private Expression<Func<HotelEntity, bool>> FilterHotelExpression(HotelsFilter filter)
+        // {
+        //     // // var hotelArgument = Expression.Parameter(typeof(HotelEntity), "hotel");
+        //     // // var result = Expression.Variable(typeof(bool), "result");
+        //     // Expression<Func<HotelEntity, bool>> isStartedName = hotel => filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name);
+        //     // Expression<Func<HotelEntity, bool>> isStartedCity = hotel =>
+        //     //     filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City);
+        //     // Func<HotelEntity, bool> isContainServices = hotel =>
+        //     //     filter.Services.IsNullOrEmpty() || filter.Services.Any(serv =>
+        //     //         hotel.Services.Any(service => service.Name.StartsWith(serv)));
+        //     // Func<HotelEntity, bool> isFilter = hotel => isStartedName(hotel) && isContainServices(hotel) && isStartedCity(hotel);
+        //     var predicate = PredicateBuilder.True<HotelEntity>();
+        //     predicate.And(hotel => filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name));
+        //     predicate.And(hotel => filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City));
+        //     predicate.And(hotel =>
+        //         filter.Services.IsNullOrEmpty() || filter.Services.Any(serv =>
+        //             hotel.Services.Any(service => service.Name.StartsWith(serv))));
+        //     return predicate;
+        // }
     }
 }
