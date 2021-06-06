@@ -37,7 +37,7 @@ namespace HotelReservation.Business.Services
 
             var roomEntity = _mapper.Map<RoomEntity>(roomModel);
 
-            var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId) ??
+            var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId.Value) ??
                               throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
             await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
@@ -78,7 +78,7 @@ namespace HotelReservation.Business.Services
             var roomEntity = await _roomsRepository.GetAsync(id) ??
                              throw new BusinessException("No room with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(roomEntity.HotelId, userClaims);
+            await CheckHotelManagementPermissionAsync(roomEntity.HotelId.Value, userClaims);
 
             var deletedRoomEntity = await _roomsRepository.DeleteAsync(id);
             var deletedRoomModel = _mapper.Map<RoomModel>(deletedRoomEntity);
@@ -96,10 +96,10 @@ namespace HotelReservation.Business.Services
             var roomEntity = await _roomsRepository.GetAsync(id) ??
                              throw new BusinessException("No room with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(roomEntity.HotelId, userClaims);
+            await CheckHotelManagementPermissionAsync(roomEntity.HotelId.Value, userClaims);
 
             // was as no tracking
-            var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId);
+            var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId.Value);
 
             if (updatingRoomModel.FloorNumber > hotelEntity.NumberFloors)
                 throw new BusinessException($"There are only {hotelEntity.NumberFloors} floors in {hotelEntity.Name}", ErrorStatus.IncorrectInput);

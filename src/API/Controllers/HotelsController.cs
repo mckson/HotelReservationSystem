@@ -105,11 +105,12 @@ namespace HotelReservation.API.Controllers
 
         [HttpDelete("{id:int}")]
         [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
-        public async Task<ActionResult> DeleteHotelAsync(int id)
+        public async Task<ActionResult<HotelResponseModel>> DeleteHotelAsync(int id)
         {
             var userClaims = User.Claims;
-            await _hotelsService.DeleteAsync(id, userClaims);
-            return Ok();
+            var deletedHotelModel = await _hotelsService.DeleteAsync(id, userClaims);
+            var deletedHotelResponse = _mapper.Map<HotelResponseModel>(deletedHotelModel);
+            return Ok(deletedHotelResponse);
         }
     }
 }

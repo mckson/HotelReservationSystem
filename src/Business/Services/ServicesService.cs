@@ -37,7 +37,7 @@ namespace HotelReservation.Business.Services
 
             var serviceEntity = _mapper.Map<ServiceEntity>(serviceModel);
 
-            var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId) ??
+            var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId.Value) ??
                               throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
             await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
@@ -77,7 +77,7 @@ namespace HotelReservation.Business.Services
             var serviceEntity = await _serviceRepository.GetAsync(id) ??
                                 throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(serviceEntity.HotelId, userClaims);
+            await CheckHotelManagementPermissionAsync(serviceEntity.HotelId.Value, userClaims);
 
             var deletedServiceEntity = await _serviceRepository.DeleteAsync(id);
             var deletedServiceModel = _mapper.Map<ServiceModel>(deletedServiceEntity);
@@ -95,7 +95,7 @@ namespace HotelReservation.Business.Services
             var serviceEntity = await _serviceRepository.GetAsync(id) ??
                              throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
-            var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId) ??
+            var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId.Value) ??
                               throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
             await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);

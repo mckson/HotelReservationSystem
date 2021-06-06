@@ -9,7 +9,7 @@ namespace HotelReservation.API.Models.RequestModels
         public int RoomNumber { get; set; }
 
         [Required]
-        [Range(1, 100)]
+        [Range(1, 500)]
         public int FloorNumber { get; set; }
 
         [Required]

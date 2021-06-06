@@ -4,14 +4,16 @@ using HotelReservation.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HotelReservation.Data.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    partial class HotelContextModelSnapshot : ModelSnapshot
+    [Migration("20210606120131_HotelLocationsToCascadeDeleteBehaviorAndNullableId")]
+    partial class HotelLocationsToCascadeDeleteBehaviorAndNullableId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,7 +23,7 @@ namespace HotelReservation.Data.Migrations
 
             modelBuilder.Entity("HotelReservation.Data.Entities.HotelEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -44,7 +46,7 @@ namespace HotelReservation.Data.Migrations
 
             modelBuilder.Entity("HotelReservation.Data.Entities.LocationEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -85,7 +87,7 @@ namespace HotelReservation.Data.Migrations
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -96,7 +98,7 @@ namespace HotelReservation.Data.Migrations
                     b.Property<DateTime>("DateOut")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("HotelId")
+                    b.Property<int>("HotelId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ReservedTime")
@@ -174,7 +176,7 @@ namespace HotelReservation.Data.Migrations
 
             modelBuilder.Entity("HotelReservation.Data.Entities.RoomEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -185,7 +187,7 @@ namespace HotelReservation.Data.Migrations
                     b.Property<int>("FloorNumber")
                         .HasColumnType("int");
 
-                    b.Property<int?>("HotelId")
+                    b.Property<int>("HotelId")
                         .HasColumnType("int");
 
                     b.Property<double>("Price")
@@ -203,12 +205,12 @@ namespace HotelReservation.Data.Migrations
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ServiceEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("HotelId")
+                    b.Property<int>("HotelId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -428,7 +430,8 @@ namespace HotelReservation.Data.Migrations
                     b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
                         .WithMany("Reservations")
                         .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("HotelReservation.Data.Entities.UserEntity", "User")
                         .WithMany("Reservations")
@@ -472,7 +475,8 @@ namespace HotelReservation.Data.Migrations
                     b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
                         .WithMany("Rooms")
                         .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ServiceEntity", b =>
@@ -480,7 +484,8 @@ namespace HotelReservation.Data.Migrations
                     b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
                         .WithMany("Services")
                         .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.UserEntity", b =>
@@ -505,7 +510,7 @@ namespace HotelReservation.Data.Migrations
                             b1.Property<DateTime>("Expires")
                                 .HasColumnType("datetime2");
 
-                            b1.Property<int>("Id")
+                            b1.Property<int?>("Id")
                                 .HasColumnType("int");
 
                             b1.Property<string>("ReplacedByToken")
