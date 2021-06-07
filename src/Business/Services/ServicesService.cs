@@ -111,13 +111,14 @@ namespace HotelReservation.Business.Services
                     ErrorStatus.AlreadyExist);
             }
 
-            var updatingServiceEntity = _mapper.Map<ServiceEntity>(updatingServiceModel);
-            updatingServiceEntity.Id = id;
+            // var updatingServiceEntity = _mapper.Map<ServiceEntity>(updatingServiceModel);
+            serviceEntity.Name = updatingServiceModel.Name;
+            serviceEntity.Price = updatingServiceModel.Price;
 
             ServiceEntity updatedServiceEntity;
             try
             {
-                updatedServiceEntity = await _serviceRepository.UpdateAsync(updatingServiceEntity);
+                updatedServiceEntity = await _serviceRepository.UpdateAsync(serviceEntity);
             }
             catch (Exception ex)
             {

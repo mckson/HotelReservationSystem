@@ -66,11 +66,12 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("LogOut")]
-        public async Task<IActionResult> RevokeTokenAsync()
+        [HttpPost("SignOut")]
+        public async Task<IActionResult> RevokeTokenAsync([FromBody] RefreshTokenRequestModel refreshToken)
         {
             // accept token from request body or cookie
-            var token = Request.Cookies["refreshToken"];
+            // var token = Request.Cookies["refreshToken"];
+            var token = refreshToken.Token;
 
             await _accountService.RevokeTokenAsync(token);
 

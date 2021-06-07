@@ -173,16 +173,15 @@ namespace HotelReservation.Business.Services
             _logger.Debug($"Refresh token {token} is revoking");
 
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken.Token == token);
-            var userModel = _mapper.Map<UserModel>(user);
 
-            if (userModel == null)
+            if (user == null)
             {
                 throw new BusinessException(
                     "Invalid refresh token. User for such refresh token does not exist",
                     ErrorStatus.NotFound);
             }
 
-            var refreshToken = userModel.RefreshToken;
+            var refreshToken = user.RefreshToken;
 
             if (!refreshToken.IsActive)
             {
@@ -196,7 +195,7 @@ namespace HotelReservation.Business.Services
 
             _logger.Debug($"Refresh token {token} revoked");
 
-            await _userManager.UpdateAsync(_mapper.Map<UserEntity>(userModel));
+            await _userManager.UpdateAsync(user);
         }
 
         private async Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel userAuth)
