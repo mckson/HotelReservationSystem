@@ -104,13 +104,18 @@ namespace HotelReservation.Business.Services
             if (updatingRoomModel.FloorNumber > hotelEntity.NumberFloors)
                 throw new BusinessException($"There are only {hotelEntity.NumberFloors} floors in {hotelEntity.Name}", ErrorStatus.IncorrectInput);
 
-            var updatingRoomEntity = _mapper.Map<RoomEntity>(updatingRoomModel);
-            updatingRoomEntity.Id = id;
+            if (hotelEntity.Rooms.Any(room => room.RoomNumber == updatingRoomModel.RoomNumber))
+                throw new BusinessException("Hotel already has room with such number", ErrorStatus.AlreadyExist);
+
+            roomEntity.RoomNumber = updatingRoomModel.RoomNumber;
+            roomEntity.FloorNumber = updatingRoomModel.FloorNumber;
+            roomEntity.Price = updatingRoomModel.Price;
+            roomEntity.Capacity = updatingRoomModel.Capacity;
 
             RoomEntity updatedRoomEntity;
             try
             {
-                updatedRoomEntity = await _roomsRepository.UpdateAsync(updatingRoomEntity);
+                updatedRoomEntity = await _roomsRepository.UpdateAsync(roomEntity);
             }
             catch (Exception ex)
             {
