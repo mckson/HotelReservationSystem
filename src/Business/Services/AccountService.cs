@@ -131,6 +131,11 @@ namespace HotelReservation.Business.Services
 
             var refreshToken = userEntity.RefreshToken;
 
+            if (refreshToken == null)
+            {
+                throw new BusinessException("Refresh token for current user is not found", ErrorStatus.NotFound);
+            }
+
             if (!refreshToken.IsActive)
             {
                 throw new BusinessException(
@@ -210,6 +215,8 @@ namespace HotelReservation.Business.Services
                 new Claim(ClaimNames.Id, userEntity.Id.ToString()),
                 new Claim(ClaimNames.HotelId, userEntity.HotelId.HasValue ? userEntity.HotelId.Value.ToString() : "0"),
                 new Claim(ClaimNames.Name, userEntity.UserName),
+                new Claim(ClaimNames.FirstName, userEntity.FirstName),
+                new Claim(ClaimNames.LastName, userEntity.LastName),
                 new Claim(ClaimNames.Email, userEntity.Email)
             };
 

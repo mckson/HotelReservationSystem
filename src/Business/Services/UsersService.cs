@@ -172,10 +172,14 @@ namespace HotelReservation.Business.Services
             if (updatingUserUpdateModel.HotelId != null)
             {
                 // was as no tracking
-                var unused = _hotelRepo.GetAsync(updatingUserUpdateModel.HotelId.Value) ??
+                var unused = await _hotelRepo.GetAsync(updatingUserUpdateModel.HotelId.Value) ??
                                   throw new BusinessException("There is no hotel with such id", ErrorStatus.NotFound);
 
                 userEntity.HotelId = updatingUserUpdateModel.HotelId;
+            }
+            else
+            {
+                userEntity.HotelId = null;
             }
 
             if (updatingUserUpdateModel.Email != null)
