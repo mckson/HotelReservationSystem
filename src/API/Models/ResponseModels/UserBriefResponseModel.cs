@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.API.Models.ResponseModels
 {
@@ -11,5 +12,7 @@ namespace HotelReservation.API.Models.ResponseModels
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
+
+        public IEnumerable<int> Hotels { get; set; }
     }
 }

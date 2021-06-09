@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace HotelReservation.API.Models.RequestModels
 {
@@ -20,6 +22,17 @@ namespace HotelReservation.API.Models.RequestModels
         public double Deposit { get; set; }
 
         [Required]
+        [MaxLength(1000)]
+        public string Description { get; set; }
+
+        [Required]
         public LocationRequestModel Location { get; set; }
+
+        public IEnumerable<string> Images { get; set; }
+
+        [Required]
+        public string MainImage { get; set; }
+
+        public IEnumerable<Guid> Managers { get; set; }
     }
 }

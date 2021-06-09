@@ -12,6 +12,12 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public double Deposit { get; set; }
 
+        public string Description { get; set; }
+
+        public IEnumerable<byte[]> Images { get; set; }
+
+        public byte[] MainImage { get; set; }
+
         public LocationResponseModel Location { get; set; }
 
         public IEnumerable<RoomResponseModel> Rooms { get; set; }

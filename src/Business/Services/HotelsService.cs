@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Claims;
@@ -95,6 +96,8 @@ namespace HotelReservation.Business.Services
             hotelEntity.Name = updatingHotelModel.Name;
             hotelEntity.Deposit = updatingHotelModel.Deposit;
             hotelEntity.NumberFloors = updatingHotelModel.NumberFloors;
+            hotelEntity.HotelUsers = _mapper.Map<IEnumerable<HotelUserEntity>>(updatingHotelModel.HotelUsers);
+            hotelEntity.Description = updatingHotelModel.Description;
 
             if (!IsLocationEqual(_mapper.Map<LocationModel>(hotelEntity.Location), updatingHotelModel.Location))
             {

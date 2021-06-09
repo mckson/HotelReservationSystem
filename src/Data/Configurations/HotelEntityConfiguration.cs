@@ -23,12 +23,11 @@ namespace HotelReservation.Data.Configurations
                 .HasForeignKey(s => s.HotelId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(x => x.Managers)
-                .WithOne(x => x.Hotel)
-                .HasForeignKey(x => x.HotelId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
-
+            // builder.HasMany(x => x.Managers)
+            //     .WithOne(x => x.Hotel)
+            //     .HasForeignKey(x => x.HotelId)
+            //     .IsRequired(false)
+            //     .OnDelete(DeleteBehavior.Restrict);
             builder.HasMany(h => h.Reservations)
                 .WithOne(res => res.Hotel)
                 .HasForeignKey(res => res.HotelId)

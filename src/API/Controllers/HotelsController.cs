@@ -9,6 +9,7 @@ using HotelReservation.Data.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -81,10 +82,22 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] HotelRequestModel hotelRequest)
         {
             var userClaims = User.Claims;
+
+            var hotelModel = _mapper.Map<HotelModel>(hotelRequest);
+            hotelModel.HotelUsers = new List<HotelUserModel>();
+
+            if (hotelRequest.Managers != null)
+            {
+                hotelModel.HotelUsers.AddRange(hotelRequest.Managers
+                    .Select(manager => new HotelUserModel { UserId = manager }).ToList());
+            }
+
+            var createdHotel = await _hotelsService.CreateAsync(
+                hotelModel,
+                userClaims);
+
             var hotelResponse =
-                _mapper.Map<HotelResponseModel>(await _hotelsService.CreateAsync(
-                    _mapper.Map<HotelModel>(hotelRequest),
-                    userClaims));
+                _mapper.Map<HotelResponseModel>(createdHotel);
 
             return Ok(hotelResponse);
         }
@@ -94,11 +107,23 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(int id, [FromBody] HotelRequestModel hotelRequest)
         {
             var userClaims = User.Claims;
+
+            var hotelModel = _mapper.Map<HotelModel>(hotelRequest);
+            hotelModel.HotelUsers = new List<HotelUserModel>();
+
+            if (hotelRequest.Managers != null)
+            {
+                hotelModel.HotelUsers.AddRange(hotelRequest.Managers
+                    .Select(manager => new HotelUserModel { UserId = manager }).ToList());
+            }
+
+            var updatedHotel = await _hotelsService.UpdateAsync(
+                id,
+                hotelModel,
+                userClaims);
+
             var hotelResponse =
-                _mapper.Map<HotelResponseModel>(await _hotelsService.UpdateAsync(
-                    id,
-                    _mapper.Map<HotelModel>(hotelRequest),
-                    userClaims));
+                _mapper.Map<HotelResponseModel>(updatedHotel);
 
             return Ok(hotelResponse);
         }

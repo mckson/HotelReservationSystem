@@ -30,7 +30,6 @@ namespace HotelReservation.Business.Models.UserModels
 
         public List<string> Roles { get; set; }
 
-        [Range(1, int.MaxValue)]
-        public int? HotelId { get; set; }
+        public IEnumerable<int> Hotels { get; set; }
     }
 }

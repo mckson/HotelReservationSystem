@@ -12,11 +12,17 @@ namespace HotelReservation.Business.Models
 
         public double Deposit { get; set; }
 
+        public string Description { get; set; }
+
+        public IEnumerable<byte[]> Images { get; set; }
+
+        public byte[] MainImage { get; set; }
+
         public LocationModel Location { get; set; }
 
         public IEnumerable<RoomModel> Rooms { get; set; }
 
-        public IEnumerable<UserModel> Managers { get; set; }
+        public List<HotelUserModel> HotelUsers { get; set; }
 
         public IEnumerable<ReservationModel> Reservations { get; set; }
 

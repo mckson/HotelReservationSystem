@@ -25,9 +25,9 @@ namespace HotelReservation.Business.Models
 
         public virtual RoomModel Room { get; set; }
 
-        public int? HotelId { get; set; }
-
-        public HotelModel Hotel { get; set; }
+        // public int? HotelId { get; set; }
+        // public HotelModel Hotel { get; set; }
+        public IEnumerable<HotelUserModel> HotelUsers { get; set; }
 
         public IEnumerable<ReservationModel> Reservations { get; set; }
 

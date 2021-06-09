@@ -169,17 +169,22 @@ namespace HotelReservation.Business.Services
             if (updatingUserUpdateModel.UserName != null)
                 userEntity.UserName = updatingUserUpdateModel.UserName;
 
-            if (updatingUserUpdateModel.HotelId != null)
+            if (updatingUserUpdateModel.Hotels != null)
             {
-                // was as no tracking
-                var unused = await _hotelRepo.GetAsync(updatingUserUpdateModel.HotelId.Value) ??
-                                  throw new BusinessException("There is no hotel with such id", ErrorStatus.NotFound);
+                userEntity.HotelUsers = new List<HotelUserEntity>();
 
-                userEntity.HotelId = updatingUserUpdateModel.HotelId;
+                foreach (var hotel in updatingUserUpdateModel.Hotels)
+                {
+                    // was as no tracking
+                    var unused = await _hotelRepo.GetAsync(hotel) ??
+                                 throw new BusinessException("There is no hotel with such id", ErrorStatus.NotFound);
+
+                    userEntity.HotelUsers.Add(new HotelUserEntity() { HotelId = hotel });
+                }
             }
             else
             {
-                userEntity.HotelId = null;
+                userEntity.HotelUsers = null;
             }
 
             if (updatingUserUpdateModel.Email != null)

@@ -33,6 +33,7 @@ namespace HotelReservation.Data
             modelBuilder.ApplyConfiguration(new LocationEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ReservationRoomEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ReservationServiceEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new HotelUserEntityConfiguration());
         }
     }
 }

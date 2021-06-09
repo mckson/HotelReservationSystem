@@ -213,7 +213,6 @@ namespace HotelReservation.Business.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimNames.Id, userEntity.Id.ToString()),
-                new Claim(ClaimNames.HotelId, userEntity.HotelId.HasValue ? userEntity.HotelId.Value.ToString() : "0"),
                 new Claim(ClaimNames.Name, userEntity.UserName),
                 new Claim(ClaimNames.FirstName, userEntity.FirstName),
                 new Claim(ClaimNames.LastName, userEntity.LastName),
@@ -224,6 +223,11 @@ namespace HotelReservation.Business.Services
             foreach (var role in await _userManager.GetRolesAsync(userEntity))
             {
                 claims.Add(new Claim(ClaimNames.Role, role));
+            }
+
+            foreach (var hotelUsers in userEntity.HotelUsers)
+            {
+                claims.Add(new Claim(ClaimNames.Hotel, hotelUsers.HotelId.ToString()));
             }
 
             var claimsIdentity = new ClaimsIdentity(

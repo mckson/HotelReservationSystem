@@ -1,9 +1,12 @@
-﻿using AutoMapper;
+﻿using System;
+using System.IO;
+using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace HotelReservation.API
 {
@@ -11,8 +14,14 @@ namespace HotelReservation.API
     {
         public MappingApiModelsProfile()
         {
-            CreateMap<HotelRequestModel, HotelModel>();
-            CreateMap<HotelModel, HotelResponseModel>();
+            CreateMap<HotelRequestModel, HotelModel>()
+                .ForMember(
+                    model => model.MainImage,
+                    options => options.MapFrom(request => ImageConverter(request.MainImage)));
+            CreateMap<HotelModel, HotelResponseModel>()
+                .ForMember(
+                    response => response.Managers,
+                    opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.User)));
 
             CreateMap<ServiceRequestModel, ServiceModel>();
             CreateMap<ServiceModel, ServiceResponseModel>();
@@ -51,8 +60,21 @@ namespace HotelReservation.API
                     response => response.RefreshToken,
                     opt => opt.MapFrom(model => model.RefreshToken.Token));
 
-            CreateMap<UserModel, UserBriefResponseModel>();
-            CreateMap<UserModel, UserResponseModel>();
+            CreateMap<UserModel, UserBriefResponseModel>()
+                .ForMember(
+                    response => response.Hotels,
+                    opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
+            CreateMap<UserModel, UserResponseModel>()
+                .ForMember(
+                response => response.Hotels,
+                opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
+        }
+
+        private static byte[] ImageConverter(string image)
+        {
+            var imageData = Convert.FromBase64String(image);
+
+            return imageData;
         }
     }
 }
