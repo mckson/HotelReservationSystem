@@ -19,6 +19,8 @@ namespace HotelReservation.Business
             CreateMap<RoomEntity, RoomModel>().ReverseMap();
             CreateMap<ServiceEntity, ServiceModel>().ReverseMap();
             CreateMap<UserEntity, UserModel>().ReverseMap();
+            CreateMap<ImageEntity, ImageModel>().ReverseMap();
+            CreateMap<MainImageEntity, ImageModel>().ReverseMap();
 
             CreateMap<UserRegistrationModel, UserEntity>();
             CreateMap<UserUpdateModel, UserEntity>();

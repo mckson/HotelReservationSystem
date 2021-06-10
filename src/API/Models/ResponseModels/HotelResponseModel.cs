@@ -14,9 +14,9 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public string Description { get; set; }
 
-        public IEnumerable<byte[]> Images { get; set; }
+        public IEnumerable<ImageResponseModel> Images { get; set; }
 
-        public byte[] MainImage { get; set; }
+        public ImageResponseModel MainImage { get; set; }
 
         public LocationResponseModel Location { get; set; }
 

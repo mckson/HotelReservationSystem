@@ -26,6 +26,7 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IRepository<RoomEntity>, RoomRepository>();
             services.AddScoped<IRepository<ReservationEntity>, ReservationRepository>();
             services.AddScoped<IRepository<ServiceEntity>, ServiceRepository>();
+            services.AddScoped<IRepository<ImageEntity>, ImagesRepository>();
 
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAccountService, AccountService>();
@@ -34,6 +35,7 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IRoomsService, RoomsService>();
             services.AddScoped<IServicesService, ServicesService>();
             services.AddScoped<IReservationsService, ReservationsService>();
+            services.AddScoped<IImageService, ImagesService>();
 
             services.AddHttpContextAccessor();
             services.AddSingleton<IUriService, UriService>(options =>

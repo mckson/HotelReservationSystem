@@ -1,12 +1,10 @@
-﻿using System;
-using System.IO;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
+using System;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 
 namespace HotelReservation.API
 {
@@ -14,14 +12,15 @@ namespace HotelReservation.API
     {
         public MappingApiModelsProfile()
         {
-            CreateMap<HotelRequestModel, HotelModel>()
-                .ForMember(
-                    model => model.MainImage,
-                    options => options.MapFrom(request => ImageConverter(request.MainImage)));
+            CreateMap<HotelRequestModel, HotelModel>();
             CreateMap<HotelModel, HotelResponseModel>()
                 .ForMember(
                     response => response.Managers,
                     opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.User)));
+
+            CreateMap<ImageRequestModel, ImageModel>()
+                .ForMember(model => model.Image, options => options.MapFrom(request => ImageConverter(request.Image)));
+            CreateMap<ImageModel, ImageResponseModel>();
 
             CreateMap<ServiceRequestModel, ServiceModel>();
             CreateMap<ServiceModel, ServiceResponseModel>();
@@ -72,7 +71,8 @@ namespace HotelReservation.API
 
         private static byte[] ImageConverter(string image)
         {
-            var imageData = Convert.FromBase64String(image);
+            var converted = image.Split(',')[1];
+            var imageData = Convert.FromBase64String(converted);
 
             return imageData;
         }

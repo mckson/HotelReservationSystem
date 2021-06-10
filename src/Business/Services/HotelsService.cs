@@ -98,6 +98,8 @@ namespace HotelReservation.Business.Services
             hotelEntity.NumberFloors = updatingHotelModel.NumberFloors;
             hotelEntity.HotelUsers = _mapper.Map<IEnumerable<HotelUserEntity>>(updatingHotelModel.HotelUsers);
             hotelEntity.Description = updatingHotelModel.Description;
+            hotelEntity.MainImage = _mapper.Map<MainImageEntity>(updatingHotelModel.MainImage);
+            hotelEntity.Images = _mapper.Map<IEnumerable<ImageEntity>>(updatingHotelModel.Images);
 
             if (!IsLocationEqual(_mapper.Map<LocationModel>(hotelEntity.Location), updatingHotelModel.Location))
             {

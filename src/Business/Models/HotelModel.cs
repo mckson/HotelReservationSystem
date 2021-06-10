@@ -14,9 +14,9 @@ namespace HotelReservation.Business.Models
 
         public string Description { get; set; }
 
-        public IEnumerable<byte[]> Images { get; set; }
+        public ImageModel MainImage { get; set; }
 
-        public byte[] MainImage { get; set; }
+        public IEnumerable<ImageModel> Images { get; set; }
 
         public LocationModel Location { get; set; }
 
