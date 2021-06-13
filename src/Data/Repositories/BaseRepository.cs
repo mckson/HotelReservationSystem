@@ -38,9 +38,15 @@ namespace HotelReservation.Data.Repositories
             return await DbSet.FirstOrDefaultAsync(entity => entity.Id.Equals(id));
         }
 
+        public IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
+        {
+            return DbSet.Where(predicate);
+        }
+
         public IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, PaginationFilter paginationFilter)
         {
-            return DbSet.Where(predicate).Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize).Take(paginationFilter.PageSize);
+            return DbSet.Where(predicate).Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize)
+                .Take(paginationFilter.PageSize);
         }
 
         public async Task<TEntity> CreateAsync(TEntity entity)

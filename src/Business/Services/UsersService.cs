@@ -24,17 +24,20 @@ namespace HotelReservation.Business.Services
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
         private readonly IHotelRepository _hotelRepo;
         private readonly ILogger _logger;
+        private readonly IReservationsService _reservationService;
 
         public UsersService(
             UserManager<UserEntity> userManager,
             IPasswordHasher<UserEntity> passwordHasher,
             IHotelRepository hotelRepo,
+            IReservationsService reservationsService,
             IMapper mapper,
             ILogger logger)
         {
             _userManager = userManager;
             _passwordHasher = passwordHasher;
             _hotelRepo = hotelRepo;
+            _reservationService = reservationsService;
             _mapper = mapper;
             _logger = logger;
         }
@@ -49,6 +52,7 @@ namespace HotelReservation.Business.Services
             foreach (var userModel in users)
             {
                 await GetRolesForUserModelAsync(userModel);
+                GetReservationsForUser(userModel);
             }
 
             _logger.Debug("Users requested");
@@ -114,6 +118,7 @@ namespace HotelReservation.Business.Services
             var userEntity = await _userManager.FindByIdAsync(id);
             var userModel = _mapper.Map<UserModel>(userEntity);
             await GetRolesForUserModelAsync(userModel);
+            GetReservationsForUser(userModel);
 
             _logger.Debug($"User {id} requested");
 
@@ -290,6 +295,12 @@ namespace HotelReservation.Business.Services
             userModel.Roles = roles;
 
             _logger.Debug($"User {userModel.Id} roles requested");
+        }
+
+        private void GetReservationsForUser(UserModel userModel)
+        {
+            var reservations = _reservationService.GetReservationsByEmail(userModel.Email);
+            userModel.Reservations = reservations;
         }
     }
 }

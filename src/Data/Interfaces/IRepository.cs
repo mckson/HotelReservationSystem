@@ -17,6 +17,8 @@ namespace HotelReservation.Data.Interfaces
 
         Task<TEntity> GetAsync(int id);
 
+        IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
+
         IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, PaginationFilter paginationFilter);
 
         Task<TEntity> CreateAsync(TEntity entity);

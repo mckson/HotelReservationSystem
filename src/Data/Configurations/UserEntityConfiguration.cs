@@ -8,12 +8,11 @@ namespace HotelReservation.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<UserEntity> builder)
         {
-            builder.HasMany(g => g.Reservations)
-                .WithOne(r => r.User)
-                .HasForeignKey(r => r.UserId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
-
+            // builder.HasMany(g => g.Reservations)
+            //     .WithOne(r => r.User)
+            //     .HasForeignKey(r => r.UserId)
+            //     .IsRequired(false)
+            //     .OnDelete(DeleteBehavior.Restrict);
             builder.Property(g => g.FirstName)
                 .HasMaxLength(100)
                 .IsRequired();

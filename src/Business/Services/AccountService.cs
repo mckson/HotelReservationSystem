@@ -222,12 +222,12 @@ namespace HotelReservation.Business.Services
             // Adds all roles to claims
             foreach (var role in await _userManager.GetRolesAsync(userEntity))
             {
-                claims.Add(new Claim(ClaimNames.Role, role));
+                claims.Add(new Claim(ClaimNames.Roles, role));
             }
 
             foreach (var hotelUsers in userEntity.HotelUsers)
             {
-                claims.Add(new Claim(ClaimNames.Hotel, hotelUsers.HotelId.ToString()));
+                claims.Add(new Claim(ClaimNames.Hotels, hotelUsers.HotelId.ToString()));
             }
 
             var claimsIdentity = new ClaimsIdentity(

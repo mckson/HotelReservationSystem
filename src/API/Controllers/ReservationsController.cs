@@ -67,7 +67,7 @@ namespace HotelReservation.API.Controllers
             reservationModel.ReservationRooms.AddRange(
                 reservationRequestModel.Rooms.Select(room => new ReservationRoomModel { RoomId = room }).ToList());
 
-            var createdReservationModel = await _reservationsService.CreateAsync(reservationModel, userClaims);
+            var createdReservationModel = await _reservationsService.CreateAsync(reservationModel);
             var createdReservationResponseModel = _mapper.Map<ReservationResponseModel>(createdReservationModel);
 
             return Ok(createdReservationResponseModel);

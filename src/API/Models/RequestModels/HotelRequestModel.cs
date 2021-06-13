@@ -22,7 +22,7 @@ namespace HotelReservation.API.Models.RequestModels
         public double Deposit { get; set; }
 
         [Required]
-        [MaxLength(1000)]
+        [MaxLength(10000)]
         public string Description { get; set; }
 
         [Required]

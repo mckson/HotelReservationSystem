@@ -31,23 +31,13 @@ namespace HotelReservation.Business.Services
             _logger = logger;
         }
 
-        public async Task<ReservationModel> CreateAsync(ReservationModel reservationModel, IEnumerable<Claim> userClaims)
+        public async Task<ReservationModel> CreateAsync(ReservationModel reservationModel)
         {
             _logger.Debug("Reservation is creating");
 
             await CheckHotelRoomsServicesExistenceAsync(reservationModel);
 
             reservationModel.ReservedTime = DateTime.Now;
-            var parsedId = Guid.Parse(userClaims.FirstOrDefault(claim => claim.Type == "id")?.Value);
-
-            if (parsedId.Equals(Guid.Empty))
-            {
-                throw new BusinessException(
-                    "Cannot maker reservation when user is not authorized",
-                    ErrorStatus.AccessDenied);
-            }
-
-            reservationModel.User.Id = parsedId;
 
             var reservationEntity = _mapper.Map<ReservationEntity>(reservationModel);
 
@@ -66,7 +56,7 @@ namespace HotelReservation.Business.Services
             var reservationEntity = await _reservationRepository.GetAsync(id) ??
                                     throw new BusinessException($"No reservation with such id: {id}", ErrorStatus.NotFound);
 
-            CheckReservationManagementPermission(reservationEntity.User.Id, userClaims);
+            CheckReservationManagementPermission(reservationEntity.Email, userClaims);
 
             var reservationModel = _mapper.Map<ReservationModel>(reservationEntity);
 
@@ -84,7 +74,7 @@ namespace HotelReservation.Business.Services
                                              $"No reservation with such id: {id}",
                                              ErrorStatus.NotFound);
 
-            CheckReservationManagementPermission(checkReservationEntity.User.Id, userClaims);
+            CheckReservationManagementPermission(checkReservationEntity.Email, userClaims);
 
             var deletedReservationEntity = await _reservationRepository.DeleteAsync(id);
             var deletedReservationModel = _mapper.Map<ReservationModel>(deletedReservationEntity);
@@ -96,14 +86,26 @@ namespace HotelReservation.Business.Services
 
         public IEnumerable<ReservationModel> GetAllReservations(IEnumerable<Claim> userClaims)
         {
-            _logger.Debug("Reservations is requesting");
+            _logger.Debug("Reservations are requesting");
 
-            CheckReservationManagementPermission(Guid.Empty, userClaims);   // admin only, change
+            CheckReservationManagementPermission(null, userClaims);   // admin only, change
 
             var reservationEntities = _reservationRepository.GetAll();
             var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
 
             _logger.Debug("Reservations requested");
+
+            return reservationModels;
+        }
+
+        public IEnumerable<ReservationModel> GetReservationsByEmail(string email)
+        {
+            _logger.Debug($"Reservations of {email} are requesting");
+
+            var reservationEntities = _reservationRepository.Find(reservation => reservation.Email.Equals(email));
+            var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
+
+            _logger.Debug($"Reservations of {email} requested");
 
             return reservationModels;
         }
@@ -140,7 +142,7 @@ namespace HotelReservation.Business.Services
             }
         }
 
-        private void CheckReservationManagementPermission(Guid reservationUserId, IEnumerable<Claim> userClaims)
+        private void CheckReservationManagementPermission(string reservationEmail, IEnumerable<Claim> userClaims)
         {
             _logger.Debug("Permissions is checking");
 
@@ -148,9 +150,9 @@ namespace HotelReservation.Business.Services
             if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
                 return;
 
-            var userClaimId = claims.FirstOrDefault(claim => claim.Type == "id")?.Value;
+            var userClaimEmail = claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Email))?.Value;
 
-            if (reservationUserId.Equals(userClaimId))
+            if (!reservationEmail.Equals(userClaimEmail))
             {
                 throw new BusinessException(
                     "You have no permissions to manage this reservation",

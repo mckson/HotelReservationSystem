@@ -7,7 +7,7 @@
         public const string Name = "name";
         public const string Email = "email";
         public const string Id = "id";
-        public const string Role = "role";
-        public const string Hotel = "hotel";
+        public const string Roles = "roles";
+        public const string Hotels = "hotels";
     }
 }
