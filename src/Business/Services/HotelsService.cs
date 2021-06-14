@@ -23,15 +23,18 @@ namespace HotelReservation.Business.Services
         private readonly ILocationRepository _locationRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
+        private readonly IRepository<MainImageEntity> _imageRepository;
 
         public HotelsService(
             IMapper mapper,
             IHotelRepository hotelRepository,
             ILocationRepository locationRepository,
+            IRepository<MainImageEntity> imageRepository,
             ILogger logger)
         {
             _hotelRepository = hotelRepository;
             _locationRepository = locationRepository;
+            _imageRepository = imageRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -98,6 +101,12 @@ namespace HotelReservation.Business.Services
             hotelEntity.NumberFloors = updatingHotelModel.NumberFloors;
             hotelEntity.HotelUsers = _mapper.Map<IEnumerable<HotelUserEntity>>(updatingHotelModel.HotelUsers);
             hotelEntity.Description = updatingHotelModel.Description;
+
+            if (hotelEntity.MainImage != null)
+            {
+                await _imageRepository.DeleteAsync(hotelEntity.MainImage.Id);
+            }
+
             hotelEntity.MainImage = _mapper.Map<MainImageEntity>(updatingHotelModel.MainImage);
             hotelEntity.Images = _mapper.Map<IEnumerable<ImageEntity>>(updatingHotelModel.Images);
 

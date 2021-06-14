@@ -104,7 +104,7 @@ namespace HotelReservation.Business.Services
             if (updatingRoomModel.FloorNumber > hotelEntity.NumberFloors)
                 throw new BusinessException($"There are only {hotelEntity.NumberFloors} floors in {hotelEntity.Name}", ErrorStatus.IncorrectInput);
 
-            if (hotelEntity.Rooms.Any(room => room.RoomNumber == updatingRoomModel.RoomNumber))
+            if (hotelEntity.Rooms.Any(room => room.RoomNumber == updatingRoomModel.RoomNumber && room.Id != id))
                 throw new BusinessException("Hotel already has room with such number", ErrorStatus.AlreadyExist);
 
             roomEntity.RoomNumber = updatingRoomModel.RoomNumber;
