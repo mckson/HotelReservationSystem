@@ -38,7 +38,7 @@ namespace HotelReservation.API.Controllers
             var validatedFilter = new PaginationFilter(paginationFilter.PageNumber, paginationFilter.PageSize);
 
             var hotelsModel =
-                _hotelsService.GetPagedHotels(validatedFilter, hotelsFilter);
+                await _hotelsService.GetPagedHotelsAsync(validatedFilter, hotelsFilter);
             var totalHotels = await _hotelsService.GetCountAsync(hotelsFilter);
 
             var hotelsResponse = _mapper.Map<IEnumerable<HotelResponseModel>>(hotelsModel);
@@ -77,7 +77,7 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] HotelRequestModel hotelRequest)
         {
@@ -102,7 +102,7 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(int id, [FromBody] HotelRequestModel hotelRequest)
         {
@@ -129,7 +129,7 @@ namespace HotelReservation.API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
+        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
         public async Task<ActionResult<HotelResponseModel>> DeleteHotelAsync(int id)
         {
             var userClaims = User.Claims;

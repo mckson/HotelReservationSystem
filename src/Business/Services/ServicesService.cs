@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
@@ -18,15 +19,18 @@ namespace HotelReservation.Business.Services
         private readonly IRepository<ServiceEntity> _serviceRepository;
         private readonly IHotelRepository _hotelRepository;
         private readonly ILogger _logger;
+        private readonly ManagementPermissionSupervisor _supervisor;
 
         public ServicesService(
             IRepository<ServiceEntity> serviceRepository,
             IHotelRepository hotelRepository,
+            ManagementPermissionSupervisor supervisor,
             IMapper mapper,
             ILogger logger)
         {
             _serviceRepository = serviceRepository;
             _hotelRepository = hotelRepository;
+            _supervisor = supervisor;
             _mapper = mapper;
             _logger = logger;
         }
@@ -40,7 +44,7 @@ namespace HotelReservation.Business.Services
             var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId.Value) ??
                               throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
+            await _supervisor.CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
 
             if (hotelEntity.Services.Any(service => string.Equals(service.Name, serviceEntity.Name, StringComparison.CurrentCultureIgnoreCase)))
                 throw new BusinessException($"Service with such name already exist in {hotelEntity.Name}", ErrorStatus.AlreadyExist);
@@ -77,7 +81,7 @@ namespace HotelReservation.Business.Services
             var serviceEntity = await _serviceRepository.GetAsync(id) ??
                                 throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(serviceEntity.HotelId.Value, userClaims);
+            await _supervisor.CheckHotelManagementPermissionAsync(serviceEntity.HotelId.Value, userClaims);
 
             var deletedServiceEntity = await _serviceRepository.DeleteAsync(id);
             var deletedServiceModel = _mapper.Map<ServiceModel>(deletedServiceEntity);
@@ -98,7 +102,7 @@ namespace HotelReservation.Business.Services
             var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId.Value) ??
                               throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
+            await _supervisor.CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
 
             // was as no tracking
             if (_serviceRepository.GetAll().Any(service =>
@@ -144,38 +148,6 @@ namespace HotelReservation.Business.Services
             _logger.Debug("Services requested");
 
             return serviceModels;
-        }
-
-        private async Task CheckHotelManagementPermissionAsync(int id, IEnumerable<Claim> userClaims)
-        {
-            _logger.Debug($"Permissions for managing hotel with id {id} is checking");
-
-            var claims = userClaims.ToList();
-            if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
-                return;
-
-            // was as no tracking
-            var hotelEntity = await _hotelRepository.GetAsync(id) ??
-                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
-
-            var hotelIdString = claims.FirstOrDefault(claim => claim.Type == "hotelId")?.Value;
-            int.TryParse(hotelIdString, out var hotelId);
-
-            if (hotelId == 0)
-            {
-                throw new BusinessException(
-                    "You have no permissions to manage hotels. Ask application admin to take that permission",
-                    ErrorStatus.AccessDenied);
-            }
-
-            if (hotelId != hotelEntity.Id)
-            {
-                throw new BusinessException(
-                    $"You have no permission to manage hotel {hotelEntity.Name}. Ask application admin about permissions",
-                    ErrorStatus.AccessDenied);
-            }
-
-            _logger.Debug($"Permissions for managing hotel with id {id} checked");
         }
     }
 }

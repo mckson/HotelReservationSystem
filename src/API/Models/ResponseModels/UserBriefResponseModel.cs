@@ -14,5 +14,7 @@ namespace HotelReservation.API.Models.ResponseModels
         public string LastName { get; set; }
 
         public IEnumerable<int> Hotels { get; set; }
+
+        public IEnumerable<string> Roles { get; set; }
     }
 }

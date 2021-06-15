@@ -10,9 +10,9 @@ namespace HotelReservation.Business.Interfaces
     {
         Task<int> GetCountAsync(HotelsFilter hotelsFilter);
 
-        IEnumerable<HotelModel> GetAllHotels();
+        Task<IEnumerable<HotelModel>> GetAllHotelsAsync();
 
-        IEnumerable<HotelModel> GetPagedHotels(PaginationFilter paginationFilter, HotelsFilter hotelsFilter);
+        Task<IEnumerable<HotelModel>> GetPagedHotelsAsync(PaginationFilter paginationFilter, HotelsFilter hotelsFilter);
 
         public Task<HotelModel> GetHotelByNameAsync(string name);
     }

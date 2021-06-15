@@ -5,11 +5,11 @@ using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Claims;
@@ -24,18 +24,21 @@ namespace HotelReservation.Business.Services
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
         private readonly IRepository<MainImageEntity> _imageRepository;
+        private readonly UserManager<UserEntity> _userManager;
 
         public HotelsService(
             IMapper mapper,
             IHotelRepository hotelRepository,
             ILocationRepository locationRepository,
             IRepository<MainImageEntity> imageRepository,
+            UserManager<UserEntity> userManager,
             ILogger logger)
         {
             _hotelRepository = hotelRepository;
             _locationRepository = locationRepository;
             _imageRepository = imageRepository;
             _mapper = mapper;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -72,9 +75,16 @@ namespace HotelReservation.Business.Services
             var hotelEntity = await _hotelRepository.GetAsync(id) ??
                               throw new BusinessException($"Hotel with {id} does not exist", ErrorStatus.NotFound);
 
+            var hotelModel = _mapper.Map<HotelModel>(hotelEntity);
+
+            foreach (var hotelUser in hotelModel.HotelUsers)
+            {
+                await GetRolesForUserModelAsync(hotelUser.User);
+            }
+
             _logger.Debug($"Hotel with {id} was get");
 
-            return _mapper.Map<HotelModel>(hotelEntity);
+            return hotelModel;
         }
 
         public async Task<HotelModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
@@ -122,18 +132,26 @@ namespace HotelReservation.Business.Services
             return _mapper.Map<HotelModel>(updatedHotel);
         }
 
-        public IEnumerable<HotelModel> GetAllHotels()
+        public async Task<IEnumerable<HotelModel>> GetAllHotelsAsync()
         {
             _logger.Debug("Hotels are requesting");
 
             var hotelEntities = _hotelRepository.GetAll();
             var hotelModels = _mapper.Map<IEnumerable<HotelModel>>(hotelEntities);
 
+            foreach (var hotelModel in hotelModels)
+            {
+                foreach (var hotelUser in hotelModel.HotelUsers)
+                {
+                    await GetRolesForUserModelAsync(hotelUser.User);
+                }
+            }
+
             _logger.Debug("Hotels are requested");
             return hotelModels;
         }
 
-        public IEnumerable<HotelModel> GetPagedHotels(PaginationFilter paginationFilter, HotelsFilter filter)
+        public async Task<IEnumerable<HotelModel>> GetPagedHotelsAsync(PaginationFilter paginationFilter, HotelsFilter filter)
         {
             _logger.Debug($"Paged hotels are requesting. Page: {paginationFilter.PageNumber}, Size: {paginationFilter.PageSize}");
 
@@ -141,6 +159,14 @@ namespace HotelReservation.Business.Services
                 FilterExpression(filter),
                 paginationFilter);
             var hotelModels = _mapper.Map<IEnumerable<HotelModel>>(hotelEntities);
+
+            foreach (var hotelModel in hotelModels)
+            {
+                foreach (var hotelUser in hotelModel.HotelUsers)
+                {
+                    await GetRolesForUserModelAsync(hotelUser.User);
+                }
+            }
 
             _logger.Debug($"Paged hotels are requested. Page: {paginationFilter.PageNumber}, Size: {paginationFilter.PageSize}");
             return hotelModels;
@@ -197,9 +223,25 @@ namespace HotelReservation.Business.Services
         private Expression<Func<HotelEntity, bool>> FilterExpression(HotelsFilter filter)
         {
             return hotel =>
+                ((!filter.DateIn.HasValue || !filter.DateOut.HasValue) || hotel.Rooms.Any(room =>
+                    !room.ReservationRooms.Any(rr =>
+                        (rr.Reservation.DateIn >= filter.DateIn && rr.Reservation.DateIn < filter.DateOut) ||
+                        (rr.Reservation.DateOut > filter.DateIn && rr.Reservation.DateOut <= filter.DateOut)))) &&
+                (!filter.ManagerId.HasValue || hotel.HotelUsers.Any(hu => hu.UserId == filter.ManagerId.Value)) &&
                 (filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name)) &&
                 (filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City)) &&
-                (filter.Services.IsNullOrEmpty() || hotel.Services.Any(service => filter.Services.First().IsNullOrEmpty() || service.Name.StartsWith(filter.Services.First())));
+                (filter.Services.IsNullOrEmpty() || hotel.Services.Any(service =>
+                    filter.Services.First().IsNullOrEmpty() || service.Name.StartsWith(filter.Services.First())));
+        }
+
+        private async Task GetRolesForUserModelAsync(UserModel userModel)
+        {
+            _logger.Debug($"Manager {userModel.Id} roles are requesting");
+
+            var roles = await _userManager.GetRolesAsync(_mapper.Map<UserEntity>(userModel));
+            userModel.Roles = roles;
+
+            _logger.Debug($"Manager {userModel.Id} roles requested");
         }
 
         // private Expression<Func<HotelEntity, bool>> FilterHotelExpression(HotelsFilter filter)

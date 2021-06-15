@@ -225,9 +225,12 @@ namespace HotelReservation.Business.Services
                 claims.Add(new Claim(ClaimNames.Roles, role));
             }
 
-            foreach (var hotelUsers in userEntity.HotelUsers)
+            if (userEntity.HotelUsers != null)
             {
-                claims.Add(new Claim(ClaimNames.Hotels, hotelUsers.HotelId.ToString()));
+                foreach (var hotelUsers in userEntity.HotelUsers)
+                {
+                    claims.Add(new Claim(ClaimNames.Hotels, hotelUsers.HotelId.ToString()));
+                }
             }
 
             var claimsIdentity = new ClaimsIdentity(

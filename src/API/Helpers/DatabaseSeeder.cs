@@ -1,4 +1,5 @@
-﻿using HotelReservation.Business.Constants;
+﻿using System;
+using HotelReservation.Business.Constants;
 using HotelReservation.Data;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -57,6 +58,16 @@ namespace HotelReservation.API.Helpers
                 };
                 await _userManager.CreateAsync(admin, adminPassword);
                 await _userManager.AddToRoleAsync(admin, Roles.Admin);
+            }
+            else
+            {
+                var admin = await _userManager.FindByEmailAsync(adminLogin);
+                var roles = await _userManager.GetRolesAsync(admin);
+
+                if (!roles.Any(r => r.Equals(Roles.Admin, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    await _userManager.AddToRoleAsync(admin, Roles.Admin);
+                }
             }
         }
 

@@ -175,7 +175,7 @@ namespace HotelReservation.Business.Services
                 userEntity.UserName = updatingUserUpdateModel.UserName;
 
             var hotelUsers = new List<HotelUserEntity>();
-            userEntity.HotelUsers = new List<HotelUserEntity>();
+            userEntity.HotelUsers.RemoveAll(hu => hu.UserId == userEntity.Id);
 
             if (updatingUserUpdateModel.Hotels != null)
             {
@@ -213,13 +213,13 @@ namespace HotelReservation.Business.Services
                 }
             }
 
-            var result = await _userManager.UpdateAsync(userEntity);
-
+            // var result = await _userManager.UpdateAsync(userEntity);
             if (hotelUsers.Count > 0)
             {
                 userEntity.HotelUsers = hotelUsers;
-                result = await _userManager.UpdateAsync(userEntity);
             }
+
+            var result = await _userManager.UpdateAsync(userEntity);
 
             var updatedUserEntity = await _userManager.FindByEmailAsync(userEntity.Email);
 
@@ -228,6 +228,7 @@ namespace HotelReservation.Business.Services
                 if (updatingUserUpdateModel.Roles != null)
                 {
                     var addedUserRoles = await _userManager.GetRolesAsync(updatedUserEntity);
+                    var userId = Guid.Parse(currentUserClaims.FirstOrDefault(cl => cl.Type == ClaimNames.Id).Value);
 
                     if (!addedUserRoles.Contains(Roles.User))
                         await _userManager.AddToRoleAsync(updatedUserEntity, Roles.User);
@@ -242,7 +243,7 @@ namespace HotelReservation.Business.Services
                         if (!updatingUserUpdateModel.Roles.Contains(role.ToUpper()))
                         {
                             if (string.Equals(role, Roles.Admin, StringComparison.InvariantCultureIgnoreCase) &&
-                                updatedUserEntity.Id.Equals(currentUserClaims.FirstOrDefault(cl => cl.Type == "id").Value))
+                                updatedUserEntity.Id.Equals(userId))
                             {
                                 throw new BusinessException(
                                     "You cannot change your own admin role",

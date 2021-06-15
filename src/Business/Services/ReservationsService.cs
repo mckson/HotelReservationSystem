@@ -122,8 +122,8 @@ namespace HotelReservation.Business.Services
 
                 var checkReservation = checkRoomEntity.ReservationRooms.Select(rr => rr.Reservation).FirstOrDefault(
                     reservation =>
-                        (reservation.DateIn >= reservationModel.DateIn && reservation.DateIn <= reservationModel.DateOut) ||
-                        (reservation.DateOut >= reservationModel.DateIn && reservation.DateOut <= reservationModel.DateOut));
+                        (reservation.DateIn >= reservationModel.DateIn && reservation.DateIn < reservationModel.DateOut) ||
+                        (reservation.DateOut > reservationModel.DateIn && reservation.DateOut <= reservationModel.DateOut));
 
                 if (checkReservation != null)
                 {

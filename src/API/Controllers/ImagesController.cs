@@ -38,8 +38,10 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ImageResponseModel>> AddImageAsync([FromBody] ImageRequestModel imageRequest)
         {
+            var userClaims = User.Claims;
+
             var imageModel = _mapper.Map<ImageModel>(imageRequest);
-            var addedImageModel = await _imageService.CreateAsync(imageModel);
+            var addedImageModel = await _imageService.CreateAsync(imageModel, userClaims);
             var addedImageResponse = _mapper.Map<ImageResponseModel>(addedImageModel);
 
             return Ok(addedImageResponse);
@@ -49,7 +51,9 @@ namespace HotelReservation.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ImageResponseModel>> DeleteImageAsync(int id)
         {
-            var deletedImageModel = await _imageService.DeleteAsync(id);
+            var userClaims = User.Claims;
+
+            var deletedImageModel = await _imageService.DeleteAsync(id, userClaims);
             var deletedImageResponse = _mapper.Map<ImageResponseModel>(deletedImageModel);
 
             return Ok(deletedImageResponse);
