@@ -20,8 +20,7 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public LocationResponseModel Location { get; set; }
 
-        public IEnumerable<RoomResponseModel> Rooms { get; set; }
-
+        // public IEnumerable<RoomResponseModel> Rooms { get; set; }
         public IEnumerable<UserBriefResponseModel> Managers { get; set; }
 
         public IEnumerable<ServiceResponseModel> Services { get; set; }

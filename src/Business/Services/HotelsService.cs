@@ -6,7 +6,6 @@ using HotelReservation.Data.Entities;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
 using System;
 using System.Collections.Generic;

@@ -37,7 +37,7 @@ namespace HotelReservation.Business.Services
 
             await CheckHotelRoomsServicesExistenceAsync(reservationModel);
 
-            reservationModel.ReservedTime = DateTime.Now;
+            reservationModel.ReservedTime = DateTime.Now; // into entity
 
             var reservationEntity = _mapper.Map<ReservationEntity>(reservationModel);
 

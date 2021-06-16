@@ -45,8 +45,8 @@ namespace HotelReservation.Data.Repositories
 
         public IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, PaginationFilter paginationFilter)
         {
-            return DbSet.Where(predicate).Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize)
-                .Take(paginationFilter.PageSize);
+            return DbSet.Where(predicate).Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize.Value)
+                .Take(paginationFilter.PageSize.Value);
         }
 
         public async Task<TEntity> CreateAsync(TEntity entity)

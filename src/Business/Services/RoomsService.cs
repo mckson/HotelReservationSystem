@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
-using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
+using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -144,6 +145,39 @@ namespace HotelReservation.Business.Services
             _logger.Debug("Rooms requested");
 
             return roomModels;
+        }
+
+        public async Task<int> GetCountAsync(RoomsFilter filter)
+        {
+            _logger.Debug("Rooms count are requesting");
+
+            var count = await _roomsRepository.GetCountAsync(FilterExpression(filter));
+
+            _logger.Debug("Rooms count are requested");
+            return count;
+        }
+
+        public IEnumerable<RoomModel> GetPagedRooms(
+            PaginationFilter paginationFilter,
+            RoomsFilter filter)
+        {
+            _logger.Debug($"Paged rooms are requesting, page: {paginationFilter.PageNumber}, size: {paginationFilter.PageSize}");
+
+            var roomEntities = _roomsRepository.Find(FilterExpression(filter), paginationFilter);
+            var roomModels = _mapper.Map<IEnumerable<RoomModel>>(roomEntities);
+
+            _logger.Debug($"Paged rooms are requested, page: {paginationFilter.PageNumber}, size: {paginationFilter.PageSize}");
+
+            return roomModels;
+        }
+
+        private Expression<Func<RoomEntity, bool>> FilterExpression(RoomsFilter filter)
+        {
+            return room =>
+                (room.HotelId.Value == filter.HotelId) &&
+                ((!filter.DateIn.HasValue || !filter.DateOut.HasValue) || !room.ReservationRooms.Any(rr =>
+                        (rr.Reservation.DateIn >= filter.DateIn && rr.Reservation.DateIn < filter.DateOut) ||
+                        (rr.Reservation.DateOut > filter.DateIn && rr.Reservation.DateOut <= filter.DateOut)));
         }
     }
 }

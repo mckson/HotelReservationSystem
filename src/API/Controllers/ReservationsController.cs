@@ -59,13 +59,9 @@ namespace HotelReservation.API.Controllers
 
             var reservationModel = _mapper.Map<ReservationModel>(reservationRequestModel);
 
-            reservationModel.ReservationServices = new List<ReservationServiceModel>();
-            reservationModel.ReservationServices.AddRange(
-                reservationRequestModel.Services.Select(service => new ReservationServiceModel { ServiceId = service }).ToList());
+            reservationModel.ReservationServices = reservationRequestModel.Services.Select(service => new ReservationServiceModel { ServiceId = service }).ToList();
 
-            reservationModel.ReservationRooms = new List<ReservationRoomModel>();
-            reservationModel.ReservationRooms.AddRange(
-                reservationRequestModel.Rooms.Select(room => new ReservationRoomModel { RoomId = room }).ToList());
+            reservationModel.ReservationRooms = reservationRequestModel.Rooms.Select(room => new ReservationRoomModel { RoomId = room }).ToList();
 
             var createdReservationModel = await _reservationsService.CreateAsync(reservationModel);
             var createdReservationResponseModel = _mapper.Map<ReservationResponseModel>(createdReservationModel);

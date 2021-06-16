@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using HotelReservation.API.Helpers;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
+using HotelReservation.Data.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -17,23 +19,46 @@ namespace HotelReservation.API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IRoomsService _roomsService;
+        private readonly IUriService _uriService;
 
         public RoomsController(
             IRoomsService roomsService,
-            IMapper mapper)
+            IMapper mapper,
+            IUriService uriService)
         {
             _roomsService = roomsService;
             _mapper = mapper;
+            _uriService = uriService;
         }
 
+        // [AllowAnonymous]
+        // [HttpGet]
+        // public ActionResult<IEnumerable<RoomResponseModel>> GetAllRooms()
+        // {
+        //     var roomModels = _roomsService.GetAllRooms();
+        //     var roomResponseModels = _mapper.Map<IEnumerable<RoomResponseModel>>(roomModels);
+        //     return Ok(roomResponseModels);
+        // }
         [AllowAnonymous]
         [HttpGet]
-        public ActionResult<IEnumerable<RoomResponseModel>> GetAllRooms()
+        public async Task<ActionResult<BasePagedResponseModel<RoomResponseModel>>> GetRoomsAsync(
+            [FromQuery] PaginationFilter paginationFilter, [FromQuery] RoomsFilter roomsFilter)
         {
-            var roomModels = _roomsService.GetAllRooms();
-            var roomResponseModels = _mapper.Map<IEnumerable<RoomResponseModel>>(roomModels);
+            var route = Request.Path.Value;
 
-            return Ok(roomResponseModels);
+            var totalRooms = await _roomsService.GetCountAsync(roomsFilter);
+
+            paginationFilter.PageSize ??= totalRooms;
+
+            var validFilter = new PaginationFilter(paginationFilter.PageNumber, paginationFilter.PageSize.Value);
+            var roomModels = _roomsService.GetPagedRooms(validFilter, roomsFilter);
+
+            var roomsResponse = _mapper.Map<IEnumerable<RoomResponseModel>>(roomModels);
+
+            var pagedRoomsResponse =
+                PaginationHelper.CreatePagedResponseModel(roomsResponse, validFilter, totalRooms, _uriService, route);
+
+            return Ok(pagedRoomsResponse);
         }
 
         [AllowAnonymous]

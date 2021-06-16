@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
+using HotelReservation.API.Helpers;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Constants;
-using HotelReservation.Business.Helpers;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Filters;
@@ -35,7 +35,7 @@ namespace HotelReservation.API.Controllers
         {
             var route = Request.Path.Value;
 
-            var validatedFilter = new PaginationFilter(paginationFilter.PageNumber, paginationFilter.PageSize);
+            var validatedFilter = new PaginationFilter(paginationFilter.PageNumber, paginationFilter.PageSize.Value);
 
             var hotelsModel =
                 await _hotelsService.GetPagedHotelsAsync(validatedFilter, hotelsFilter);
