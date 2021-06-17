@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.API.Models.ResponseModels
 {
@@ -14,9 +15,9 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public string Description { get; set; }
 
-        public IEnumerable<ImageResponseModel> Images { get; set; }
+        public IEnumerable<Uri> Images { get; set; }
 
-        public ImageResponseModel MainImage { get; set; }
+        public Uri MainImage { get; set; }
 
         public LocationResponseModel Location { get; set; }
 

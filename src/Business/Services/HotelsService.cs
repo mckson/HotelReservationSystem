@@ -22,14 +22,14 @@ namespace HotelReservation.Business.Services
         private readonly ILocationRepository _locationRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
-        private readonly IRepository<MainImageEntity> _imageRepository;
+        private readonly IRepository<ImageEntity> _imageRepository;
         private readonly UserManager<UserEntity> _userManager;
 
         public HotelsService(
             IMapper mapper,
             IHotelRepository hotelRepository,
             ILocationRepository locationRepository,
-            IRepository<MainImageEntity> imageRepository,
+            IRepository<ImageEntity> imageRepository,
             UserManager<UserEntity> userManager,
             ILogger logger)
         {
@@ -111,13 +111,15 @@ namespace HotelReservation.Business.Services
             hotelEntity.HotelUsers = _mapper.Map<IEnumerable<HotelUserEntity>>(updatingHotelModel.HotelUsers);
             hotelEntity.Description = updatingHotelModel.Description;
 
-            if (hotelEntity.MainImage != null)
-            {
-                await _imageRepository.DeleteAsync(hotelEntity.MainImage.Id);
-            }
+            // if (hotelEntity.MainImage != null)
+            // {
+            //     await _imageRepository.DeleteAsync(hotelEntity.MainImage.Id);
+            // }
+            var newMainImage = _mapper.Map<ImageEntity>(updatingHotelModel.MainImage);
 
-            hotelEntity.MainImage = _mapper.Map<MainImageEntity>(updatingHotelModel.MainImage);
-            hotelEntity.Images = _mapper.Map<IEnumerable<ImageEntity>>(updatingHotelModel.Images);
+            hotelEntity.Images = _mapper.Map<ICollection<ImageEntity>>(updatingHotelModel.Images);
+
+            await ChangeHotelMainImageAsync(hotelEntity, newMainImage);
 
             if (!IsLocationEqual(_mapper.Map<LocationModel>(hotelEntity.Location), updatingHotelModel.Location))
             {
@@ -241,6 +243,38 @@ namespace HotelReservation.Business.Services
             userModel.Roles = roles;
 
             _logger.Debug($"Manager {userModel.Id} roles requested");
+        }
+
+        private async Task ChangeHotelMainImageAsync(HotelEntity hotelEntity, ImageEntity newImage)
+        {
+            _logger.Debug($"Main image of hotel {hotelEntity.Id} is updating");
+
+            var oldImage = _imageRepository.Find(image => image.IsMain && image.HotelId == hotelEntity.Id).FirstOrDefault();
+
+            if (oldImage != null && newImage != null)
+            {
+                oldImage.Name = newImage.Name;
+                oldImage.Type = newImage.Type;
+                oldImage.Image = newImage.Image;
+
+                // await _imageRepository.UpdateAsync(oldImage);
+            }
+            else
+            {
+                if (newImage != null)
+                {
+                    newImage.IsMain = true;
+                    hotelEntity.Images.Add(newImage);
+                    // await _imageRepository.CreateAsync(newImage);
+                }
+                else if (oldImage != null)
+                {
+                    hotelEntity.Images.Remove(oldImage);
+                    // await _imageRepository.DeleteAsync(oldImage.Id);
+                }
+            }
+
+            _logger.Debug($"Main image of hotel {hotelEntity.Id} is updated");
         }
 
         // private Expression<Func<HotelEntity, bool>> FilterHotelExpression(HotelsFilter filter)

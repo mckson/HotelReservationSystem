@@ -29,12 +29,11 @@ namespace HotelReservation.Data.Configurations
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(h => h.MainImage)
-                .WithOne(i => i.Hotel)
-                .HasForeignKey<MainImageEntity>(i => i.HotelId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Cascade);
-
+            // builder.HasOne(h => h.MainImage)
+            //     .WithOne(i => i.Hotel)
+            //     .HasForeignKey<ImageEntity>(i => i.HotelId)
+            //     .IsRequired(false)
+            //     .OnDelete(DeleteBehavior.Cascade);
             // builder.HasMany(x => x.Managers)
             //     .WithOne(x => x.Hotel)
             //     .HasForeignKey(x => x.HotelId)

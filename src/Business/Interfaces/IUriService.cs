@@ -1,10 +1,12 @@
-﻿using System;
-using HotelReservation.Data.Filters;
+﻿using HotelReservation.Data.Filters;
+using System;
 
 namespace HotelReservation.Business.Interfaces
 {
     public interface IUriService
     {
-        public Uri GetPageUri(PaginationFilter filter, string route);
+        Uri GetPageUri(PaginationFilter filter, string route);
+
+        Uri GetResourceUri(string route, int resourceId);
     }
 }

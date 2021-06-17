@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business.Constants;
+using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using System;
@@ -10,17 +12,25 @@ namespace HotelReservation.API
 {
     public class MappingApiModelsProfile : Profile
     {
-        public MappingApiModelsProfile()
+        public MappingApiModelsProfile(IUriService uriService)
         {
             CreateMap<HotelRequestModel, HotelModel>();
             CreateMap<HotelModel, HotelResponseModel>()
                 .ForMember(
                     response => response.Managers,
-                    opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.User)));
-
+                    opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.User)))
+                .ForMember(
+                    response => response.MainImage,
+                    options => options.MapFrom(model =>
+                        uriService.GetResourceUri(Endpoints.Images, model.MainImage.Id)))
+                .ForMember(
+                    response => response.Images,
+                    options => options.MapFrom(model =>
+                        model.Images.Select(image => uriService.GetResourceUri(Endpoints.Images, image.Id))));
             CreateMap<ImageRequestModel, ImageModel>()
-                .ForMember(model => model.Image, options => options.MapFrom(request => ImageConverter(request.Image)));
-            CreateMap<ImageModel, ImageResponseModel>();
+                .ForMember(model => model.Image, options => options.MapFrom(request => ConvertBase64ToBytes(request.Image)));
+            CreateMap<ImageModel, ImageResponseModel>()
+                .ForMember(response => response.Image, options => options.MapFrom(model => ConvertBytesToBase64(model.Image, model.Type)));
 
             CreateMap<ServiceRequestModel, ServiceModel>();
             CreateMap<ServiceModel, ServiceResponseModel>();
@@ -69,12 +79,22 @@ namespace HotelReservation.API
                 opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
         }
 
-        private static byte[] ImageConverter(string image)
+        private static byte[] ConvertBase64ToBytes(string image)
         {
             var converted = image.Split(',')[1];
             var imageData = Convert.FromBase64String(converted);
 
             return imageData;
+        }
+
+        private static string ConvertBytesToBase64(byte[] image, string type)
+        {
+            type ??= "image/jpeg";
+
+            var base64 = Convert.ToBase64String(image);
+            var base64Full = $"data:{type};base64,{base64}";
+
+            return base64Full;
         }
     }
 }

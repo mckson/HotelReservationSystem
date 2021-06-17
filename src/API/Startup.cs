@@ -1,8 +1,10 @@
-﻿using HotelReservation.API.Extensions;
+﻿using AutoMapper;
+using HotelReservation.API.Extensions;
 using HotelReservation.API.Helpers;
 using HotelReservation.API.Middleware;
 using HotelReservation.Business;
 using HotelReservation.Business.Constants;
+using HotelReservation.Business.Interfaces;
 using HotelReservation.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -56,8 +58,12 @@ namespace HotelReservation.API
 
             services.AddAuthenticationAndAuthorization(Configuration.GetSection(AuthenticationOptions.Authentication).Get<AuthenticationOptions>());
 
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+            services.AddSingleton(provider => new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new MappingApiModelsProfile(provider.GetService<IUriService>()));
+                cfg.AddProfile(new ModelEntityMapperProfile());
+            }).CreateMapper());
+            // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddDataAndBusiness();
 
             services.AddScoped<DatabaseSeeder>();

@@ -7,6 +7,12 @@ namespace HotelReservation.API.Models.RequestModels
         [Required]
         public string Image { get; set; }
 
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string Type { get; set; }
+
         public int HotelId { get; set; }
     }
 }

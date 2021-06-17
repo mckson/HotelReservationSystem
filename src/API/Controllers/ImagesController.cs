@@ -26,12 +26,12 @@ namespace HotelReservation.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ImageResponseModel>> GetImageAsync(int id)
+        public async Task<FileResult> GetImageAsync(int id)
         {
             var imageModel = await _imageService.GetAsync(id);
             var imageResponse = _mapper.Map<ImageResponseModel>(imageModel);
-
-            return Ok(imageResponse);
+            var image = File(imageModel.Image, imageModel.Type, imageModel.Name);
+            return image;
         }
 
         [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]

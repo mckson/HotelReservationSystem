@@ -4,14 +4,16 @@ using HotelReservation.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HotelReservation.Data.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    partial class HotelContextModelSnapshot : ModelSnapshot
+    [Migration("20210617100504_AddedNameAndTypeForImageEntity")]
+    partial class AddedNameAndTypeForImageEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,9 +75,6 @@ namespace HotelReservation.Data.Migrations
                     b.Property<byte[]>("Image")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<bool>("IsMain")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -128,6 +127,33 @@ namespace HotelReservation.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Locations");
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.MainImageEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelId")
+                        .IsUnique();
+
+                    b.ToTable("MainImageEntity");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationEntity", b =>
@@ -490,6 +516,14 @@ namespace HotelReservation.Data.Migrations
                         .HasForeignKey("HotelReservation.Data.Entities.LocationEntity", "HotelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("HotelReservation.Data.Entities.MainImageEntity", b =>
+                {
+                    b.HasOne("HotelReservation.Data.Entities.HotelEntity", "Hotel")
+                        .WithOne("MainImage")
+                        .HasForeignKey("HotelReservation.Data.Entities.MainImageEntity", "HotelId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("HotelReservation.Data.Entities.ReservationEntity", b =>

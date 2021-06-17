@@ -20,8 +20,16 @@ namespace HotelReservation.Business.Services
         public Uri GetPageUri(PaginationFilter filter, string route)
         {
             var endpointUri = string.Concat(_baseUri, route);
-            endpointUri = QueryHelpers.AddQueryString(endpointUri.ToString(), PageNumber, filter.PageNumber.ToString());
-            endpointUri = QueryHelpers.AddQueryString(endpointUri.ToString(), PageSize, filter.PageSize.ToString());
+            endpointUri = QueryHelpers.AddQueryString(endpointUri, PageNumber, filter.PageNumber.ToString());
+            endpointUri = QueryHelpers.AddQueryString(endpointUri, PageSize, filter.PageSize.ToString());
+
+            return new Uri(endpointUri);
+        }
+
+        public Uri GetResourceUri(string route, int resourceId)
+        {
+            var endpointUri = string.Concat(_baseUri, route);
+            endpointUri = string.Concat(endpointUri, $"/{resourceId}");
 
             return new Uri(endpointUri);
         }

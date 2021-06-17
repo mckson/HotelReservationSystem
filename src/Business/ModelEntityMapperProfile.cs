@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
@@ -9,7 +10,10 @@ namespace HotelReservation.Business
     {
         public ModelEntityMapperProfile()
         {
-            CreateMap<HotelEntity, HotelModel>().ReverseMap();
+            CreateMap<HotelEntity, HotelModel>().ForMember(
+                model => model.MainImage,
+                options => options.MapFrom(entity => entity.Images.FirstOrDefault(image => image.IsMain)));
+            CreateMap<HotelModel, HotelEntity>();
             CreateMap<LocationEntity, LocationModel>().ReverseMap();
             CreateMap<RefreshTokenEntity, RefreshTokenModel>().ReverseMap();
             CreateMap<ReservationEntity, ReservationModel>().ReverseMap();
@@ -20,7 +24,6 @@ namespace HotelReservation.Business
             CreateMap<ServiceEntity, ServiceModel>().ReverseMap();
             CreateMap<UserEntity, UserModel>().ReverseMap();
             CreateMap<ImageEntity, ImageModel>().ReverseMap();
-            CreateMap<MainImageEntity, ImageModel>().ReverseMap();
 
             CreateMap<UserRegistrationModel, UserEntity>();
             CreateMap<UserUpdateModel, UserEntity>();

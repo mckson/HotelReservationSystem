@@ -27,7 +27,6 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IRepository<ReservationEntity>, ReservationRepository>();
             services.AddScoped<IRepository<ServiceEntity>, ServiceRepository>();
             services.AddScoped<IRepository<ImageEntity>, ImagesRepository>();
-            services.AddScoped<IRepository<MainImageEntity>, MainImagesRepository>();
 
             services.AddScoped<ManagementPermissionSupervisor>();
 
