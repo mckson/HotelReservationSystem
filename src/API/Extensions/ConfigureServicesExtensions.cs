@@ -69,7 +69,6 @@ namespace HotelReservation.API.Extensions
                 options.Password.RequireUppercase = passwordOptions.RequireUppercase;
                 options.Password.RequireLowercase = passwordOptions.RequireLowercase;
             });
-
             return services;
         }
 
@@ -77,8 +76,12 @@ namespace HotelReservation.API.Extensions
             this IServiceCollection services,
             AuthenticationOptions authOptions)
         {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
                 {
                     options.RequireHttpsMetadata = false;
                     options.TokenValidationParameters = new TokenValidationParameters

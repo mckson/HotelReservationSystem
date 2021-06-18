@@ -37,7 +37,7 @@ namespace HotelReservation.API.Controllers
             return image;
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
+        [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPost]
         public async Task<ActionResult<ImageResponseModel>> AddImageAsync([FromBody] ImageRequestModel imageRequest)
         {
@@ -50,7 +50,7 @@ namespace HotelReservation.API.Controllers
             return Ok();
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
+        [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ImageResponseModel>> DeleteImageAsync(int id)
         {

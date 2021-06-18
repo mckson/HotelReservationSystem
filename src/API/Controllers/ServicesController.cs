@@ -46,7 +46,7 @@ namespace HotelReservation.API.Controllers
             return Ok(serviceResponseModel);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
+        [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPost]
         public async Task<ActionResult<ServiceResponseModel>> CreateServiceAsync([FromBody] ServiceRequestModel serviceRequestModel)
         {
@@ -59,7 +59,7 @@ namespace HotelReservation.API.Controllers
             return Ok(createdServiceResponseModel);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
+        [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPut("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> UpdateServiceAsync(int id, [FromBody] ServiceRequestModel serviceRequestModel)
         {
@@ -72,7 +72,7 @@ namespace HotelReservation.API.Controllers
             return Ok(updatedServiceResponseModel);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
+        [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> DeleteServiceAsync(int id)
         {

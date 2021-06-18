@@ -53,7 +53,6 @@ namespace HotelReservation.API.Controllers
             return pagedHotelsResponse;
         }
 
-        // GET api/<HotelsController>/5
         [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(int id)
@@ -77,7 +76,7 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] HotelRequestModel hotelRequest)
         {
@@ -102,8 +101,8 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
         [HttpPut("{id:int}")]
+        [Authorize(Policy = Policies.AdminPermission)]
         public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(int id, [FromBody] HotelRequestModel hotelRequest)
         {
             var userClaims = User.Claims;
@@ -129,7 +128,7 @@ namespace HotelReservation.API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
+        [Authorize(Policy = Policies.AdminPermission)]
         public async Task<ActionResult<HotelResponseModel>> DeleteHotelAsync(int id)
         {
             var userClaims = User.Claims;

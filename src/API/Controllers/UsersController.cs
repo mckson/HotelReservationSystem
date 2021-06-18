@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
+    [Authorize(Policy = Policies.AdminPermission)]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase

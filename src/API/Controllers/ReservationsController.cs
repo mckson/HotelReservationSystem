@@ -27,18 +27,6 @@ namespace HotelReservation.API.Controllers
             _mapper = mapper;
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
-        [HttpGet]
-        public ActionResult<IEnumerable<ReservationResponseModel>> GetAllReservations()
-        {
-            var userClaims = User.Claims;
-
-            var reservationModels = _reservationsService.GetAllReservations(userClaims);
-            var reservationResponseModels = _mapper.Map<IEnumerable<ReservationResponseModel>>(reservationModels);
-
-            return Ok(reservationResponseModels);
-        }
-
         [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ReservationResponseModel>> GetReservationByIdAsync(int id)
@@ -55,8 +43,6 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ReservationResponseModel>> CreateReservationAsync([FromBody] ReservationRequestModel reservationRequestModel)
         {
-            var userClaims = User.Claims;
-
             var reservationModel = _mapper.Map<ReservationModel>(reservationRequestModel);
 
             reservationModel.ReservationServices = reservationRequestModel.Services.Select(service => new ReservationServiceModel { ServiceId = service }).ToList();
@@ -69,7 +55,7 @@ namespace HotelReservation.API.Controllers
             return Ok(createdReservationResponseModel);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminPermission)]
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ReservationResponseModel>> DeleteReservation(int id)
         {
