@@ -28,9 +28,9 @@ namespace HotelReservation.API.Models.RequestModels
         [Required]
         public LocationRequestModel Location { get; set; }
 
-        public IEnumerable<ImageRequestModel> Images { get; set; }
+        /*public IEnumerable<ImageRequestModel> Images { get; set; }
 
-        public ImageRequestModel MainImage { get; set; }
+        public ImageRequestModel MainImage { get; set; }*/
 
         public IEnumerable<Guid> Managers { get; set; }
     }

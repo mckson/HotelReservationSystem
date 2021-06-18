@@ -13,6 +13,8 @@ namespace HotelReservation.API.Models.RequestModels
         [Required]
         public string Type { get; set; }
 
+        public bool IsMain { get; set; }
+
         public int HotelId { get; set; }
     }
 }

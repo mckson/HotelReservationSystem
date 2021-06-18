@@ -12,5 +12,7 @@ namespace HotelReservation.Business.Interfaces
         Task<ImageModel> GetAsync(int id);
 
         Task<ImageModel> DeleteAsync(int id, IEnumerable<Claim> userClaims);
+
+        Task<ImageModel> ChangeImageToMainAsync(int id, IEnumerable<Claim> userClaims);
     }
 }

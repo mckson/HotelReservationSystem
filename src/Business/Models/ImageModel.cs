@@ -12,6 +12,8 @@
 
         public int HotelId { get; set; }
 
+        public bool IsMain { get; set; }
+
         public virtual HotelModel Hotel { get; set; }
     }
 }

@@ -111,16 +111,9 @@ namespace HotelReservation.Business.Services
             hotelEntity.HotelUsers = _mapper.Map<IEnumerable<HotelUserEntity>>(updatingHotelModel.HotelUsers);
             hotelEntity.Description = updatingHotelModel.Description;
 
-            // if (hotelEntity.MainImage != null)
-            // {
-            //     await _imageRepository.DeleteAsync(hotelEntity.MainImage.Id);
-            // }
-            var newMainImage = _mapper.Map<ImageEntity>(updatingHotelModel.MainImage);
-
+            /*var newMainImage = _mapper.Map<ImageEntity>(updatingHotelModel.MainImage);
             hotelEntity.Images = _mapper.Map<ICollection<ImageEntity>>(updatingHotelModel.Images);
-
-            await ChangeHotelMainImageAsync(hotelEntity, newMainImage);
-
+            await ChangeHotelMainImageAsync(hotelEntity, newMainImage);*/
             if (!IsLocationEqual(_mapper.Map<LocationModel>(hotelEntity.Location), updatingHotelModel.Location))
             {
                 await UpdateLocationEntityFieldsAsync(hotelEntity.Location, updatingHotelModel.Location);
@@ -245,7 +238,7 @@ namespace HotelReservation.Business.Services
             _logger.Debug($"Manager {userModel.Id} roles requested");
         }
 
-        private async Task ChangeHotelMainImageAsync(HotelEntity hotelEntity, ImageEntity newImage)
+        /*private async Task ChangeHotelMainImageAsync(HotelEntity hotelEntity, ImageEntity newImage)
         {
             _logger.Debug($"Main image of hotel {hotelEntity.Id} is updating");
 
@@ -275,7 +268,7 @@ namespace HotelReservation.Business.Services
             }
 
             _logger.Debug($"Main image of hotel {hotelEntity.Id} is updated");
-        }
+        }*/
 
         // private Expression<Func<HotelEntity, bool>> FilterHotelExpression(HotelsFilter filter)
         // {

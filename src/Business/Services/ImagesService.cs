@@ -5,6 +5,7 @@ using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using Serilog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -39,6 +40,12 @@ namespace HotelReservation.Business.Services
             await _supervisor.CheckHotelManagementPermissionAsync(imageModel.HotelId, userClaims);
 
             var imageEntity = _mapper.Map<ImageEntity>(imageModel);
+
+            if (imageEntity.IsMain)
+            {
+                await ChangeHotelMainImageAsync(imageEntity.HotelId, imageEntity);
+            }
+
             var createdImageEntity = await _imagesRepository.CreateAsync(imageEntity);
             var createdImageModel = _mapper.Map<ImageModel>(createdImageEntity);
 
@@ -78,49 +85,56 @@ namespace HotelReservation.Business.Services
             return deletedImageModel;
         }
 
-/*
-        private async Task CheckHotelManagementPermissionAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<ImageModel> ChangeImageToMainAsync(int id, IEnumerable<Claim> userClaims)
         {
-            _logger.Debug($"Permissions for managing hotel with id {id} is checking");
+            _logger.Debug($"Image {id} is updating");
 
-            var claims = userClaims.ToList();
-            if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
-                return;
+            var imageEntity = await _imagesRepository.GetAsync(id) ??
+                              throw new BusinessException("No image with such id", ErrorStatus.NotFound);
 
-            // was as no tracking
-            var hotelEntity = await _hotelRepository.GetAsync(id) ??
-                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
+            await _supervisor.CheckHotelManagementPermissionAsync(imageEntity.HotelId, userClaims);
+            await ChangeHotelMainImageAsync(imageEntity.HotelId, imageEntity);
+            imageEntity.IsMain = true;
 
-            var hotels = claims.FindAll(claim => claim.Type == ClaimNames.Hotels);
+            var updatedImageEntity = await _imagesRepository.UpdateAsync(imageEntity);
+            var imageModel = _mapper.Map<ImageModel>(updatedImageEntity);
 
-            if (hotels.Count == 0)
-            {
-                throw new BusinessException(
-                    "You have no permissions to manage hotels. Ask application admin to take that permission",
-                    ErrorStatus.AccessDenied);
-            }
+            _logger.Debug($"Image {id} is updated");
 
-            var accessDenied = true;
-            foreach (var hotel in hotels)
-            {
-                int.TryParse(hotel.Value, out var hotelId);
-
-                if (hotelId != hotelEntity.Id)
-                    continue;
-
-                accessDenied = false;
-                break;
-            }
-
-            if (accessDenied)
-            {
-                throw new BusinessException(
-                    $"You have no permission to manage hotel {hotelEntity.Name}. Ask application admin about permissions",
-                    ErrorStatus.AccessDenied);
-            }
-
-            _logger.Debug($"Permissions for managing hotel with id {id} checked");
+            return imageModel;
         }
-*/
+
+        private async Task ChangeHotelMainImageAsync(int hotelId, ImageEntity newImage)
+        {
+            var hotelEntity = await _hotelRepository.GetAsync(hotelId) ??
+                              throw new BusinessException("Hotel does not exists", ErrorStatus.NotFound);
+
+            _logger.Debug($"Main image of hotel {hotelEntity.Id} is updating");
+
+            var oldImage = _imagesRepository.Find(image => image.IsMain && image.HotelId == hotelEntity.Id).FirstOrDefault();
+
+            if (oldImage != null && newImage != null)
+            {
+                oldImage.IsMain = false;
+                await _imagesRepository.UpdateAsync(oldImage);
+            }
+
+            /*else
+            {
+                if (newImage != null)
+                {
+                    newImage.IsMain = true;
+                    hotelEntity.Images.Add(newImage);
+                    // await _imageRepository.CreateAsync(newImage);
+                }
+                else if (oldImage != null)
+                {
+                    hotelEntity.Images.Remove(oldImage);
+                    // await _imageRepository.DeleteAsync(oldImage.Id);
+                }
+            }*/
+
+            _logger.Debug($"Main image of hotel {hotelEntity.Id} is updated");
+        }
     }
 }
