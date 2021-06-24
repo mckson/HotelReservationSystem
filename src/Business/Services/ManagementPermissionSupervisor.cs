@@ -1,28 +1,33 @@
 ﻿using HotelReservation.Business.Constants;
+using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace HotelReservation.Business
+namespace HotelReservation.Business.Services
 {
-    public class ManagementPermissionSupervisor
+    public class ManagementPermissionSupervisor : IManagementPermissionSupervisor
     {
         private readonly ILogger _logger;
         private readonly IHotelRepository _hotelRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ManagementPermissionSupervisor(ILogger logger, IHotelRepository hotelRepository)
+        public ManagementPermissionSupervisor(ILogger logger, IHotelRepository hotelRepository, IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _hotelRepository = hotelRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task CheckHotelManagementPermissionAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task CheckHotelManagementPermissionAsync(int hotelId)
         {
-            _logger.Debug($"Permissions for managing hotel with id {id} is checking");
+            _logger.Debug($"Permissions for managing hotel with hotelId {hotelId} is checking");
+
+            var userClaims = _httpContextAccessor.HttpContext.User.Claims;
 
             var claims = userClaims.ToList();
             if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role))
@@ -31,8 +36,8 @@ namespace HotelReservation.Business
                 return;
             }
 
-            var hotelEntity = await _hotelRepository.GetAsync(id) ??
-                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
+            var hotelEntity = await _hotelRepository.GetAsync(hotelId) ??
+                              throw new BusinessException("No hotel with such hotelId", ErrorStatus.NotFound);
 
             var hotels = claims.FindAll(claim => claim.Type == ClaimNames.Hotels);
 
@@ -46,9 +51,9 @@ namespace HotelReservation.Business
             var accessDenied = true;
             foreach (var hotel in hotels)
             {
-                int.TryParse(hotel.Value, out var hotelId);
+                int.TryParse(hotel.Value, out var id);
 
-                if (hotelId != hotelEntity.Id)
+                if (id != hotelEntity.Id)
                     continue;
 
                 accessDenied = false;
@@ -62,9 +67,7 @@ namespace HotelReservation.Business
                     ErrorStatus.AccessDenied);
             }
 
-            _logger.Debug($"Permissions for managing hotel with id {id} checked");
-
-            // return !accessDenied;
+            _logger.Debug($"Permissions for managing hotel with hotelId {hotelId} checked");
         }
     }
 }

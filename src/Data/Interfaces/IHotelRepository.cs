@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HotelReservation.Data.Entities;
 using System.Threading.Tasks;
-using HotelReservation.Data.Entities;
 
 namespace HotelReservation.Data.Interfaces
 {

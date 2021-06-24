@@ -23,12 +23,12 @@ namespace HotelReservation.API.Extensions
         {
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
-            services.AddScoped<IRepository<RoomEntity>, RoomRepository>();
-            services.AddScoped<IRepository<ReservationEntity>, ReservationRepository>();
-            services.AddScoped<IRepository<ServiceEntity>, ServiceRepository>();
-            services.AddScoped<IRepository<ImageEntity>, ImagesRepository>();
+            services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<IReservationRepository, ReservationRepository>();
+            services.AddScoped<IServiceRepository, ServiceRepository>();
+            services.AddScoped<IImageRepository, ImagesRepository>();
 
-            services.AddScoped<ManagementPermissionSupervisor>();
+            services.AddScoped<IManagementPermissionSupervisor, ManagementPermissionSupervisor>();
 
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAccountService, AccountService>();

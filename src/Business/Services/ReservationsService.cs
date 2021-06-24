@@ -3,6 +3,7 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -14,19 +15,22 @@ namespace HotelReservation.Business.Services
 {
     public class ReservationsService : IReservationsService
     {
-        private readonly IRepository<ReservationEntity> _reservationRepository;
+        private readonly IReservationRepository _reservationRepository;
         private readonly IMapper _mapper;
         private readonly IHotelRepository _hotelRepository;
         private readonly ILogger _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ReservationsService(
-            IRepository<ReservationEntity> reservationRepository,
+            IReservationRepository reservationRepository,
             IHotelRepository hotelRepository,
+            IHttpContextAccessor httpContextAccessor,
             IMapper mapper,
             ILogger logger)
         {
             _reservationRepository = reservationRepository;
             _hotelRepository = hotelRepository;
+            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _logger = logger;
         }
@@ -49,14 +53,14 @@ namespace HotelReservation.Business.Services
             return createdReservationModel;
         }
 
-        public async Task<ReservationModel> GetAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<ReservationModel> GetAsync(int id)
         {
             _logger.Debug($"Reservation {id} is requesting");
 
             var reservationEntity = await _reservationRepository.GetAsync(id) ??
                                     throw new BusinessException($"No reservation with such id: {id}", ErrorStatus.NotFound);
 
-            CheckReservationManagementPermission(reservationEntity.Email, userClaims);
+            CheckReservationManagementPermission(reservationEntity.Email);
 
             var reservationModel = _mapper.Map<ReservationModel>(reservationEntity);
 
@@ -65,7 +69,7 @@ namespace HotelReservation.Business.Services
             return reservationModel;
         }
 
-        public async Task<ReservationModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<ReservationModel> DeleteAsync(int id)
         {
             _logger.Debug($"Reservation {id} is deleting");
 
@@ -74,7 +78,7 @@ namespace HotelReservation.Business.Services
                                              $"No reservation with such id: {id}",
                                              ErrorStatus.NotFound);
 
-            CheckReservationManagementPermission(checkReservationEntity.Email, userClaims);
+            CheckReservationManagementPermission(checkReservationEntity.Email);
 
             var deletedReservationEntity = await _reservationRepository.DeleteAsync(id);
             var deletedReservationModel = _mapper.Map<ReservationModel>(deletedReservationEntity);
@@ -88,7 +92,7 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug("Reservations are requesting");
 
-            CheckReservationManagementPermission(null, userClaims);   // admin only, change
+            CheckReservationManagementPermission(null);   // admin only, change
 
             var reservationEntities = _reservationRepository.GetAll();
             var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
@@ -142,9 +146,11 @@ namespace HotelReservation.Business.Services
             }
         }
 
-        private void CheckReservationManagementPermission(string reservationEmail, IEnumerable<Claim> userClaims)
+        private void CheckReservationManagementPermission(string reservationEmail)
         {
             _logger.Debug("Permissions is checking");
+
+            var userClaims = _httpContextAccessor.HttpContext.User.Claims;
 
             var claims = userClaims.ToList();
             if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))

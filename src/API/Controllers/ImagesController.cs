@@ -7,7 +7,6 @@ using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Microsoft.Net.Http.Headers;
 
 namespace HotelReservation.API.Controllers
 {
@@ -41,10 +40,8 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ImageResponseModel>> AddImageAsync([FromBody] ImageRequestModel imageRequest)
         {
-            var userClaims = User.Claims;
-
             var imageModel = _mapper.Map<ImageModel>(imageRequest);
-            var addedImageModel = await _imageService.CreateAsync(imageModel, userClaims);
+            var addedImageModel = await _imageService.CreateAsync(imageModel);
 
             // var addedImageResponse = _mapper.Map<ImageResponseModel>(addedImageModel);
             return Ok();
@@ -54,8 +51,7 @@ namespace HotelReservation.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ImageResponseModel>> DeleteImageAsync(int id)
         {
-            var userClaims = User.Claims;
-            var deletedImageModel = await _imageService.DeleteAsync(id, userClaims);
+            var deletedImageModel = await _imageService.DeleteAsync(id);
 
             // var deletedImageResponse = _mapper.Map<ImageResponseModel>(deletedImageModel);
             return Ok();
@@ -65,8 +61,7 @@ namespace HotelReservation.API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<ImageResponseModel>> UpdateImageToMainAsync(int id)
         {
-            var userClaims = User.Claims;
-            var updatedImageModel = await _imageService.ChangeImageToMainAsync(id, userClaims);
+            var updatedImageModel = await _imageService.ChangeImageToMainAsync(id);
 
             return Ok();
         }

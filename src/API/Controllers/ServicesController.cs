@@ -50,10 +50,8 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ServiceResponseModel>> CreateServiceAsync([FromBody] ServiceRequestModel serviceRequestModel)
         {
-            var userClaims = User.Claims;
-
             var serviceModel = _mapper.Map<ServiceModel>(serviceRequestModel);
-            var createdServiceModel = await _servicesService.CreateAsync(serviceModel, userClaims);
+            var createdServiceModel = await _servicesService.CreateAsync(serviceModel);
             var createdServiceResponseModel = _mapper.Map<ServiceResponseModel>(createdServiceModel);
 
             return Ok(createdServiceResponseModel);
@@ -63,10 +61,8 @@ namespace HotelReservation.API.Controllers
         [HttpPut("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> UpdateServiceAsync(int id, [FromBody] ServiceRequestModel serviceRequestModel)
         {
-            var userClaims = User.Claims;
-
             var serviceModel = _mapper.Map<ServiceModel>(serviceRequestModel);
-            var updatedServiceModel = await _servicesService.UpdateAsync(id, serviceModel, userClaims);
+            var updatedServiceModel = await _servicesService.UpdateAsync(id, serviceModel);
             var updatedServiceResponseModel = _mapper.Map<ServiceResponseModel>(updatedServiceModel);
 
             return Ok(updatedServiceResponseModel);
@@ -76,9 +72,7 @@ namespace HotelReservation.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ServiceResponseModel>> DeleteServiceAsync(int id)
         {
-            var userClaims = User.Claims;
-
-            var deletedServiceModel = await _servicesService.DeleteAsync(id, userClaims);
+            var deletedServiceModel = await _servicesService.DeleteAsync(id);
             var deletedServiceResponseModel = _mapper.Map<ServiceResponseModel>(deletedServiceModel);
 
             return Ok(deletedServiceResponseModel);

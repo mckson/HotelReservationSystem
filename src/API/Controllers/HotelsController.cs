@@ -80,8 +80,6 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] HotelRequestModel hotelRequest)
         {
-            var userClaims = User.Claims;
-
             var hotelModel = _mapper.Map<HotelModel>(hotelRequest);
             hotelModel.HotelUsers = new List<HotelUserModel>();
 
@@ -91,9 +89,7 @@ namespace HotelReservation.API.Controllers
                     .Select(manager => new HotelUserModel { UserId = manager }).ToList());
             }
 
-            var createdHotel = await _hotelsService.CreateAsync(
-                hotelModel,
-                userClaims);
+            var createdHotel = await _hotelsService.CreateAsync(hotelModel);
 
             var hotelResponse =
                 _mapper.Map<HotelResponseModel>(createdHotel);
@@ -105,8 +101,6 @@ namespace HotelReservation.API.Controllers
         [Authorize(Policy = Policies.AdminPermission)]
         public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(int id, [FromBody] HotelRequestModel hotelRequest)
         {
-            var userClaims = User.Claims;
-
             var hotelModel = _mapper.Map<HotelModel>(hotelRequest);
             hotelModel.HotelUsers = new List<HotelUserModel>();
 
@@ -118,8 +112,7 @@ namespace HotelReservation.API.Controllers
 
             var updatedHotel = await _hotelsService.UpdateAsync(
                 id,
-                hotelModel,
-                userClaims);
+                hotelModel);
 
             var hotelResponse =
                 _mapper.Map<HotelResponseModel>(updatedHotel);
@@ -131,8 +124,7 @@ namespace HotelReservation.API.Controllers
         [Authorize(Policy = Policies.AdminPermission)]
         public async Task<ActionResult<HotelResponseModel>> DeleteHotelAsync(int id)
         {
-            var userClaims = User.Claims;
-            var deletedHotelModel = await _hotelsService.DeleteAsync(id, userClaims);
+            var deletedHotelModel = await _hotelsService.DeleteAsync(id);
             var deletedHotelResponse = _mapper.Map<HotelResponseModel>(deletedHotelModel);
             return Ok(deletedHotelResponse);
         }

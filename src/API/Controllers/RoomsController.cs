@@ -75,9 +75,8 @@ namespace HotelReservation.API.Controllers
         [HttpPost]
         public async Task<ActionResult<RoomResponseModel>> CreateRoomAsync([FromBody] RoomRequestModel roomRequestModel)
         {
-            var userClaims = User.Claims;
             var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
-            var createdRoom = await _roomsService.CreateAsync(roomModel, userClaims);
+            var createdRoom = await _roomsService.CreateAsync(roomModel);
             var createdRoomResponseModel = _mapper.Map<RoomResponseModel>(createdRoom);
 
             return Ok(createdRoomResponseModel);
@@ -87,9 +86,8 @@ namespace HotelReservation.API.Controllers
         [HttpPut("{id:int}")]
         public async Task<ActionResult<RoomResponseModel>> UpdateRoomAsync(int id, [FromBody] RoomRequestModel roomRequestModel)
         {
-            var userClaims = User.Claims;
             var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
-            var createdRoom = await _roomsService.UpdateAsync(id, roomModel, userClaims);
+            var createdRoom = await _roomsService.UpdateAsync(id, roomModel);
             var createdRoomResponseModel = _mapper.Map<RoomResponseModel>(createdRoom);
 
             return Ok(createdRoomResponseModel);
@@ -99,8 +97,7 @@ namespace HotelReservation.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<RoomResponseModel>> DeleteRoomAsync(int id)
         {
-            var userClaims = User.Claims;
-            var deletedRoomModel = await _roomsService.DeleteAsync(id, userClaims);
+            var deletedRoomModel = await _roomsService.DeleteAsync(id);
             var deletedRoomResponseModel = _mapper.Map<RoomResponseModel>(deletedRoomModel);
 
             return Ok(deletedRoomResponseModel);

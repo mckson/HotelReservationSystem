@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
@@ -38,7 +37,7 @@ namespace HotelReservation.Business.Services
             _logger = logger;
         }
 
-        public async Task<HotelModel> CreateAsync(HotelModel hotelModel, IEnumerable<Claim> userClaims)
+        public async Task<HotelModel> CreateAsync(HotelModel hotelModel)
         {
             _logger.Debug($"Hotel {hotelModel.Name} is creating");
 
@@ -83,7 +82,7 @@ namespace HotelReservation.Business.Services
             return hotelModel;
         }
 
-        public async Task<HotelModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<HotelModel> DeleteAsync(int id)
         {
             _logger.Debug($"Hotel with {id} is deleting");
 
@@ -95,7 +94,7 @@ namespace HotelReservation.Business.Services
             return _mapper.Map<HotelModel>(deletedHotel);
         }
 
-        public async Task<HotelModel> UpdateAsync(int id, HotelModel updatingHotelModel, IEnumerable<Claim> userClaims)
+        public async Task<HotelModel> UpdateAsync(int id, HotelModel updatingHotelModel)
         {
             _logger.Debug($"Hotel with {id} is updating");
 

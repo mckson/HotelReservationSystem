@@ -6,7 +6,6 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -33,7 +32,7 @@ namespace HotelReservation.API.Controllers
         {
             var userClaims = User.Claims;
 
-            var reservationModel = await _reservationsService.GetAsync(id, userClaims);
+            var reservationModel = await _reservationsService.GetAsync(id);
             var reservationResponseModel = _mapper.Map<ReservationResponseModel>(reservationModel);
 
             return Ok(reservationResponseModel);
@@ -61,7 +60,7 @@ namespace HotelReservation.API.Controllers
         {
             var userClaims = User.Claims;
 
-            var deletedReservationModel = await _reservationsService.DeleteAsync(id, userClaims);
+            var deletedReservationModel = await _reservationsService.DeleteAsync(id);
             var deletedReservationResponseModel = _mapper.Map<ReservationResponseModel>(deletedReservationModel);
 
             return Ok(deletedReservationResponseModel);

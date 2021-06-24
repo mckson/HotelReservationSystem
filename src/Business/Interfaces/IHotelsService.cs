@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using HotelReservation.Business.Models;
-using HotelReservation.Data.Entities;
+﻿using HotelReservation.Business.Models;
 using HotelReservation.Data.Filters;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Interfaces
 {
-    public interface IHotelsService : IBaseService<HotelEntity, HotelModel>
+    public interface IHotelsService : IBaseService<HotelModel>, IUpdateService<HotelModel>
     {
         Task<int> GetCountAsync(HotelsFilter hotelsFilter);
 

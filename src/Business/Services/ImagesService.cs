@@ -4,25 +4,23 @@ using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using Serilog;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
 {
     public class ImagesService : IImageService
     {
-        private readonly IRepository<ImageEntity> _imagesRepository;
+        private readonly IImageRepository _imagesRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
         private readonly IHotelRepository _hotelRepository;
-        private readonly ManagementPermissionSupervisor _supervisor;
+        private readonly IManagementPermissionSupervisor _supervisor;
 
         public ImagesService(
-            IRepository<ImageEntity> imagesRepository,
+            IImageRepository imagesRepository,
             IHotelRepository hotelRepository,
-            ManagementPermissionSupervisor supervisor,
+            IManagementPermissionSupervisor supervisor,
             IMapper mapper,
             ILogger logger)
         {
@@ -33,11 +31,11 @@ namespace HotelReservation.Business.Services
             _logger = logger;
         }
 
-        public async Task<ImageModel> CreateAsync(ImageModel imageModel, IEnumerable<Claim> userClaims)
+        public async Task<ImageModel> CreateAsync(ImageModel imageModel)
         {
             _logger.Debug("Image is creating");
 
-            await _supervisor.CheckHotelManagementPermissionAsync(imageModel.HotelId, userClaims);
+            await _supervisor.CheckHotelManagementPermissionAsync(imageModel.HotelId);
 
             var imageEntity = _mapper.Map<ImageEntity>(imageModel);
 
@@ -68,14 +66,14 @@ namespace HotelReservation.Business.Services
             return imageModel;
         }
 
-        public async Task<ImageModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<ImageModel> DeleteAsync(int id)
         {
             _logger.Debug($"Image {id} is deleting");
 
             var imageEntity = await _imagesRepository.GetAsync(id) ??
                               throw new BusinessException("No image with such id", ErrorStatus.NotFound);
 
-            await _supervisor.CheckHotelManagementPermissionAsync(imageEntity.HotelId, userClaims);
+            await _supervisor.CheckHotelManagementPermissionAsync(imageEntity.HotelId);
 
             var deletedImageEntity = await _imagesRepository.DeleteAsync(id);
             var deletedImageModel = _mapper.Map<ImageModel>(deletedImageEntity);
@@ -85,14 +83,14 @@ namespace HotelReservation.Business.Services
             return deletedImageModel;
         }
 
-        public async Task<ImageModel> ChangeImageToMainAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<ImageModel> ChangeImageToMainAsync(int id)
         {
             _logger.Debug($"Image {id} is updating");
 
             var imageEntity = await _imagesRepository.GetAsync(id) ??
                               throw new BusinessException("No image with such id", ErrorStatus.NotFound);
 
-            await _supervisor.CheckHotelManagementPermissionAsync(imageEntity.HotelId, userClaims);
+            await _supervisor.CheckHotelManagementPermissionAsync(imageEntity.HotelId);
             await ChangeHotelMainImageAsync(imageEntity.HotelId, imageEntity);
             imageEntity.IsMain = true;
 
@@ -118,21 +116,6 @@ namespace HotelReservation.Business.Services
                 oldImage.IsMain = false;
                 await _imagesRepository.UpdateAsync(oldImage);
             }
-
-            /*else
-            {
-                if (newImage != null)
-                {
-                    newImage.IsMain = true;
-                    hotelEntity.Images.Add(newImage);
-                    // await _imageRepository.CreateAsync(newImage);
-                }
-                else if (oldImage != null)
-                {
-                    hotelEntity.Images.Remove(oldImage);
-                    // await _imageRepository.DeleteAsync(oldImage.Id);
-                }
-            }*/
 
             _logger.Debug($"Main image of hotel {hotelEntity.Id} is updated");
         }
