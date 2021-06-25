@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.Data.Entities
 {
@@ -12,7 +13,7 @@ namespace HotelReservation.Data.Entities
 
         public double Price { get; set; }
 
-        public int? HotelId { get; set; }
+        public Guid? HotelId { get; set; }
 
         public virtual HotelEntity Hotel { get; set; }
 

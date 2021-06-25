@@ -1,4 +1,4 @@
-﻿namespace HotelReservation.Business.Constants
+﻿namespace HotelReservation.Data.Constants
 {
     public static class Roles
     {

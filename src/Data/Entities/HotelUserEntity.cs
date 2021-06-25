@@ -4,7 +4,7 @@ namespace HotelReservation.Data.Entities
 {
     public class HotelUserEntity
     {
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
         public virtual HotelEntity Hotel { get; set; }
 

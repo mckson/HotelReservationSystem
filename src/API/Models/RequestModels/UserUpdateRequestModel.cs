@@ -30,6 +30,6 @@ namespace HotelReservation.API.Models.RequestModels
 
         public List<string> Roles { get; set; }
 
-        public IEnumerable<int> Hotels { get; set; }
+        public IEnumerable<string> Hotels { get; set; }
     }
 }

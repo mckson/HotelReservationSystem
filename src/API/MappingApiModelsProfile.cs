@@ -22,11 +22,11 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.MainImage,
                     options => options.MapFrom(model =>
-                        uriService.GetResourceUri(Endpoints.Images, model.MainImage.Id)))
+                        uriService.GetResourceUri(Endpoints.Images, model.MainImage.Id.ToString())))
                 .ForMember(
                     response => response.Images,
                     options => options.MapFrom(model =>
-                        model.Images.Select(image => uriService.GetResourceUri(Endpoints.Images, image.Id))));
+                        model.Images.Select(image => uriService.GetResourceUri(Endpoints.Images, image.Id.ToString()))));
             CreateMap<ImageRequestModel, ImageModel>()
                 .ForMember(model => model.Image, options => options.MapFrom(request => ConvertBase64ToBytes(request.Image)));
             CreateMap<ImageModel, ImageResponseModel>()

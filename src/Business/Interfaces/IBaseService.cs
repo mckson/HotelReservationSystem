@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Interfaces
 {
@@ -6,8 +7,8 @@ namespace HotelReservation.Business.Interfaces
     {
         public Task<TModel> CreateAsync(TModel userModel);
 
-        public Task<TModel> GetAsync(int id);
+        public Task<TModel> GetAsync(Guid id);
 
-        public Task<TModel> DeleteAsync(int id);
+        public Task<TModel> DeleteAsync(Guid id);
     }
 }

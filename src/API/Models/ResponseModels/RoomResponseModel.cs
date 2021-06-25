@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.API.Models.ResponseModels
 {
     public class RoomResponseModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public int RoomNumber { get; set; }
 
@@ -14,8 +15,8 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public double Price { get; set; }
 
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
-        public IEnumerable<int> Reservations { get; set; }
+        public IEnumerable<Guid> Reservations { get; set; }
     }
 }

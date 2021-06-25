@@ -1,16 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.Business.Models
 {
     public class ServiceModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Name { get; set; }
 
         public double Price { get; set; }
 
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
         public HotelModel Hotel { get; set; }
 

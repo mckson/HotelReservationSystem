@@ -3,6 +3,7 @@ using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
 using HotelReservation.Data;
+using HotelReservation.Data.Constants;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using HotelReservation.Data.Repositories;
@@ -27,6 +28,7 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IServiceRepository, ServiceRepository>();
             services.AddScoped<IImageRepository, ImagesRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddScoped<IManagementPermissionSupervisor, ManagementPermissionSupervisor>();
 

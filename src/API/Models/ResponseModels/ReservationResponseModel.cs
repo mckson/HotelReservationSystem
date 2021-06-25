@@ -5,9 +5,9 @@ namespace HotelReservation.API.Models.ResponseModels
 {
     public class ReservationResponseModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
         public string UserId { get; set; }
 

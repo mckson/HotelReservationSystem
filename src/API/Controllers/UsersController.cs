@@ -6,6 +6,7 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models.UserModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -37,8 +38,8 @@ namespace HotelReservation.API.Controllers
             return Ok(userResponseModels);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(string id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(Guid id)
         {
             var userModel = await _usersService.GetAsync(id);
 
@@ -54,8 +55,8 @@ namespace HotelReservation.API.Controllers
             return Ok(_mapper.Map<UserResponseModel>(addedUser));
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(string id, [FromBody] UserUpdateRequestModel user)
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(Guid id, [FromBody] UserUpdateRequestModel user)
         {
             var currentUserClaims = User.Claims;
 
@@ -66,14 +67,14 @@ namespace HotelReservation.API.Controllers
             return Ok(updatedUserResponseModel);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(string id)
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(Guid id)
         {
             var currentUserClaims = User.Claims;
-            var deletedUser = await _usersService.DeleteAsync(id, currentUserClaims);
-            var deletedUserResponse = _mapper.Map<UserResponseModel>(deletedUser);
 
-            return Ok(deletedUserResponse);
+            await _usersService.DeleteAsync(id, currentUserClaims);
+
+            return Ok();
         }
     }
 }

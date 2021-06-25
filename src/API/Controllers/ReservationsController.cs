@@ -6,6 +6,7 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,11 +28,9 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<ReservationResponseModel>> GetReservationByIdAsync(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ReservationResponseModel>> GetReservationByIdAsync(Guid id)
         {
-            var userClaims = User.Claims;
-
             var reservationModel = await _reservationsService.GetAsync(id);
             var reservationResponseModel = _mapper.Map<ReservationResponseModel>(reservationModel);
 
@@ -44,9 +43,9 @@ namespace HotelReservation.API.Controllers
         {
             var reservationModel = _mapper.Map<ReservationModel>(reservationRequestModel);
 
-            reservationModel.ReservationServices = reservationRequestModel.Services.Select(service => new ReservationServiceModel { ServiceId = service }).ToList();
+            reservationModel.ReservationServices = reservationRequestModel.Services.Select(service => new ReservationServiceModel { ServiceId = Guid.Parse(service) }).ToList();
 
-            reservationModel.ReservationRooms = reservationRequestModel.Rooms.Select(room => new ReservationRoomModel { RoomId = room }).ToList();
+            reservationModel.ReservationRooms = reservationRequestModel.Rooms.Select(room => new ReservationRoomModel { RoomId = Guid.Parse(room) }).ToList();
 
             var createdReservationModel = await _reservationsService.CreateAsync(reservationModel);
             var createdReservationResponseModel = _mapper.Map<ReservationResponseModel>(createdReservationModel);
@@ -55,11 +54,9 @@ namespace HotelReservation.API.Controllers
         }
 
         [Authorize(Policy = Policies.AdminPermission)]
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult<ReservationResponseModel>> DeleteReservation(int id)
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult<ReservationResponseModel>> DeleteReservation(Guid id)
         {
-            var userClaims = User.Claims;
-
             var deletedReservationModel = await _reservationsService.DeleteAsync(id);
             var deletedReservationResponseModel = _mapper.Map<ReservationResponseModel>(deletedReservationModel);
 

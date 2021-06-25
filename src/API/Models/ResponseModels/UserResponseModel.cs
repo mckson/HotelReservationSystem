@@ -23,6 +23,6 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public IEnumerable<ReservationResponseModel> Reservations { get; set; }
 
-        public IEnumerable<int> Hotels { get; set; }
+        public IEnumerable<Guid> Hotels { get; set; }
     }
 }

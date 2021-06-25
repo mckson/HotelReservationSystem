@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.Business.Models
 {
     public class RoomModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public int RoomNumber { get; set; }
 
@@ -14,7 +15,7 @@ namespace HotelReservation.Business.Models
 
         public double Price { get; set; }
 
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
         public HotelModel Hotel { get; set; }
 

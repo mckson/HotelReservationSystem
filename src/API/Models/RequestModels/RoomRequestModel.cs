@@ -21,7 +21,6 @@ namespace HotelReservation.API.Models.RequestModels
         public double Price { get; set; }
 
         [Required]
-        [Range(1, int.MaxValue)]
-        public int HotelId { get; set; }
+        public string HotelId { get; set; }
     }
 }

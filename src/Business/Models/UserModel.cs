@@ -21,7 +21,7 @@ namespace HotelReservation.Business.Models
 
         public DateTime DateOfBirth { get; set; }
 
-        public int? RoomId { get; set; }
+        public Guid? RoomId { get; set; }
 
         public virtual RoomModel Room { get; set; }
 

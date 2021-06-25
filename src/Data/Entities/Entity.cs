@@ -1,7 +1,10 @@
-﻿namespace HotelReservation.Data.Entities
+﻿using HotelReservation.Data.Interfaces;
+using System;
+
+namespace HotelReservation.Data.Entities
 {
-    public abstract class Entity
+    public abstract class Entity : IEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using HotelReservation.Data.Entities;
+using HotelReservation.Data.Filters;
+using HotelReservation.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using HotelReservation.Data.Entities;
-using HotelReservation.Data.Filters;
-using HotelReservation.Data.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Repositories
 {
@@ -33,7 +33,7 @@ namespace HotelReservation.Data.Repositories
             return DbSet;
         }
 
-        public async Task<TEntity> GetAsync(int id)
+        public async Task<TEntity> GetAsync(Guid id)
         {
             return await DbSet.FirstOrDefaultAsync(entity => entity.Id.Equals(id));
         }
@@ -65,7 +65,7 @@ namespace HotelReservation.Data.Repositories
             return updatedEntityEntry.Entity;
         }
 
-        public async Task<TEntity> DeleteAsync(int id)
+        public async Task<TEntity> DeleteAsync(Guid id)
         {
             var deletingEntity = await DbSet.FindAsync(id);
 

@@ -23,6 +23,8 @@ namespace HotelReservation.Data.Configurations
 
             builder.Property(g => g.DateOfBirth)
                 .IsRequired();
+
+            builder.Ignore(user => user.Roles);
         }
     }
 }

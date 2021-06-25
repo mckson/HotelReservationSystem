@@ -4,7 +4,7 @@ namespace HotelReservation.Business.Models
 {
     public class RefreshTokenModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Token { get; set; }
 

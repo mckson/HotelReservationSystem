@@ -26,7 +26,7 @@ namespace HotelReservation.Business.Services
             return new Uri(endpointUri);
         }
 
-        public Uri GetResourceUri(string route, int resourceId)
+        public Uri GetResourceUri(string route, string resourceId)
         {
             var endpointUri = string.Concat(_baseUri, route);
             endpointUri = string.Concat(endpointUri, $"/{resourceId}");

@@ -6,6 +6,7 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -37,8 +38,8 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<ServiceResponseModel>> GetServiceAsync(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ServiceResponseModel>> GetServiceAsync(Guid id)
         {
             var serviceModel = await _servicesService.GetAsync(id);
             var serviceResponseModel = _mapper.Map<ServiceResponseModel>(serviceModel);
@@ -58,8 +59,8 @@ namespace HotelReservation.API.Controllers
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult<ServiceResponseModel>> UpdateServiceAsync(int id, [FromBody] ServiceRequestModel serviceRequestModel)
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<ServiceResponseModel>> UpdateServiceAsync(Guid id, [FromBody] ServiceRequestModel serviceRequestModel)
         {
             var serviceModel = _mapper.Map<ServiceModel>(serviceRequestModel);
             var updatedServiceModel = await _servicesService.UpdateAsync(id, serviceModel);
@@ -69,8 +70,8 @@ namespace HotelReservation.API.Controllers
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult<ServiceResponseModel>> DeleteServiceAsync(int id)
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult<ServiceResponseModel>> DeleteServiceAsync(Guid id)
         {
             var deletedServiceModel = await _servicesService.DeleteAsync(id);
             var deletedServiceResponseModel = _mapper.Map<ServiceResponseModel>(deletedServiceModel);

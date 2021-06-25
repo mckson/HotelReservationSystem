@@ -1,5 +1,4 @@
-﻿using HotelReservation.Data.Entities;
-using HotelReservation.Data.Filters;
+﻿using HotelReservation.Data.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +8,13 @@ using System.Threading.Tasks;
 namespace HotelReservation.Data.Interfaces
 {
     public interface IRepository<TEntity>
-        where TEntity : Entity
+        where TEntity : IEntity
     {
         Task<int> GetCountAsync(Expression<Func<TEntity, bool>> predicate);
 
         IEnumerable<TEntity> GetAll();
 
-        Task<TEntity> GetAsync(int id);
+        Task<TEntity> GetAsync(Guid id);
 
         IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
 
@@ -25,6 +24,6 @@ namespace HotelReservation.Data.Interfaces
 
         Task<TEntity> UpdateAsync(TEntity newEntity);
 
-        Task<TEntity> DeleteAsync(int id);
+        Task<TEntity> DeleteAsync(Guid id);
     }
 }

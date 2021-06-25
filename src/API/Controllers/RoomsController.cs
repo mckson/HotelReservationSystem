@@ -8,6 +8,7 @@ using HotelReservation.Business.Models;
 using HotelReservation.Data.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -31,14 +32,6 @@ namespace HotelReservation.API.Controllers
             _uriService = uriService;
         }
 
-        // [AllowAnonymous]
-        // [HttpGet]
-        // public ActionResult<IEnumerable<RoomResponseModel>> GetAllRooms()
-        // {
-        //     var roomModels = _roomsService.GetAllRooms();
-        //     var roomResponseModels = _mapper.Map<IEnumerable<RoomResponseModel>>(roomModels);
-        //     return Ok(roomResponseModels);
-        // }
         [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<BasePagedResponseModel<RoomResponseModel>>> GetRoomsAsync(
@@ -62,8 +55,8 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<RoomResponseModel>> GetRoomByIdAsync(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<RoomResponseModel>> GetRoomByIdAsync(Guid id)
         {
             var roomModel = await _roomsService.GetAsync(id);
             var roomResponseModel = _mapper.Map<RoomResponseModel>(roomModel);
@@ -83,8 +76,8 @@ namespace HotelReservation.API.Controllers
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult<RoomResponseModel>> UpdateRoomAsync(int id, [FromBody] RoomRequestModel roomRequestModel)
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<RoomResponseModel>> UpdateRoomAsync(Guid id, [FromBody] RoomRequestModel roomRequestModel)
         {
             var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
             var createdRoom = await _roomsService.UpdateAsync(id, roomModel);
@@ -94,8 +87,8 @@ namespace HotelReservation.API.Controllers
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult<RoomResponseModel>> DeleteRoomAsync(int id)
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult<RoomResponseModel>> DeleteRoomAsync(Guid id)
         {
             var deletedRoomModel = await _roomsService.DeleteAsync(id);
             var deletedRoomResponseModel = _mapper.Map<RoomResponseModel>(deletedRoomModel);

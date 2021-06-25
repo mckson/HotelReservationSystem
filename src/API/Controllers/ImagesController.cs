@@ -6,6 +6,7 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -25,12 +26,11 @@ namespace HotelReservation.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult> GetImageAsync(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult> GetImageAsync(Guid id)
         {
             var imageModel = await _imageService.GetAsync(id);
 
-            // var imageResponse = _mapper.Map<ImageResponseModel>(imageModel);
             imageModel.Type ??= "image/jpeg";
             var image = new FileContentResult(imageModel.Image, imageModel.Type) { FileDownloadName = imageModel.Name };
             return image;
@@ -41,27 +41,25 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<ImageResponseModel>> AddImageAsync([FromBody] ImageRequestModel imageRequest)
         {
             var imageModel = _mapper.Map<ImageModel>(imageRequest);
-            var addedImageModel = await _imageService.CreateAsync(imageModel);
+            await _imageService.CreateAsync(imageModel);
 
-            // var addedImageResponse = _mapper.Map<ImageResponseModel>(addedImageModel);
             return Ok();
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<ImageResponseModel>> DeleteImageAsync(int id)
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult<ImageResponseModel>> DeleteImageAsync(Guid id)
         {
-            var deletedImageModel = await _imageService.DeleteAsync(id);
+            await _imageService.DeleteAsync(id);
 
-            // var deletedImageResponse = _mapper.Map<ImageResponseModel>(deletedImageModel);
             return Ok();
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer", Policy = Policies.AdminManagerPermission)]
-        [HttpPut("{id}")]
-        public async Task<ActionResult<ImageResponseModel>> UpdateImageToMainAsync(int id)
+        [Authorize(Policy = Policies.AdminManagerPermission)]
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<ImageResponseModel>> UpdateImageToMainAsync(Guid id)
         {
-            var updatedImageModel = await _imageService.ChangeImageToMainAsync(id);
+            await _imageService.ChangeImageToMainAsync(id);
 
             return Ok();
         }

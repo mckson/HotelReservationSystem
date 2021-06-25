@@ -4,6 +4,7 @@ using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using Serilog;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -52,7 +53,7 @@ namespace HotelReservation.Business.Services
             return createdImageModel;
         }
 
-        public async Task<ImageModel> GetAsync(int id)
+        public async Task<ImageModel> GetAsync(Guid id)
         {
             _logger.Debug($"Image {id} is requesting");
 
@@ -66,7 +67,7 @@ namespace HotelReservation.Business.Services
             return imageModel;
         }
 
-        public async Task<ImageModel> DeleteAsync(int id)
+        public async Task<ImageModel> DeleteAsync(Guid id)
         {
             _logger.Debug($"Image {id} is deleting");
 
@@ -83,7 +84,7 @@ namespace HotelReservation.Business.Services
             return deletedImageModel;
         }
 
-        public async Task<ImageModel> ChangeImageToMainAsync(int id)
+        public async Task<ImageModel> ChangeImageToMainAsync(Guid id)
         {
             _logger.Debug($"Image {id} is updating");
 
@@ -102,7 +103,7 @@ namespace HotelReservation.Business.Services
             return imageModel;
         }
 
-        private async Task ChangeHotelMainImageAsync(int hotelId, ImageEntity newImage)
+        private async Task ChangeHotelMainImageAsync(Guid hotelId, ImageEntity newImage)
         {
             var hotelEntity = await _hotelRepository.GetAsync(hotelId) ??
                               throw new BusinessException("Hotel does not exists", ErrorStatus.NotFound);

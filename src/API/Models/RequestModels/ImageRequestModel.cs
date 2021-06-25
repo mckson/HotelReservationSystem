@@ -15,6 +15,7 @@ namespace HotelReservation.API.Models.RequestModels
 
         public bool IsMain { get; set; }
 
-        public int HotelId { get; set; }
+        [Required]
+        public string HotelId { get; set; }
     }
 }

@@ -7,6 +7,6 @@ namespace HotelReservation.Business.Interfaces
     {
         Uri GetPageUri(PaginationFilter filter, string route);
 
-        Uri GetResourceUri(string route, int resourceId);
+        Uri GetResourceUri(string route, string resourceId);
     }
 }

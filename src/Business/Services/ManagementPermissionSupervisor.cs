@@ -1,5 +1,6 @@
 ﻿using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
+using HotelReservation.Data.Constants;
 using HotelReservation.Data.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Serilog;
@@ -23,7 +24,7 @@ namespace HotelReservation.Business.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task CheckHotelManagementPermissionAsync(int hotelId)
+        public async Task CheckHotelManagementPermissionAsync(Guid hotelId)
         {
             _logger.Debug($"Permissions for managing hotel with hotelId {hotelId} is checking");
 
@@ -51,9 +52,9 @@ namespace HotelReservation.Business.Services
             var accessDenied = true;
             foreach (var hotel in hotels)
             {
-                int.TryParse(hotel.Value, out var id);
+                Guid.TryParse(hotel.Value, out var id);
 
-                if (id != hotelEntity.Id)
+                if (!id.Equals(hotelEntity.Id))
                     continue;
 
                 accessDenied = false;

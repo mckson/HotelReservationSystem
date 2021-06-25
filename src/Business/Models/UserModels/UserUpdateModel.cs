@@ -30,6 +30,6 @@ namespace HotelReservation.Business.Models.UserModels
 
         public List<string> Roles { get; set; }
 
-        public IEnumerable<int> Hotels { get; set; }
+        public IEnumerable<Guid> Hotels { get; set; }
     }
 }

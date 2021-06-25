@@ -53,7 +53,7 @@ namespace HotelReservation.Business.Services
             return createdReservationModel;
         }
 
-        public async Task<ReservationModel> GetAsync(int id)
+        public async Task<ReservationModel> GetAsync(Guid id)
         {
             _logger.Debug($"Reservation {id} is requesting");
 
@@ -69,7 +69,7 @@ namespace HotelReservation.Business.Services
             return reservationModel;
         }
 
-        public async Task<ReservationModel> DeleteAsync(int id)
+        public async Task<ReservationModel> DeleteAsync(Guid id)
         {
             _logger.Debug($"Reservation {id} is deleting");
 
@@ -88,7 +88,7 @@ namespace HotelReservation.Business.Services
             return deletedReservationModel;
         }
 
-        public IEnumerable<ReservationModel> GetAllReservations(IEnumerable<Claim> userClaims)
+        public IEnumerable<ReservationModel> GetAllReservations()
         {
             _logger.Debug("Reservations are requesting");
 

@@ -12,10 +12,6 @@ namespace HotelReservation.Data.Entities
 
         public string Description { get; set; }
 
-        // public IEnumerable<byte[]> Images { get; set; }
-        // public byte[] MainImage { get; set; }
-        // public virtual MainImageEntity MainImage { get; set; }
-        // public virtual ImageEntity MainImage { get; set; }
         public virtual ICollection<ImageEntity> Images { get; set; }
 
         public virtual LocationEntity Location { get; set; }

@@ -63,7 +63,7 @@ namespace HotelReservation.Business.Services
             return _mapper.Map<HotelModel>(createdHotelModel);
         }
 
-        public async Task<HotelModel> GetAsync(int id)
+        public async Task<HotelModel> GetAsync(Guid id)
         {
             _logger.Debug($"Hotel with {id} is getting");
 
@@ -82,7 +82,7 @@ namespace HotelReservation.Business.Services
             return hotelModel;
         }
 
-        public async Task<HotelModel> DeleteAsync(int id)
+        public async Task<HotelModel> DeleteAsync(Guid id)
         {
             _logger.Debug($"Hotel with {id} is deleting");
 
@@ -94,7 +94,7 @@ namespace HotelReservation.Business.Services
             return _mapper.Map<HotelModel>(deletedHotel);
         }
 
-        public async Task<HotelModel> UpdateAsync(int id, HotelModel updatingHotelModel)
+        public async Task<HotelModel> UpdateAsync(Guid id, HotelModel updatingHotelModel)
         {
             _logger.Debug($"Hotel with {id} is updating");
 
@@ -126,7 +126,8 @@ namespace HotelReservation.Business.Services
             var hotelEntities = _hotelRepository.GetAll();
             var hotelModels = _mapper.Map<IEnumerable<HotelModel>>(hotelEntities);
 
-            foreach (var hotelModel in hotelModels)
+            var hotelModelsList = hotelModels.ToList();
+            foreach (var hotelModel in hotelModelsList)
             {
                 foreach (var hotelUser in hotelModel.HotelUsers)
                 {
@@ -135,7 +136,7 @@ namespace HotelReservation.Business.Services
             }
 
             _logger.Debug("Hotels are requested");
-            return hotelModels;
+            return hotelModelsList;
         }
 
         public async Task<IEnumerable<HotelModel>> GetPagedHotelsAsync(PaginationFilter paginationFilter, HotelsFilter filter)
@@ -147,7 +148,8 @@ namespace HotelReservation.Business.Services
                 paginationFilter);
             var hotelModels = _mapper.Map<IEnumerable<HotelModel>>(hotelEntities);
 
-            foreach (var hotelModel in hotelModels)
+            var hotelModelsList = hotelModels.ToList();
+            foreach (var hotelModel in hotelModelsList)
             {
                 foreach (var hotelUser in hotelModel.HotelUsers)
                 {
@@ -156,7 +158,7 @@ namespace HotelReservation.Business.Services
             }
 
             _logger.Debug($"Paged hotels are requested. Page: {paginationFilter.PageNumber}, Size: {paginationFilter.PageSize}");
-            return hotelModels;
+            return hotelModelsList;
         }
 
         public async Task<int> GetCountAsync(HotelsFilter filter)

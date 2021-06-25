@@ -1,8 +1,10 @@
-﻿namespace HotelReservation.Business.Models
+﻿using System;
+
+namespace HotelReservation.Business.Models
 {
     public class ImageModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public byte[] Image { get; set; }
 
@@ -10,7 +12,7 @@
 
         public string Type { get; set; }
 
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
         public bool IsMain { get; set; }
 

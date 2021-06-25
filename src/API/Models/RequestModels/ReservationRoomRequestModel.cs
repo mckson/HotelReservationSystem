@@ -2,6 +2,6 @@
 {
     public class ReservationRoomRequestModel
     {
-        public int RoomId { get; set; }
+        public string RoomId { get; set; }
     }
 }

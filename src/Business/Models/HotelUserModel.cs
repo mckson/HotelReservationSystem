@@ -4,7 +4,7 @@ namespace HotelReservation.Business.Models
 {
     public class HotelUserModel
     {
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
         public HotelModel Hotel { get; set; }
 

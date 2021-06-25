@@ -1,10 +1,10 @@
-﻿using System;
-using HotelReservation.Business.Constants;
-using HotelReservation.Data;
+﻿using HotelReservation.Data;
+using HotelReservation.Data.Constants;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 

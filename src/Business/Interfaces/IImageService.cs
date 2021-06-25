@@ -1,10 +1,11 @@
-﻿using HotelReservation.Business.Models;
+﻿using System;
+using HotelReservation.Business.Models;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Interfaces
 {
     public interface IImageService : IBaseService<ImageModel>
     {
-        Task<ImageModel> ChangeImageToMainAsync(int id);
+        Task<ImageModel> ChangeImageToMainAsync(Guid id);
     }
 }

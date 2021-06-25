@@ -8,6 +8,7 @@ using HotelReservation.Business.Models;
 using HotelReservation.Data.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -54,8 +55,8 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(Guid id)
         {
             var hotelModel = await _hotelsService.GetAsync(id);
             var hotelResponse = _mapper.Map<HotelResponseModel>(hotelModel);
@@ -66,16 +67,14 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        // GET api/<HotelsController>/hotelName
-        [AllowAnonymous]
-        [HttpGet("{name}")]
-        public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(string name)
-        {
-            var hotelResponse = _mapper.Map<HotelResponseModel>(await _hotelsService.GetHotelByNameAsync(name));
-
-            return Ok(hotelResponse);
-        }
-
+        // // GET api/<HotelsController>/hotelName
+        // [AllowAnonymous]
+        // [HttpGet("{name}")]
+        // public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(string name)
+        // {
+        //     var hotelResponse = _mapper.Map<HotelResponseModel>(await _hotelsService.GetHotelByNameAsync(name))
+        //     return Ok(hotelResponse);
+        // }
         [Authorize(Policy = Policies.AdminPermission)]
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] HotelRequestModel hotelRequest)
@@ -97,9 +96,9 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:guid}")]
         [Authorize(Policy = Policies.AdminPermission)]
-        public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(int id, [FromBody] HotelRequestModel hotelRequest)
+        public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(Guid id, [FromBody] HotelRequestModel hotelRequest)
         {
             var hotelModel = _mapper.Map<HotelModel>(hotelRequest);
             hotelModel.HotelUsers = new List<HotelUserModel>();
@@ -120,9 +119,9 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:guid}")]
         [Authorize(Policy = Policies.AdminPermission)]
-        public async Task<ActionResult<HotelResponseModel>> DeleteHotelAsync(int id)
+        public async Task<ActionResult<HotelResponseModel>> DeleteHotelAsync(Guid id)
         {
             var deletedHotelModel = await _hotelsService.DeleteAsync(id);
             var deletedHotelResponse = _mapper.Map<HotelResponseModel>(deletedHotelModel);
