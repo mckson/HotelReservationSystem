@@ -1,5 +1,7 @@
 ﻿using HotelReservation.Business.Models;
+using HotelReservation.Data.Filters;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Interfaces
 {
@@ -8,5 +10,9 @@ namespace HotelReservation.Business.Interfaces
         IEnumerable<ReservationModel> GetAllReservations();
 
         IEnumerable<ReservationModel> GetReservationsByEmail(string email);
+
+        Task<int> GetReservationsCountAsync(ReservationsFilter reservationsFilter);
+
+        IEnumerable<ReservationModel> GetPagedReservations(PaginationFilter paginationFilter, ReservationsFilter reservationsFilter);
     }
 }

@@ -203,7 +203,7 @@ namespace HotelReservation.Business.Services
             return roomModels;
         }
 
-        private Expression<Func<RoomEntity, bool>> FilterExpression(RoomsFilter filter)
+        private static Expression<Func<RoomEntity, bool>> FilterExpression(RoomsFilter filter)
         {
             return room =>
                 room.HotelId.Value.Equals(filter.HotelId) &&

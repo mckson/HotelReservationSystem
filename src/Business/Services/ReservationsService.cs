@@ -1,13 +1,16 @@
 ﻿using AutoMapper;
+using Castle.Core.Internal;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
+using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -112,6 +115,38 @@ namespace HotelReservation.Business.Services
             _logger.Debug($"Reservations of {email} requested");
 
             return reservationModels;
+        }
+
+        public async Task<int> GetReservationsCountAsync(ReservationsFilter reservationsFilter)
+        {
+            _logger.Debug($"Reservations for user {reservationsFilter.Email} count is requesting");
+
+            var count = await _reservationRepository.GetCountAsync(FilterExpression(reservationsFilter));
+
+            _logger.Debug($"Reservations for user {reservationsFilter.Email} count is requested");
+
+            return count;
+        }
+
+        public IEnumerable<ReservationModel> GetPagedReservations(PaginationFilter paginationFilter, ReservationsFilter reservationsFilter)
+        {
+            _logger.Debug(
+                $"Paged reservations for user {reservationsFilter.Email} are requesting. , page: {paginationFilter.PageNumber}, size: {paginationFilter.PageSize}");
+
+            var reservationEntities =
+                _reservationRepository.Find(FilterExpression(reservationsFilter), paginationFilter);
+            var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
+
+            _logger.Debug(
+                $"Paged reservations for user {reservationsFilter.Email} are requested. , page: {paginationFilter.PageNumber}, size: {paginationFilter.PageSize}");
+
+            return reservationModels;
+        }
+
+        private static Expression<Func<ReservationEntity, bool>> FilterExpression(ReservationsFilter reservationsFilter)
+        {
+            return reservation => reservationsFilter.Email.IsNullOrEmpty() ||
+                                  reservation.Email == reservationsFilter.Email;
         }
 
         private async Task CheckHotelRoomsServicesExistenceAsync(ReservationModel reservationModel)
