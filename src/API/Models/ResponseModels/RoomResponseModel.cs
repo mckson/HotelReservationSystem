@@ -18,5 +18,7 @@ namespace HotelReservation.API.Models.ResponseModels
         public Guid HotelId { get; set; }
 
         public IEnumerable<Guid> Reservations { get; set; }
+
+        public IEnumerable<Uri> Images { get; set; }
     }
 }

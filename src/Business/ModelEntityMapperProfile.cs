@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
+using System.Linq;
 
 namespace HotelReservation.Business
 {
@@ -23,11 +23,11 @@ namespace HotelReservation.Business
             CreateMap<RoomEntity, RoomModel>().ReverseMap();
             CreateMap<ServiceEntity, ServiceModel>().ReverseMap();
             CreateMap<UserEntity, UserModel>().ReverseMap();
-            CreateMap<ImageEntity, ImageModel>().ReverseMap();
+            CreateMap<HotelImageEntity, HotelImageModel>().ReverseMap();
+            CreateMap<RoomImageEntity, RoomImageModel>().ReverseMap();
 
             CreateMap<UserRegistrationModel, UserEntity>();
             CreateMap<UserUpdateModel, UserEntity>();
-            // CreateMap<UserAuthenticationModel, UserModel>();
             CreateMap<UserRegistrationModel, UserAuthenticationModel>();
             CreateMap<UserModel, UserAuthenticationModel>();
         }

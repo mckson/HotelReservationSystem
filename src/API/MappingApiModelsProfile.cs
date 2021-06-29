@@ -22,16 +22,21 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.MainImage,
                     options => options.MapFrom(model =>
-                        uriService.GetResourceUri(Endpoints.Images, model.MainImage.Id.ToString())))
+                        uriService.GetResourceUri(Endpoints.HotelImages, model.MainImage.Id.ToString())))
                 .ForMember(
                     response => response.Images,
                     options => options.MapFrom(model =>
-                        model.Images.Select(image => uriService.GetResourceUri(Endpoints.Images, image.Id.ToString()))));
+                        model.Images.Select(image => uriService.GetResourceUri(Endpoints.HotelImages, image.Id.ToString()))));
             CreateMap<HotelModel, HotelBriefResponse>();
 
-            CreateMap<ImageRequestModel, ImageModel>()
+            CreateMap<HotelImageRequestModel, HotelImageModel>()
                 .ForMember(model => model.Image, options => options.MapFrom(request => ConvertBase64ToBytes(request.Image)));
-            CreateMap<ImageModel, ImageResponseModel>()
+            CreateMap<HotelImageModel, HotelImageResponseModel>()
+                .ForMember(response => response.Image, options => options.MapFrom(model => ConvertBytesToBase64(model.Image, model.Type)));
+
+            CreateMap<RoomImageRequestModel, RoomImageModel>()
+                .ForMember(model => model.Image, options => options.MapFrom(request => ConvertBase64ToBytes(request.Image)));
+            CreateMap<RoomImageModel, RoomImageResponseModel>()
                 .ForMember(response => response.Image, options => options.MapFrom(model => ConvertBytesToBase64(model.Image, model.Type)));
 
             CreateMap<ServiceRequestModel, ServiceModel>();
@@ -42,7 +47,11 @@ namespace HotelReservation.API
             CreateMap<RoomModel, RoomResponseModel>()
                 .ForMember(
                     response => response.Reservations,
-                    opt => opt.MapFrom(model => model.ReservationRooms.Select(rr => rr.ReservationId)));
+                    opt => opt.MapFrom(model => model.ReservationRooms.Select(rr => rr.ReservationId)))
+                .ForMember(
+                    response => response.Images,
+                    options => options.MapFrom(model =>
+                        model.Images.Select(image => uriService.GetResourceUri(Endpoints.RoomImages, image.Id.ToString()))));
             CreateMap<RoomModel, RoomBriefResponseModel>();
 
             CreateMap<LocationModel, LocationResponseModel>();

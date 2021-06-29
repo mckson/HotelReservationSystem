@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Interfaces
 {
-    public interface IImageService : IBaseService<ImageModel>
+    public interface IHotelImagesService : IBaseService<HotelImageModel>
     {
-        Task<ImageModel> ChangeImageToMainAsync(Guid id);
+        Task<HotelImageModel> ChangeImageToMainAsync(Guid id);
     }
 }

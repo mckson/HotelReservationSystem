@@ -2,7 +2,7 @@
 
 namespace HotelReservation.API.Models.ResponseModels
 {
-    public class ImageResponseModel
+    public class HotelImageResponseModel
     {
         public Guid Id { get; set; }
 

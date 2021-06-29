@@ -15,51 +15,84 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class ImagesController : ControllerBase
     {
-        private readonly IImageService _imageService;
+        private const string DefaultType = "image/jpeg";
+        private readonly IHotelImagesService _hotelImagesService;
         private readonly IMapper _mapper;
+        private readonly IRoomImagesService _roomImagesService;
 
         public ImagesController(
-            IImageService imageService,
+            IHotelImagesService hotelImagesService,
+            IRoomImagesService roomImagesService,
             IMapper mapper)
         {
-            _imageService = imageService;
+            _hotelImagesService = hotelImagesService;
+            _roomImagesService = roomImagesService;
             _mapper = mapper;
         }
 
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult> GetImageAsync(Guid id)
+        [HttpGet("Hotel/{id:guid}")]
+        public async Task<ActionResult> GetHotelImageAsync(Guid id)
         {
-            var imageModel = await _imageService.GetAsync(id);
+            var imageModel = await _hotelImagesService.GetAsync(id);
 
-            imageModel.Type ??= "image/jpeg";
+            imageModel.Type ??= DefaultType;
+            var image = new FileContentResult(imageModel.Image, imageModel.Type) { FileDownloadName = imageModel.Name };
+            return image;
+        }
+
+        [HttpGet("Room/{id:guid}")]
+        public async Task<ActionResult> GetRoomImageAsync(Guid id)
+        {
+            var imageModel = await _roomImagesService.GetAsync(id);
+
+            imageModel.Type ??= DefaultType;
             var image = new FileContentResult(imageModel.Image, imageModel.Type) { FileDownloadName = imageModel.Name };
             return image;
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
-        [HttpPost]
-        public async Task<ActionResult<ImageResponseModel>> AddImageAsync([FromBody] ImageRequestModel imageRequest)
+        [HttpPost("Hotel")]
+        public async Task<ActionResult<HotelImageResponseModel>> AddHotelImageAsync([FromBody] HotelImageRequestModel hotelImageRequest)
         {
-            var imageModel = _mapper.Map<ImageModel>(imageRequest);
-            await _imageService.CreateAsync(imageModel);
+            var imageModel = _mapper.Map<HotelImageModel>(hotelImageRequest);
+            await _hotelImagesService.CreateAsync(imageModel);
 
             return Ok();
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
-        [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<ImageResponseModel>> DeleteImageAsync(Guid id)
+        [HttpPost("Room")]
+        public async Task<ActionResult<HotelImageResponseModel>> AddRoomImageAsync([FromBody] RoomImageRequestModel roomImageRequest)
         {
-            await _imageService.DeleteAsync(id);
+            var imageModel = _mapper.Map<RoomImageModel>(roomImageRequest);
+            await _roomImagesService.CreateAsync(imageModel);
 
             return Ok();
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
-        [HttpPut("{id:guid}")]
-        public async Task<ActionResult<ImageResponseModel>> UpdateImageToMainAsync(Guid id)
+        [HttpDelete("Hotel/{id:guid}")]
+        public async Task<ActionResult<HotelImageResponseModel>> DeleteHotelImageAsync(Guid id)
         {
-            await _imageService.ChangeImageToMainAsync(id);
+            await _hotelImagesService.DeleteAsync(id);
+
+            return Ok();
+        }
+
+        [Authorize(Policy = Policies.AdminManagerPermission)]
+        [HttpDelete("Room/{id:guid}")]
+        public async Task<ActionResult<HotelImageResponseModel>> DeleteRoomImageAsync(Guid id)
+        {
+            await _roomImagesService.DeleteAsync(id);
+
+            return Ok();
+        }
+
+        [Authorize(Policy = Policies.AdminManagerPermission)]
+        [HttpPut("Hotel/{id:guid}")]
+        public async Task<ActionResult<HotelImageResponseModel>> UpdateImageToMainAsync(Guid id)
+        {
+            await _hotelImagesService.ChangeImageToMainAsync(id);
 
             return Ok();
         }

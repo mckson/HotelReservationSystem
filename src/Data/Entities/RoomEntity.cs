@@ -18,5 +18,7 @@ namespace HotelReservation.Data.Entities
         public virtual HotelEntity Hotel { get; set; }
 
         public virtual IEnumerable<ReservationRoomEntity> ReservationRooms { get; set; }
+
+        public virtual ICollection<RoomImageEntity> Images { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace HotelReservation.Data.Entities
 
         public string Description { get; set; }
 
-        public virtual ICollection<ImageEntity> Images { get; set; }
+        public virtual ICollection<HotelImageEntity> Images { get; set; }
 
         public virtual LocationEntity Location { get; set; }
 

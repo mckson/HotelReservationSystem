@@ -3,9 +3,9 @@ using HotelReservation.Data.Interfaces;
 
 namespace HotelReservation.Data.Repositories
 {
-    public class ImagesRepository : BaseRepository<ImageEntity>, IImageRepository
+    public class RoomImageRepository : BaseRepository<RoomImageEntity>, IRoomImageRepository
     {
-        public ImagesRepository(HotelContext context)
+        public RoomImageRepository(HotelContext context)
             : base(context)
         {
         }

@@ -16,6 +16,12 @@ namespace HotelReservation.Data.Configurations
 
             builder.Property(r => r.Capacity)
                 .IsRequired();
+
+            builder.HasMany(r => r.Images)
+                .WithOne(i => i.Room)
+                .HasForeignKey(i => i.RoomId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

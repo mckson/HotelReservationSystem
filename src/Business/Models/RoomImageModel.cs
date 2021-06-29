@@ -2,7 +2,7 @@
 
 namespace HotelReservation.Business.Models
 {
-    public class ImageModel
+    public class RoomImageModel
     {
         public Guid Id { get; set; }
 
@@ -12,10 +12,8 @@ namespace HotelReservation.Business.Models
 
         public string Type { get; set; }
 
-        public Guid HotelId { get; set; }
+        public Guid RoomId { get; set; }
 
-        public bool IsMain { get; set; }
-
-        public virtual HotelModel Hotel { get; set; }
+        public virtual RoomModel Room { get; set; }
     }
 }

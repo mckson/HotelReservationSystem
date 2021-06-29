@@ -2,6 +2,8 @@
 {
     public static class Endpoints
     {
-        public const string Images = "/api/Images";
+        public const string HotelImages = "/api/Images/Hotel";
+
+        public const string RoomImages = "/api/Images/Room";
     }
 }

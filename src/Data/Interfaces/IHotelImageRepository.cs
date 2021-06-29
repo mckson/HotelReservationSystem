@@ -2,7 +2,7 @@
 
 namespace HotelReservation.Data.Interfaces
 {
-    public interface IImageRepository : IRepository<ImageEntity>
+    public interface IHotelImageRepository : IRepository<HotelImageEntity>
     {
     }
 }

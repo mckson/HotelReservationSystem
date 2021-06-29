@@ -20,5 +20,7 @@ namespace HotelReservation.Business.Models
         public HotelModel Hotel { get; set; }
 
         public IEnumerable<ReservationRoomModel> ReservationRooms { get; set; }
+
+        public virtual ICollection<RoomImageModel> Images { get; set; }
     }
 }
