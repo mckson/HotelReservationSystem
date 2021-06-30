@@ -22,6 +22,12 @@ namespace HotelReservation.Data.Configurations
                 .HasForeignKey(i => i.RoomId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(r => r.Facilities)
+                .WithOne(f => f.Room)
+                .HasForeignKey(f => f.RoomId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

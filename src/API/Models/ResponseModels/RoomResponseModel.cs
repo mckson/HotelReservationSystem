@@ -13,11 +13,23 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public int Capacity { get; set; }
 
+        public double Area { get; set; }
+
+        public string Description { get; set; }
+
         public double Price { get; set; }
+
+        public bool Smoking { get; set; }
+
+        public bool Parking { get; set; }
 
         public Guid HotelId { get; set; }
 
         public IEnumerable<Guid> Reservations { get; set; }
+
+        public virtual IEnumerable<RoomFacilityResponseModel> Facilities { get; set; }
+
+        public virtual IEnumerable<RoomViewResponseModel> Views { get; set; }
 
         public IEnumerable<Uri> Images { get; set; }
     }

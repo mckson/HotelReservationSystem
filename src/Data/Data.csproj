@@ -9,6 +9,8 @@
   <ItemGroup>
     <Compile Remove="Migrations\20210629111534_AddedImagesToRoom.cs" />
     <Compile Remove="Migrations\20210629111534_AddedImagesToRoom.Designer.cs" />
+    <Compile Remove="Migrations\20210630123239_AddedRoomViewAndRoomFacilityEntities2.cs" />
+    <Compile Remove="Migrations\20210630123239_AddedRoomViewAndRoomFacilityEntities2.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

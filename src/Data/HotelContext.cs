@@ -1,8 +1,8 @@
-﻿using System;
-using HotelReservation.Data.Configurations;
+﻿using HotelReservation.Data.Configurations;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace HotelReservation.Data
 {
@@ -34,6 +34,7 @@ namespace HotelReservation.Data
             modelBuilder.ApplyConfiguration(new ReservationRoomEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ReservationServiceEntityConfiguration());
             modelBuilder.ApplyConfiguration(new HotelUserEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new RoomRoomViewEntityConfiguration());
         }
     }
 }

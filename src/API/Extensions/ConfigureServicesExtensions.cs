@@ -30,6 +30,7 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IHotelImageRepository, HotelImageRepository>();
             services.AddScoped<IRoomImageRepository, RoomImageRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoomViewRepository, RoomViewRepository>();
 
             services.AddScoped<IManagementPermissionSupervisor, ManagementPermissionSupervisor>();
 
@@ -42,6 +43,7 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IReservationsService, ReservationsService>();
             services.AddScoped<IHotelImagesService, HotelImagesService>();
             services.AddScoped<IRoomImagesService, RoomImagesService>();
+            services.AddScoped<IRoomViewsService, RoomViewsService>();
 
             services.AddHttpContextAccessor();
             services.AddSingleton<IUriService, UriService>(options =>

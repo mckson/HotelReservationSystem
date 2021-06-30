@@ -148,6 +148,12 @@ namespace HotelReservation.Business.Services
             roomEntity.FloorNumber = updatingRoomModel.FloorNumber;
             roomEntity.Price = updatingRoomModel.Price;
             roomEntity.Capacity = updatingRoomModel.Capacity;
+            roomEntity.Area = updatingRoomModel.Area;
+            roomEntity.Description = updatingRoomModel.Description;
+            roomEntity.Smoking = updatingRoomModel.Smoking;
+            roomEntity.Parking = updatingRoomModel.Parking;
+            roomEntity.Facilities = _mapper.Map<IEnumerable<RoomFacilityEntity>>(updatingRoomModel.Facilities);
+            roomEntity.RoomViews = _mapper.Map<IEnumerable<RoomRoomViewEntity>>(updatingRoomModel.RoomViews);
 
             RoomEntity updatedRoomEntity;
             try
