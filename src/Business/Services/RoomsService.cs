@@ -20,16 +20,19 @@ namespace HotelReservation.Business.Services
         private readonly ILogger _logger;
         private readonly IHotelRepository _hotelRepository;
         private readonly IManagementPermissionSupervisor _supervisor;
+        private readonly IRoomViewRepository _roomViewRepository;
 
         public RoomsService(
             IRoomRepository roomsRepository,
             IHotelRepository hotelRepository,
+            IRoomViewRepository roomViewRepository,
             IManagementPermissionSupervisor supervisor,
             IMapper mapper,
             ILogger logger)
         {
             _roomsRepository = roomsRepository;
             _hotelRepository = hotelRepository;
+            _roomViewRepository = roomViewRepository;
             _supervisor = supervisor;
             _mapper = mapper;
             _logger = logger;
@@ -153,8 +156,27 @@ namespace HotelReservation.Business.Services
             roomEntity.Smoking = updatingRoomModel.Smoking;
             roomEntity.Parking = updatingRoomModel.Parking;
             roomEntity.Facilities = _mapper.Map<IEnumerable<RoomFacilityEntity>>(updatingRoomModel.Facilities);
-            roomEntity.RoomViews = _mapper.Map<IEnumerable<RoomRoomViewEntity>>(updatingRoomModel.RoomViews);
 
+            var roomRoomViews = new List<RoomRoomViewEntity>();
+            roomEntity.RoomViews.RemoveAll(rr => rr.RoomId == roomEntity.Id);
+
+            if (updatingRoomModel.RoomViews != null)
+            {
+                foreach (var roomRoomView in updatingRoomModel.RoomViews)
+                {
+                    var unused = await _roomViewRepository.GetAsync(roomRoomView.RoomViewId) ??
+                                 throw new BusinessException("There is no room view with such id", ErrorStatus.NotFound);
+
+                    roomRoomViews.Add(new RoomRoomViewEntity() { RoomViewId = roomRoomView.RoomViewId });
+                }
+            }
+
+            if (roomRoomViews.Count > 0)
+            {
+                roomEntity.RoomViews = roomRoomViews;
+            }
+
+            // roomEntity.RoomViews = _mapper.Map<IEnumerable<RoomRoomViewEntity>>(updatingRoomModel.RoomViews);
             RoomEntity updatedRoomEntity;
             try
             {

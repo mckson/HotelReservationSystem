@@ -31,7 +31,7 @@ namespace HotelReservation.Data.Entities
 
         public virtual IEnumerable<RoomFacilityEntity> Facilities { get; set; }
 
-        public virtual IEnumerable<RoomRoomViewEntity> RoomViews { get; set; }
+        public virtual List<RoomRoomViewEntity> RoomViews { get; set; }
 
         public virtual ICollection<RoomImageEntity> Images { get; set; }
     }
