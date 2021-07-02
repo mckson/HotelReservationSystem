@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 namespace HotelReservation.API.Models.RequestModels
 {
     public class RoomRequestModel
     {
+        [Required]
+        public string Name { get; set; }
+
         [Required]
         [Range(1, 10000)]
         public int RoomNumber { get; set; }

@@ -147,6 +147,7 @@ namespace HotelReservation.Business.Services
                     ErrorStatus.NotFound);
             }
 
+            roomEntity.Name = updatingRoomModel.Name;
             roomEntity.RoomNumber = updatingRoomModel.RoomNumber;
             roomEntity.FloorNumber = updatingRoomModel.FloorNumber;
             roomEntity.Price = updatingRoomModel.Price;
@@ -155,7 +156,9 @@ namespace HotelReservation.Business.Services
             roomEntity.Description = updatingRoomModel.Description;
             roomEntity.Smoking = updatingRoomModel.Smoking;
             roomEntity.Parking = updatingRoomModel.Parking;
-            roomEntity.Facilities = _mapper.Map<IEnumerable<RoomFacilityEntity>>(updatingRoomModel.Facilities);
+
+            roomEntity.Facilities.RemoveAll(f => f.RoomId == id);
+            roomEntity.Facilities = _mapper.Map<List<RoomFacilityEntity>>(updatingRoomModel.Facilities);
 
             var roomRoomViews = new List<RoomRoomViewEntity>();
             roomEntity.RoomViews.RemoveAll(rr => rr.RoomId == roomEntity.Id);

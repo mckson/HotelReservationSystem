@@ -7,6 +7,8 @@ namespace HotelReservation.API.Models.ResponseModels
     {
         public Guid Id { get; set; }
 
+        public string Name { get; set; }
+
         public int RoomNumber { get; set; }
 
         public int FloorNumber { get; set; }
