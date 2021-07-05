@@ -1,13 +1,15 @@
-﻿namespace HotelReservation.API.Models.ResponseModels
+﻿using System;
+
+namespace HotelReservation.API.Models.ResponseModels
 {
     public class ServiceResponseModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Name { get; set; }
 
         public double Price { get; set; }
 
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
     }
 }

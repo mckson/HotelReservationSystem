@@ -1,6 +1,6 @@
 ﻿using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
@@ -13,14 +13,14 @@ namespace HotelReservation.Business.Services
 {
     public class TokenService : ITokenService
     {
-        private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        private readonly AuthenticationOptions _authOptions;
 
         public TokenService(
-            IConfiguration configuration,
+            IOptions<AuthenticationOptions> authOptions,
             ILogger logger)
         {
-            _configuration = configuration;
+            _authOptions = authOptions.Value;
             _logger = logger;
         }
 
@@ -31,15 +31,15 @@ namespace HotelReservation.Business.Services
             var timeNow = DateTime.UtcNow;
 
             var securityKey =
-                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["AuthOptions:key"]));
+                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_authOptions.Key));
 
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var jwt = new JwtSecurityToken(
-                issuer: _configuration["AuthOptions:issuer"],
-                audience: _configuration["AuthOptions:audience"],
+                issuer: _authOptions.Issuer,
+                audience: _authOptions.Audience,
                 claims: claims.Claims,
-                expires: timeNow.AddMinutes(double.Parse(_configuration["AuthOptions:lifetime"])),
+                expires: timeNow.AddMinutes(_authOptions.Lifetime),
                 signingCredentials: credentials);
 
             _logger.Debug("JWT token generated");

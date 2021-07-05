@@ -1,12 +1,14 @@
-﻿namespace HotelReservation.Business.Models
+﻿using System;
+
+namespace HotelReservation.Business.Models
 {
     public class ReservationServiceModel
     {
-        public int ReservationId { get; set; }
+        public Guid ReservationId { get; set; }
 
         public ReservationModel Reservation { get; set; }
 
-        public int ServiceId { get; set; }
+        public Guid ServiceId { get; set; }
 
         public ServiceModel Service { get; set; }
     }

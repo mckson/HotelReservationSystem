@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Security.Claims;
+﻿using HotelReservation.Business.Models;
+using HotelReservation.Data.Filters;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using HotelReservation.Business.Models;
 
 namespace HotelReservation.Business.Interfaces
 {
-    public interface IReservationsService
+    public interface IReservationsService : IBaseService<ReservationModel>
     {
-        Task<ReservationModel> CreateAsync(ReservationModel userModel, IEnumerable<Claim> userClaims);
+        IEnumerable<ReservationModel> GetAllReservations();
 
-        Task<ReservationModel> GetAsync(int id, IEnumerable<Claim> userClaims);
+        IEnumerable<ReservationModel> GetReservationsByEmail(string email);
 
-        Task<ReservationModel> DeleteAsync(int id, IEnumerable<Claim> userClaims);
+        Task<int> GetReservationsCountAsync(ReservationsFilter reservationsFilter);
 
-        IEnumerable<ReservationModel> GetAllReservations(IEnumerable<Claim> userClaims);
+        IEnumerable<ReservationModel> GetPagedReservations(PaginationFilter paginationFilter, ReservationsFilter reservationsFilter);
     }
 }

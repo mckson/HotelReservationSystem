@@ -6,15 +6,17 @@ namespace HotelReservation.Business.Models
 {
     public class ReservationModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
         public HotelModel Hotel { get; set; }
 
-        public string UserId { get; set; }
+        public string FirstName { get; set; }
 
-        public UserModel User { get; set; }
+        public string LastName { get; set; }
+
+        public string Email { get; set; }
 
         public List<ReservationRoomModel> ReservationRooms { get; set; }
 

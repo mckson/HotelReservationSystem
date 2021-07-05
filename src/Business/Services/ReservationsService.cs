@@ -1,12 +1,16 @@
 ﻿using AutoMapper;
+using Castle.Core.Internal;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
+using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -14,34 +18,33 @@ namespace HotelReservation.Business.Services
 {
     public class ReservationsService : IReservationsService
     {
-        private readonly IRepository<ReservationEntity> _reservationRepository;
+        private readonly IReservationRepository _reservationRepository;
         private readonly IMapper _mapper;
         private readonly IHotelRepository _hotelRepository;
         private readonly ILogger _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ReservationsService(
-            IRepository<ReservationEntity> reservationRepository,
+            IReservationRepository reservationRepository,
             IHotelRepository hotelRepository,
+            IHttpContextAccessor httpContextAccessor,
             IMapper mapper,
             ILogger logger)
         {
             _reservationRepository = reservationRepository;
             _hotelRepository = hotelRepository;
+            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
             _logger = logger;
         }
 
-        public async Task<ReservationModel> CreateAsync(ReservationModel reservationModel, IEnumerable<Claim> userClaims)
+        public async Task<ReservationModel> CreateAsync(ReservationModel reservationModel)
         {
             _logger.Debug("Reservation is creating");
 
             await CheckHotelRoomsServicesExistenceAsync(reservationModel);
 
-            reservationModel.ReservedTime = DateTime.Now;
-            reservationModel.UserId = userClaims.FirstOrDefault(claim => claim.Type == "id")?.Value ??
-                                      throw new BusinessException(
-                                          "Cannot maker reservation when user is not authorized",
-                                          ErrorStatus.AccessDenied);
+            reservationModel.ReservedTime = DateTime.Now; // into entity
 
             var reservationEntity = _mapper.Map<ReservationEntity>(reservationModel);
 
@@ -53,14 +56,14 @@ namespace HotelReservation.Business.Services
             return createdReservationModel;
         }
 
-        public async Task<ReservationModel> GetAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<ReservationModel> GetAsync(Guid id)
         {
             _logger.Debug($"Reservation {id} is requesting");
 
             var reservationEntity = await _reservationRepository.GetAsync(id) ??
                                     throw new BusinessException($"No reservation with such id: {id}", ErrorStatus.NotFound);
 
-            CheckReservationManagementPermission(reservationEntity.UserId, userClaims);
+            CheckReservationManagementPermission(reservationEntity.Email);
 
             var reservationModel = _mapper.Map<ReservationModel>(reservationEntity);
 
@@ -69,16 +72,16 @@ namespace HotelReservation.Business.Services
             return reservationModel;
         }
 
-        public async Task<ReservationModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<ReservationModel> DeleteAsync(Guid id)
         {
             _logger.Debug($"Reservation {id} is deleting");
 
-            var checkReservationEntity = await _reservationRepository.GetAsync(id, true) ??
+            var checkReservationEntity = await _reservationRepository.GetAsync(id) ??
                                          throw new BusinessException(
                                              $"No reservation with such id: {id}",
                                              ErrorStatus.NotFound);
 
-            CheckReservationManagementPermission(checkReservationEntity.UserId, userClaims);
+            CheckReservationManagementPermission(checkReservationEntity.Email);
 
             var deletedReservationEntity = await _reservationRepository.DeleteAsync(id);
             var deletedReservationModel = _mapper.Map<ReservationModel>(deletedReservationEntity);
@@ -88,11 +91,11 @@ namespace HotelReservation.Business.Services
             return deletedReservationModel;
         }
 
-        public IEnumerable<ReservationModel> GetAllReservations(IEnumerable<Claim> userClaims)
+        public IEnumerable<ReservationModel> GetAllReservations()
         {
-            _logger.Debug("Reservations is requesting");
+            _logger.Debug("Reservations are requesting");
 
-            CheckReservationManagementPermission(null, userClaims);   // admin only, change
+            CheckReservationManagementPermission(null);   // admin only, change
 
             var reservationEntities = _reservationRepository.GetAll();
             var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
@@ -100,6 +103,50 @@ namespace HotelReservation.Business.Services
             _logger.Debug("Reservations requested");
 
             return reservationModels;
+        }
+
+        public IEnumerable<ReservationModel> GetReservationsByEmail(string email)
+        {
+            _logger.Debug($"Reservations of {email} are requesting");
+
+            var reservationEntities = _reservationRepository.Find(reservation => reservation.Email.Equals(email));
+            var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
+
+            _logger.Debug($"Reservations of {email} requested");
+
+            return reservationModels;
+        }
+
+        public async Task<int> GetReservationsCountAsync(ReservationsFilter reservationsFilter)
+        {
+            _logger.Debug($"Reservations for user {reservationsFilter.Email} count is requesting");
+
+            var count = await _reservationRepository.GetCountAsync(FilterExpression(reservationsFilter));
+
+            _logger.Debug($"Reservations for user {reservationsFilter.Email} count is requested");
+
+            return count;
+        }
+
+        public IEnumerable<ReservationModel> GetPagedReservations(PaginationFilter paginationFilter, ReservationsFilter reservationsFilter)
+        {
+            _logger.Debug(
+                $"Paged reservations for user {reservationsFilter.Email} are requesting. , page: {paginationFilter.PageNumber}, size: {paginationFilter.PageSize}");
+
+            var reservationEntities =
+                _reservationRepository.Find(FilterExpression(reservationsFilter), paginationFilter);
+            var reservationModels = _mapper.Map<IEnumerable<ReservationModel>>(reservationEntities);
+
+            _logger.Debug(
+                $"Paged reservations for user {reservationsFilter.Email} are requested. , page: {paginationFilter.PageNumber}, size: {paginationFilter.PageSize}");
+
+            return reservationModels;
+        }
+
+        private static Expression<Func<ReservationEntity, bool>> FilterExpression(ReservationsFilter reservationsFilter)
+        {
+            return reservation => reservationsFilter.Email.IsNullOrEmpty() ||
+                                  reservation.Email == reservationsFilter.Email;
         }
 
         private async Task CheckHotelRoomsServicesExistenceAsync(ReservationModel reservationModel)
@@ -114,8 +161,8 @@ namespace HotelReservation.Business.Services
 
                 var checkReservation = checkRoomEntity.ReservationRooms.Select(rr => rr.Reservation).FirstOrDefault(
                     reservation =>
-                        (reservation.DateIn >= reservationModel.DateIn && reservation.DateIn <= reservationModel.DateOut) ||
-                        (reservation.DateOut >= reservationModel.DateIn && reservation.DateOut <= reservationModel.DateOut));
+                        (reservation.DateIn >= reservationModel.DateIn && reservation.DateIn < reservationModel.DateOut) ||
+                        (reservation.DateOut > reservationModel.DateIn && reservation.DateOut <= reservationModel.DateOut));
 
                 if (checkReservation != null)
                 {
@@ -134,17 +181,19 @@ namespace HotelReservation.Business.Services
             }
         }
 
-        private void CheckReservationManagementPermission(string reservationUserId, IEnumerable<Claim> userClaims)
+        private void CheckReservationManagementPermission(string reservationEmail)
         {
             _logger.Debug("Permissions is checking");
+
+            var userClaims = _httpContextAccessor.HttpContext.User.Claims;
 
             var claims = userClaims.ToList();
             if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
                 return;
 
-            var userClaimId = claims.FirstOrDefault(claim => claim.Type == "id")?.Value;
+            var userClaimEmail = claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Email))?.Value;
 
-            if (reservationUserId != userClaimId)
+            if (!reservationEmail.Equals(userClaimEmail))
             {
                 throw new BusinessException(
                     "You have no permissions to manage this reservation",

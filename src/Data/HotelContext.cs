@@ -2,10 +2,11 @@
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace HotelReservation.Data
 {
-    public class HotelContext : IdentityDbContext<UserEntity>
+    public class HotelContext : IdentityDbContext<UserEntity, RoleEntity, Guid>
     {
         public HotelContext(DbContextOptions<HotelContext> options)
             : base(options)
@@ -22,10 +23,6 @@ namespace HotelReservation.Data
 
         public DbSet<ServiceEntity> Services { get; set; }
 
-        public DbSet<ReservationRoomEntity> ReservationRooms { get; set; }
-
-        public DbSet<ReservationServiceEntity> ReservationServices { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -36,6 +33,8 @@ namespace HotelReservation.Data
             modelBuilder.ApplyConfiguration(new LocationEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ReservationRoomEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ReservationServiceEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new HotelUserEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new RoomRoomViewEntityConfiguration());
         }
     }
 }

@@ -1,8 +1,10 @@
-﻿namespace HotelReservation.Business.Models
+﻿using System;
+
+namespace HotelReservation.Business.Models
 {
     public class LocationModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Country { get; set; }
 
@@ -14,7 +16,7 @@
 
         public int BuildingNumber { get; set; }
 
-        public int HotelId { get; set; }
+        public Guid HotelId { get; set; }
 
         public HotelModel Hotel { get; set; }
     }

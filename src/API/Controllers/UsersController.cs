@@ -1,16 +1,18 @@
 ﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models.UserModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize(Policy = "AdminPermission")]
+    [Authorize(Policy = Policies.AdminPermission)]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -26,7 +28,6 @@ namespace HotelReservation.API.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/<UsersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserResponseModel>>> GetAllUsersAsync()
         {
@@ -37,16 +38,14 @@ namespace HotelReservation.API.Controllers
             return Ok(userResponseModels);
         }
 
-        // GET api/<UsersController>/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(string id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(Guid id)
         {
             var userModel = await _usersService.GetAsync(id);
 
             return Ok(_mapper.Map<UserResponseModel>(userModel));
         }
 
-        // POST api/<UsersController>
         [HttpPost]
         public async Task<ActionResult<UserResponseModel>> CreateUserAsync([FromBody] UserAdminCreationRequestModel creatingUser)
         {
@@ -56,9 +55,8 @@ namespace HotelReservation.API.Controllers
             return Ok(_mapper.Map<UserResponseModel>(addedUser));
         }
 
-        // PUT api/<UsersController>/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(string id, [FromBody] UserUpdateRequestModel user)
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(Guid id, [FromBody] UserUpdateRequestModel user)
         {
             var currentUserClaims = User.Claims;
 
@@ -69,15 +67,14 @@ namespace HotelReservation.API.Controllers
             return Ok(updatedUserResponseModel);
         }
 
-        // DELETE api/<UsersController>/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(string id)
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(Guid id)
         {
             var currentUserClaims = User.Claims;
-            var deletedUser = await _usersService.DeleteAsync(id, currentUserClaims);
-            var deletedUserResponse = _mapper.Map<UserResponseModel>(deletedUser);
 
-            return Ok(deletedUserResponse);
+            await _usersService.DeleteAsync(id, currentUserClaims);
+
+            return Ok();
         }
     }
 }

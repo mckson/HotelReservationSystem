@@ -1,52 +1,68 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
+using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
 {
     public class RoomsService : IRoomsService
     {
-        private readonly IRepository<RoomEntity> _roomsRepository;
+        private readonly IRoomRepository _roomsRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
         private readonly IHotelRepository _hotelRepository;
+        private readonly IManagementPermissionSupervisor _supervisor;
+        private readonly IRoomViewRepository _roomViewRepository;
 
         public RoomsService(
-            IRepository<RoomEntity> roomsRepository,
+            IRoomRepository roomsRepository,
             IHotelRepository hotelRepository,
+            IRoomViewRepository roomViewRepository,
+            IManagementPermissionSupervisor supervisor,
             IMapper mapper,
             ILogger logger)
         {
             _roomsRepository = roomsRepository;
             _hotelRepository = hotelRepository;
+            _roomViewRepository = roomViewRepository;
+            _supervisor = supervisor;
             _mapper = mapper;
             _logger = logger;
         }
 
-        public async Task<RoomModel> CreateAsync(RoomModel roomModel, IEnumerable<Claim> userClaims)
+        public async Task<RoomModel> CreateAsync(RoomModel roomModel)
         {
             _logger.Debug("Room is creating");
 
             var roomEntity = _mapper.Map<RoomEntity>(roomModel);
 
-            var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId) ??
-                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
+            if (roomEntity.HotelId != null)
+            {
+                var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId.Value) ??
+                                  throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
+                await _supervisor.CheckHotelManagementPermissionAsync(hotelEntity.Id);
 
-            if (hotelEntity.Rooms.Any(room => room.RoomNumber == roomEntity.RoomNumber))
-                throw new BusinessException("Hotel already has room with such number", ErrorStatus.AlreadyExist);
+                if (hotelEntity.Rooms.Any(room => room.RoomNumber == roomEntity.RoomNumber))
+                    throw new BusinessException("Hotel already has room with such number", ErrorStatus.AlreadyExist);
 
-            if (roomModel.FloorNumber > hotelEntity.NumberFloors)
-                throw new BusinessException($"There are only {hotelEntity.NumberFloors} floors in {hotelEntity.Name}", ErrorStatus.IncorrectInput);
+                if (roomModel.FloorNumber > hotelEntity.NumberFloors)
+                    throw new BusinessException($"There are only {hotelEntity.NumberFloors} floors in {hotelEntity.Name}", ErrorStatus.IncorrectInput);
+            }
+            else
+            {
+                throw new BusinessException(
+                    "Hotel id was null. Room cannot be created without hotel",
+                    ErrorStatus.NotFound);
+            }
 
             var createdRoomEntity = await _roomsRepository.CreateAsync(roomEntity);
             var createdRoomModel = _mapper.Map<RoomModel>(createdRoomEntity);
@@ -56,7 +72,7 @@ namespace HotelReservation.Business.Services
             return createdRoomModel;
         }
 
-        public async Task<RoomModel> GetAsync(int id)
+        public async Task<RoomModel> GetAsync(Guid id)
         {
             _logger.Debug($"Room {id} is requesting");
 
@@ -70,14 +86,24 @@ namespace HotelReservation.Business.Services
             return roomModel;
         }
 
-        public async Task<RoomModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<RoomModel> DeleteAsync(Guid id)
         {
             _logger.Debug($"Room {id} is deleting");
 
-            var roomEntity = await _roomsRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var roomEntity = await _roomsRepository.GetAsync(id) ??
                              throw new BusinessException("No room with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(roomEntity.HotelId, userClaims);
+            if (roomEntity.HotelId != null)
+            {
+                await _supervisor.CheckHotelManagementPermissionAsync(roomEntity.HotelId.Value);
+            }
+            else
+            {
+                throw new BusinessException(
+                    "Hotel id was null. Room cannot be created without hotel",
+                    ErrorStatus.NotFound);
+            }
 
             var deletedRoomEntity = await _roomsRepository.DeleteAsync(id);
             var deletedRoomModel = _mapper.Map<RoomModel>(deletedRoomEntity);
@@ -87,27 +113,77 @@ namespace HotelReservation.Business.Services
             return deletedRoomModel;
         }
 
-        public async Task<RoomModel> UpdateAsync(int id, RoomModel updatingRoomModel, IEnumerable<Claim> userClaims)
+        public async Task<RoomModel> UpdateAsync(Guid id, RoomModel updatingRoomModel)
         {
             _logger.Debug($"Room {id} is updating");
 
-            var roomEntity = await _roomsRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var roomEntity = await _roomsRepository.GetAsync(id) ??
                              throw new BusinessException("No room with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(roomEntity.HotelId, userClaims);
+            if (roomEntity.HotelId != null)
+            {
+                await _supervisor.CheckHotelManagementPermissionAsync(roomEntity.HotelId.Value);
 
-            var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId, true);
+                // was as no tracking
+                var hotelEntity = await _hotelRepository.GetAsync(roomEntity.HotelId.Value);
 
-            if (updatingRoomModel.FloorNumber > hotelEntity.NumberFloors)
-                throw new BusinessException($"There are only {hotelEntity.NumberFloors} floors in {hotelEntity.Name}", ErrorStatus.IncorrectInput);
+                if (updatingRoomModel.FloorNumber > hotelEntity.NumberFloors)
+                {
+                    throw new BusinessException(
+                        $"There are only {hotelEntity.NumberFloors} floors in {hotelEntity.Name}",
+                        ErrorStatus.IncorrectInput);
+                }
 
-            var updatingRoomEntity = _mapper.Map<RoomEntity>(updatingRoomModel);
-            updatingRoomEntity.Id = id;
+                if (hotelEntity.Rooms.Any(room => room.RoomNumber == updatingRoomModel.RoomNumber && room.Id != id))
+                {
+                    throw new BusinessException("Hotel already has room with such number", ErrorStatus.AlreadyExist);
+                }
+            }
+            else
+            {
+                throw new BusinessException(
+                    "Hotel id was null. Room cannot be created without hotel",
+                    ErrorStatus.NotFound);
+            }
 
+            roomEntity.Name = updatingRoomModel.Name;
+            roomEntity.RoomNumber = updatingRoomModel.RoomNumber;
+            roomEntity.FloorNumber = updatingRoomModel.FloorNumber;
+            roomEntity.Price = updatingRoomModel.Price;
+            roomEntity.Capacity = updatingRoomModel.Capacity;
+            roomEntity.Area = updatingRoomModel.Area;
+            roomEntity.Description = updatingRoomModel.Description;
+            roomEntity.Smoking = updatingRoomModel.Smoking;
+            roomEntity.Parking = updatingRoomModel.Parking;
+
+            roomEntity.Facilities.RemoveAll(f => f.RoomId == id);
+            roomEntity.Facilities = _mapper.Map<List<RoomFacilityEntity>>(updatingRoomModel.Facilities);
+
+            var roomRoomViews = new List<RoomRoomViewEntity>();
+            roomEntity.RoomViews.RemoveAll(rr => rr.RoomId == roomEntity.Id);
+
+            if (updatingRoomModel.RoomViews != null)
+            {
+                foreach (var roomRoomView in updatingRoomModel.RoomViews)
+                {
+                    var unused = await _roomViewRepository.GetAsync(roomRoomView.RoomViewId) ??
+                                 throw new BusinessException("There is no room view with such id", ErrorStatus.NotFound);
+
+                    roomRoomViews.Add(new RoomRoomViewEntity() { RoomViewId = roomRoomView.RoomViewId });
+                }
+            }
+
+            if (roomRoomViews.Count > 0)
+            {
+                roomEntity.RoomViews = roomRoomViews;
+            }
+
+            // roomEntity.RoomViews = _mapper.Map<IEnumerable<RoomRoomViewEntity>>(updatingRoomModel.RoomViews);
             RoomEntity updatedRoomEntity;
             try
             {
-                updatedRoomEntity = await _roomsRepository.UpdateAsync(updatingRoomEntity);
+                updatedRoomEntity = await _roomsRepository.UpdateAsync(roomEntity);
             }
             catch (Exception ex)
             {
@@ -134,35 +210,37 @@ namespace HotelReservation.Business.Services
             return roomModels;
         }
 
-        private async Task CheckHotelManagementPermissionAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<int> GetCountAsync(RoomsFilter filter)
         {
-            _logger.Debug($"Permissions for managing hotel with id {id} is checking");
+            _logger.Debug("Rooms count are requesting");
 
-            var claims = userClaims.ToList();
-            if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
-                return;
+            var count = await _roomsRepository.GetCountAsync(FilterExpression(filter));
 
-            var hotelEntity = await _hotelRepository.GetAsync(id, true) ??
-                              throw new BusinessException($"No hotel with such id {id}", ErrorStatus.NotFound);
+            _logger.Debug("Rooms count are requested");
+            return count;
+        }
 
-            var hotelIdString = claims.FirstOrDefault(claim => claim.Type == "hotelId")?.Value;
-            int.TryParse(hotelIdString, out var hotelId);
+        public IEnumerable<RoomModel> GetPagedRooms(
+            PaginationFilter paginationFilter,
+            RoomsFilter filter)
+        {
+            _logger.Debug($"Paged rooms are requesting, page: {paginationFilter.PageNumber}, size: {paginationFilter.PageSize}");
 
-            if (hotelId == 0)
-            {
-                throw new BusinessException(
-                    "You have no permissions to manage hotels. Ask application admin to take that permission",
-                    ErrorStatus.AccessDenied);
-            }
+            var roomEntities = _roomsRepository.Find(FilterExpression(filter), paginationFilter);
+            var roomModels = _mapper.Map<IEnumerable<RoomModel>>(roomEntities);
 
-            if (hotelId != hotelEntity.Id)
-            {
-                throw new BusinessException(
-                    $"You have no permission to manage hotel {hotelEntity.Name}. Ask application admin about permissions",
-                    ErrorStatus.AccessDenied);
-            }
+            _logger.Debug($"Paged rooms are requested, page: {paginationFilter.PageNumber}, size: {paginationFilter.PageSize}");
 
-            _logger.Debug($"Permissions for managing hotel with id {id} checked");
+            return roomModels;
+        }
+
+        private static Expression<Func<RoomEntity, bool>> FilterExpression(RoomsFilter filter)
+        {
+            return room =>
+                room.HotelId.Value.Equals(filter.HotelId) &&
+                ((!filter.DateIn.HasValue || !filter.DateOut.HasValue) || !room.ReservationRooms.Any(rr =>
+                        (rr.Reservation.DateIn >= filter.DateIn && rr.Reservation.DateIn < filter.DateOut) ||
+                        (rr.Reservation.DateOut > filter.DateIn && rr.Reservation.DateOut <= filter.DateOut)));
         }
     }
 }

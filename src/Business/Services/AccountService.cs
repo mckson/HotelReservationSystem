@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Castle.Core.Internal;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -131,6 +131,11 @@ namespace HotelReservation.Business.Services
 
             var refreshToken = userEntity.RefreshToken;
 
+            if (refreshToken == null)
+            {
+                throw new BusinessException("Refresh token for current user is not found", ErrorStatus.NotFound);
+            }
+
             if (!refreshToken.IsActive)
             {
                 throw new BusinessException(
@@ -173,16 +178,15 @@ namespace HotelReservation.Business.Services
             _logger.Debug($"Refresh token {token} is revoking");
 
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken.Token == token);
-            var userModel = _mapper.Map<UserModel>(user);
 
-            if (userModel == null)
+            if (user == null)
             {
                 throw new BusinessException(
                     "Invalid refresh token. User for such refresh token does not exist",
                     ErrorStatus.NotFound);
             }
 
-            var refreshToken = userModel.RefreshToken;
+            var refreshToken = user.RefreshToken;
 
             if (!refreshToken.IsActive)
             {
@@ -196,7 +200,7 @@ namespace HotelReservation.Business.Services
 
             _logger.Debug($"Refresh token {token} revoked");
 
-            await _userManager.UpdateAsync(_mapper.Map<UserEntity>(userModel));
+            await _userManager.UpdateAsync(user);
         }
 
         private async Task<ClaimsIdentity> GetIdentityAsync(UserAuthenticationModel userAuth)
@@ -208,23 +212,30 @@ namespace HotelReservation.Business.Services
 
             var claims = new List<Claim>
             {
-                // this guarantees the token is unique
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("id", userEntity.Id),
-                new Claim("hotelId", userEntity.HotelId.HasValue ? userEntity.HotelId.Value.ToString() : "0")
+                new Claim(ClaimNames.Id, userEntity.Id.ToString()),
+                new Claim(ClaimNames.Name, userEntity.UserName),
+                new Claim(ClaimNames.FirstName, userEntity.FirstName),
+                new Claim(ClaimNames.LastName, userEntity.LastName),
+                new Claim(ClaimNames.Email, userEntity.Email)
             };
 
             // Adds all roles to claims
             foreach (var role in await _userManager.GetRolesAsync(userEntity))
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(ClaimNames.Roles, role));
+            }
+
+            if (userEntity.HotelUsers != null)
+            {
+                foreach (var hotelUsers in userEntity.HotelUsers)
+                {
+                    claims.Add(new Claim(ClaimNames.Hotels, hotelUsers.HotelId.ToString()));
+                }
             }
 
             var claimsIdentity = new ClaimsIdentity(
                 claims,
-                "Token",
-                ClaimsIdentity.DefaultNameClaimType,
-                ClaimsIdentity.DefaultRoleClaimType);
+                "Token");
 
             return claimsIdentity;
         }

@@ -1,5 +1,6 @@
 ﻿using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -12,10 +13,10 @@ namespace HotelReservation.Business.Interfaces
 
         Task<UserModel> CreateAsync(UserRegistrationModel userModel);
 
-        Task<UserModel> GetAsync(string id);
+        Task<UserModel> GetAsync(Guid id);
 
-        Task<UserModel> DeleteAsync(string id, IEnumerable<Claim> currentUserClaims);
+        Task<bool> DeleteAsync(Guid id, IEnumerable<Claim> currentUserClaims);
 
-        Task<UserModel> UpdateAsync(string id, UserUpdateModel updatingUserUpdateModel, IEnumerable<Claim> currentUserClaims);
+        Task<UserModel> UpdateAsync(Guid id, UserUpdateModel updatingUserUpdateModel, IEnumerable<Claim> currentUserClaims);
     }
 }

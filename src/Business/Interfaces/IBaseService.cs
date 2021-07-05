@@ -1,17 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Security.Claims;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Interfaces
 {
-    public interface IBaseService<TEntity, TModel>
+    public interface IBaseService<TModel>
     {
-        public Task<TModel> CreateAsync(TModel userModel, IEnumerable<Claim> userClaims);
+        public Task<TModel> CreateAsync(TModel userModel);
 
-        public Task<TModel> GetAsync(int id);
+        public Task<TModel> GetAsync(Guid id);
 
-        public Task<TModel> DeleteAsync(int id, IEnumerable<Claim> userClaims);
-
-        public Task<TModel> UpdateAsync(int id, TModel updatingRoomModel, IEnumerable<Claim> userClaims);
+        public Task<TModel> DeleteAsync(Guid id);
     }
 }

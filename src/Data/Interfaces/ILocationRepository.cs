@@ -10,7 +10,6 @@ namespace HotelReservation.Data.Interfaces
             string region,
             string city,
             string street,
-            int building,
-            bool asNoTracking = false);
+            int building);
     }
 }

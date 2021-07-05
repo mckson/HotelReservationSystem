@@ -1,22 +1,29 @@
-﻿using System;
+﻿using HotelReservation.Data.Filters;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Data.Interfaces
 {
     public interface IRepository<TEntity>
-        where TEntity : class
+        where TEntity : IEntity
     {
-        IEnumerable<TEntity> GetAll(bool asNoTracking = false);
+        Task<int> GetCountAsync(Expression<Func<TEntity, bool>> predicate);
 
-        Task<TEntity> GetAsync(int id, bool asNoTracking = false);
+        IEnumerable<TEntity> GetAll();
 
-        IEnumerable<TEntity> Find(Func<TEntity, bool> predicate, bool asNoTracking = false);
+        Task<TEntity> GetAsync(Guid id);
 
-        Task<TEntity> CreateAsync(TEntity item);
+        IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
 
-        Task<TEntity> UpdateAsync(TEntity newItem);
+        IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, PaginationFilter paginationFilter);
 
-        Task<TEntity> DeleteAsync(int id);
+        Task<TEntity> CreateAsync(TEntity entity);
+
+        Task<TEntity> UpdateAsync(TEntity newEntity);
+
+        Task<TEntity> DeleteAsync(Guid id);
     }
 }

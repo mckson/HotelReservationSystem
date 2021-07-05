@@ -2,6 +2,7 @@
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
+using System.Linq;
 
 namespace HotelReservation.Business
 {
@@ -9,19 +10,27 @@ namespace HotelReservation.Business
     {
         public ModelEntityMapperProfile()
         {
-            CreateMap<HotelEntity, HotelModel>().ReverseMap();
+            CreateMap<HotelEntity, HotelModel>().ForMember(
+                model => model.MainImage,
+                options => options.MapFrom(entity => entity.Images.FirstOrDefault(image => image.IsMain)));
+            CreateMap<HotelModel, HotelEntity>();
             CreateMap<LocationEntity, LocationModel>().ReverseMap();
             CreateMap<RefreshTokenEntity, RefreshTokenModel>().ReverseMap();
             CreateMap<ReservationEntity, ReservationModel>().ReverseMap();
             CreateMap<ReservationRoomEntity, ReservationRoomModel>().ReverseMap();
             CreateMap<ReservationServiceEntity, ReservationServiceModel>().ReverseMap();
+            CreateMap<HotelUserEntity, HotelUserModel>().ReverseMap();
             CreateMap<RoomEntity, RoomModel>().ReverseMap();
             CreateMap<ServiceEntity, ServiceModel>().ReverseMap();
             CreateMap<UserEntity, UserModel>().ReverseMap();
+            CreateMap<HotelImageEntity, HotelImageModel>().ReverseMap();
+            CreateMap<RoomImageEntity, RoomImageModel>().ReverseMap();
+            CreateMap<RoomViewEntity, RoomViewModel>().ReverseMap();
+            CreateMap<RoomFacilityEntity, RoomFacilityModel>().ReverseMap();
+            CreateMap<RoomRoomViewEntity, RoomRoomViewModel>().ReverseMap();
 
             CreateMap<UserRegistrationModel, UserEntity>();
             CreateMap<UserUpdateModel, UserEntity>();
-            // CreateMap<UserAuthenticationModel, UserModel>();
             CreateMap<UserRegistrationModel, UserAuthenticationModel>();
             CreateMap<UserModel, UserAuthenticationModel>();
         }

@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.API.Models.ResponseModels
 {
     public class RoomResponseModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
+
+        public string Name { get; set; }
 
         public int RoomNumber { get; set; }
 
@@ -12,10 +15,24 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public int Capacity { get; set; }
 
+        public double Area { get; set; }
+
+        public string Description { get; set; }
+
         public double Price { get; set; }
 
-        public int HotelId { get; set; }
+        public bool Smoking { get; set; }
 
-        public IEnumerable<int> Reservations { get; set; }
+        public bool Parking { get; set; }
+
+        public Guid HotelId { get; set; }
+
+        public IEnumerable<Guid> Reservations { get; set; }
+
+        public virtual IEnumerable<RoomFacilityResponseModel> Facilities { get; set; }
+
+        public virtual IEnumerable<RoomViewResponseModel> Views { get; set; }
+
+        public IEnumerable<Uri> Images { get; set; }
     }
 }

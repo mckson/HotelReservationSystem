@@ -1,47 +1,64 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
+using HotelReservation.API.Helpers;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
+using HotelReservation.Data.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HotelsController : ControllerBase
     {
-        private readonly IHotelsService _service;
+        private readonly IHotelsService _hotelsService;
         private readonly IMapper _mapper;
+        private readonly IUriService _uriService;
 
-        public HotelsController(IHotelsService service, IMapper mapper)
+        public HotelsController(IHotelsService hotelsService, IMapper mapper, IUriService uriService)
         {
-            _service = service;
+            _hotelsService = hotelsService;
+            _uriService = uriService;
             _mapper = mapper;
         }
 
-        // GET: api/<HotelsController>
         [AllowAnonymous]
         [HttpGet]
-        public IEnumerable<HotelResponseModel> GetHotels()
+        public async Task<BasePagedResponseModel<HotelResponseModel>> GetHotelsAsync([FromQuery] PaginationFilter paginationFilter, [FromQuery] HotelsFilter hotelsFilter)
         {
-            var hotelsResponse = _mapper.Map<IEnumerable<HotelResponseModel>>(_service.GetHotels());
-            /*if (hotelsResponse == null)
-                return NotFound("There is no hotels in system");*/
+            var route = Request.Path.Value;
 
-            return hotelsResponse;
+            var validatedFilter = new PaginationFilter(paginationFilter.PageNumber, paginationFilter.PageSize.Value);
+
+            var hotelsModel =
+                await _hotelsService.GetPagedHotelsAsync(validatedFilter, hotelsFilter);
+            var totalHotels = await _hotelsService.GetCountAsync(hotelsFilter);
+
+            var hotelsResponse = _mapper.Map<IEnumerable<HotelResponseModel>>(hotelsModel);
+
+            var pagedHotelsResponse = PaginationHelper.CreatePagedResponseModel(
+                hotelsResponse,
+                validatedFilter,
+                totalHotels,
+                _uriService,
+                route);
+
+            return pagedHotelsResponse;
         }
 
-        // GET api/<HotelsController>/5
         [AllowAnonymous]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(Guid id)
         {
-            var hotelModel = await _service.GetAsync(id);
+            var hotelModel = await _hotelsService.GetAsync(id);
             var hotelResponse = _mapper.Map<HotelResponseModel>(hotelModel);
 
             if (hotelResponse == null)
@@ -50,53 +67,65 @@ namespace HotelReservation.API.Controllers
             return Ok(hotelResponse);
         }
 
-        // GET api/<HotelsController>/5
-        [AllowAnonymous]
-        [HttpGet("{name}")]
-        public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(string name)
-        {
-            var hotelResponse = _mapper.Map<HotelResponseModel>(await _service.GetHotelByNameAsync(name));
-
-            return Ok(hotelResponse);
-        }
-
-        // POST api/<HotelsController>
-        [Authorize(Policy = "AdminPermission")]
+        // // GET api/<HotelsController>/hotelName
+        // [AllowAnonymous]
+        // [HttpGet("{name}")]
+        // public async Task<ActionResult<HotelResponseModel>> GetHotelByIdAsync(string name)
+        // {
+        //     var hotelResponse = _mapper.Map<HotelResponseModel>(await _hotelsService.GetHotelByNameAsync(name))
+        //     return Ok(hotelResponse);
+        // }
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpPost]
         public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] HotelRequestModel hotelRequest)
         {
-            var userClaims = User.Claims;
+            var hotelModel = _mapper.Map<HotelModel>(hotelRequest);
+            hotelModel.HotelUsers = new List<HotelUserModel>();
+
+            if (hotelRequest.Managers != null)
+            {
+                hotelModel.HotelUsers.AddRange(hotelRequest.Managers
+                    .Select(manager => new HotelUserModel { UserId = manager }).ToList());
+            }
+
+            var createdHotel = await _hotelsService.CreateAsync(hotelModel);
+
             var hotelResponse =
-                _mapper.Map<HotelResponseModel>(await _service.CreateAsync(
-                    _mapper.Map<HotelModel>(hotelRequest),
-                    userClaims));
+                _mapper.Map<HotelResponseModel>(createdHotel);
 
             return Ok(hotelResponse);
         }
 
-        // PUT api/<HotelsController>/5
-        [Authorize(Policy = "AdminManagerPermission")]
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(int id, [FromBody] HotelRequestModel hotelRequest)
+        [HttpPut("{id:guid}")]
+        [Authorize(Policy = Policies.AdminPermission)]
+        public async Task<ActionResult<HotelResponseModel>> UpdateHotelAsync(Guid id, [FromBody] HotelRequestModel hotelRequest)
         {
-            var userClaims = User.Claims;
+            var hotelModel = _mapper.Map<HotelModel>(hotelRequest);
+            hotelModel.HotelUsers = new List<HotelUserModel>();
+
+            if (hotelRequest.Managers != null)
+            {
+                hotelModel.HotelUsers.AddRange(hotelRequest.Managers
+                    .Select(manager => new HotelUserModel { UserId = manager }).ToList());
+            }
+
+            var updatedHotel = await _hotelsService.UpdateAsync(
+                id,
+                hotelModel);
+
             var hotelResponse =
-                _mapper.Map<HotelResponseModel>(await _service.UpdateAsync(
-                    id,
-                    _mapper.Map<HotelModel>(hotelRequest),
-                    userClaims));
+                _mapper.Map<HotelResponseModel>(updatedHotel);
 
             return Ok(hotelResponse);
         }
 
-        // DELETE api/<HotelsController>/5
-        [HttpDelete("{id:int}")]
-        [Authorize(Policy = "AdminManagerPermission")]
-        public async Task<ActionResult> DeleteHotelAsync(int id)
+        [HttpDelete("{id:guid}")]
+        [Authorize(Policy = Policies.AdminPermission)]
+        public async Task<ActionResult<HotelResponseModel>> DeleteHotelAsync(Guid id)
         {
-            var userClaims = User.Claims;
-            await _service.DeleteAsync(id, userClaims);
-            return Ok();
+            var deletedHotelModel = await _hotelsService.DeleteAsync(id);
+            var deletedHotelResponse = _mapper.Map<HotelResponseModel>(deletedHotelModel);
+            return Ok(deletedHotelResponse);
         }
     }
 }

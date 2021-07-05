@@ -2,6 +2,6 @@
 {
     public class ReservationServiceRequestModel
     {
-        public int ServiceId { get; set; }
+        public string ServiceId { get; set; }
     }
 }

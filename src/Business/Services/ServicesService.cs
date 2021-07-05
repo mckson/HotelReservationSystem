@@ -7,7 +7,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
@@ -15,35 +14,47 @@ namespace HotelReservation.Business.Services
     public class ServicesService : IServicesService
     {
         private readonly IMapper _mapper;
-        private readonly IRepository<ServiceEntity> _serviceRepository;
+        private readonly IServiceRepository _serviceRepository;
         private readonly IHotelRepository _hotelRepository;
         private readonly ILogger _logger;
+        private readonly IManagementPermissionSupervisor _supervisor;
 
         public ServicesService(
-            IRepository<ServiceEntity> serviceRepository,
+            IServiceRepository serviceRepository,
             IHotelRepository hotelRepository,
+            IManagementPermissionSupervisor supervisor,
             IMapper mapper,
             ILogger logger)
         {
             _serviceRepository = serviceRepository;
             _hotelRepository = hotelRepository;
+            _supervisor = supervisor;
             _mapper = mapper;
             _logger = logger;
         }
 
-        public async Task<ServiceModel> CreateAsync(ServiceModel serviceModel, IEnumerable<Claim> userClaims)
+        public async Task<ServiceModel> CreateAsync(ServiceModel serviceModel)
         {
             _logger.Debug("Service is creating");
 
             var serviceEntity = _mapper.Map<ServiceEntity>(serviceModel);
 
-            var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId) ??
-                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
+            if (serviceEntity.HotelId != null)
+            {
+                var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId.Value) ??
+                                  throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
+                await _supervisor.CheckHotelManagementPermissionAsync(hotelEntity.Id);
 
-            if (hotelEntity.Services.Any(service => string.Equals(service.Name, serviceEntity.Name, StringComparison.CurrentCultureIgnoreCase)))
-                throw new BusinessException($"Service with such name already exist in {hotelEntity.Name}", ErrorStatus.AlreadyExist);
+                if (hotelEntity.Services.Any(service => string.Equals(service.Name, serviceEntity.Name, StringComparison.CurrentCultureIgnoreCase)))
+                    throw new BusinessException($"Service with such name already exist in {hotelEntity.Name}", ErrorStatus.AlreadyExist);
+            }
+            else
+            {
+                throw new BusinessException(
+                    "Hotel id was null. Room cannot be created without hotel",
+                    ErrorStatus.NotFound);
+            }
 
             var createdServiceEntity = await _serviceRepository.CreateAsync(serviceEntity);
             var createdServiceModel = _mapper.Map<ServiceModel>(createdServiceEntity);
@@ -53,7 +64,7 @@ namespace HotelReservation.Business.Services
             return createdServiceModel;
         }
 
-        public async Task<ServiceModel> GetAsync(int id)
+        public async Task<ServiceModel> GetAsync(Guid id)
         {
             _logger.Debug($"Service {id} is requesting");
 
@@ -69,14 +80,24 @@ namespace HotelReservation.Business.Services
             return serviceModel;
         }
 
-        public async Task<ServiceModel> DeleteAsync(int id, IEnumerable<Claim> userClaims)
+        public async Task<ServiceModel> DeleteAsync(Guid id)
         {
             _logger.Debug($"Service {id} is deleting");
 
-            var serviceEntity = await _serviceRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var serviceEntity = await _serviceRepository.GetAsync(id) ??
                                 throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(serviceEntity.HotelId, userClaims);
+            if (serviceEntity.HotelId != null)
+            {
+                await _supervisor.CheckHotelManagementPermissionAsync(serviceEntity.HotelId.Value);
+            }
+            else
+            {
+                throw new BusinessException(
+                    "Hotel id was null. Room cannot be created without hotel",
+                    ErrorStatus.NotFound);
+            }
 
             var deletedServiceEntity = await _serviceRepository.DeleteAsync(id);
             var deletedServiceModel = _mapper.Map<ServiceModel>(deletedServiceEntity);
@@ -86,35 +107,46 @@ namespace HotelReservation.Business.Services
             return deletedServiceModel;
         }
 
-        public async Task<ServiceModel> UpdateAsync(int id, ServiceModel updatingServiceModel, IEnumerable<Claim> userClaims)
+        public async Task<ServiceModel> UpdateAsync(Guid id, ServiceModel updatingServiceModel)
         {
             _logger.Debug($"Service {id} is updating");
 
-            var serviceEntity = await _serviceRepository.GetAsync(id, true) ??
+            // was as no tracking
+            var serviceEntity = await _serviceRepository.GetAsync(id) ??
                              throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
-            var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId) ??
-                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
+            if (serviceEntity.HotelId != null)
+            {
+                var hotelEntity = await _hotelRepository.GetAsync(serviceEntity.HotelId.Value) ??
+                                  throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
 
-            await CheckHotelManagementPermissionAsync(hotelEntity.Id, userClaims);
+                await _supervisor.CheckHotelManagementPermissionAsync(hotelEntity.Id);
 
-            if (_serviceRepository.GetAll(true).Any(service =>
-                string.Equals(service.Name, updatingServiceModel.Name, StringComparison.CurrentCultureIgnoreCase) &&
-                service.HotelId == serviceEntity.HotelId &&
-                serviceEntity.Id != service.Id))
+                // was as no tracking
+                if (_serviceRepository.GetAll().Any(service =>
+                    string.Equals(service.Name, updatingServiceModel.Name, StringComparison.CurrentCultureIgnoreCase) &&
+                    service.HotelId == serviceEntity.HotelId &&
+                    serviceEntity.Id != service.Id))
+                {
+                    throw new BusinessException(
+                        $"Service with such name already exist in {hotelEntity.Name}",
+                        ErrorStatus.AlreadyExist);
+                }
+            }
+            else
             {
                 throw new BusinessException(
-                    $"Service with such name already exist in {hotelEntity.Name}",
-                    ErrorStatus.AlreadyExist);
+                    "Hotel id was null. Room cannot be created without hotel",
+                    ErrorStatus.NotFound);
             }
 
-            var updatingServiceEntity = _mapper.Map<ServiceEntity>(updatingServiceModel);
-            updatingServiceEntity.Id = id;
+            serviceEntity.Name = updatingServiceModel.Name;
+            serviceEntity.Price = updatingServiceModel.Price;
 
             ServiceEntity updatedServiceEntity;
             try
             {
-                updatedServiceEntity = await _serviceRepository.UpdateAsync(updatingServiceEntity);
+                updatedServiceEntity = await _serviceRepository.UpdateAsync(serviceEntity);
             }
             catch (Exception ex)
             {
@@ -140,37 +172,6 @@ namespace HotelReservation.Business.Services
             _logger.Debug("Services requested");
 
             return serviceModels;
-        }
-
-        private async Task CheckHotelManagementPermissionAsync(int id, IEnumerable<Claim> userClaims)
-        {
-            _logger.Debug($"Permissions for managing hotel with id {id} is checking");
-
-            var claims = userClaims.ToList();
-            if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
-                return;
-
-            var hotelEntity = await _hotelRepository.GetAsync(id, true) ??
-                              throw new BusinessException("No hotel with such id", ErrorStatus.NotFound);
-
-            var hotelIdString = claims.FirstOrDefault(claim => claim.Type == "hotelId")?.Value;
-            int.TryParse(hotelIdString, out var hotelId);
-
-            if (hotelId == 0)
-            {
-                throw new BusinessException(
-                    "You have no permissions to manage hotels. Ask application admin to take that permission",
-                    ErrorStatus.AccessDenied);
-            }
-
-            if (hotelId != hotelEntity.Id)
-            {
-                throw new BusinessException(
-                    $"You have no permission to manage hotel {hotelEntity.Name}. Ask application admin about permissions",
-                    ErrorStatus.AccessDenied);
-            }
-
-            _logger.Debug($"Permissions for managing hotel with id {id} checked");
         }
     }
 }

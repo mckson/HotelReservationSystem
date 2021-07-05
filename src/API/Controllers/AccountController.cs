@@ -28,12 +28,12 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("SignIn")]
-        public async Task<ActionResult<UserTokenAndIdResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
+        public async Task<ActionResult<TokenResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
         {
             var userAuthModel = _mapper.Map<UserAuthenticationModel>(userAuthRequestModel);
             var loggedUser = await _accountService.AuthenticateAsync(userAuthModel);
 
-            var responseUser = _mapper.Map<UserTokenAndIdResponseModel>(loggedUser);
+            var responseUser = _mapper.Map<TokenResponseModel>(loggedUser);
             SetTokenCookie(responseUser.RefreshToken);
 
             return Ok(responseUser);
@@ -41,7 +41,7 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("SignUp")]
-        public async Task<ActionResult<UserTokenAndIdResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
+        public async Task<ActionResult<TokenResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
         {
             var userModel = _mapper.Map<UserRegistrationModel>(userRequestModel);
             var registeredUserAuth = await _accountService.RegisterAsync(userModel);
@@ -51,25 +51,27 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("RefreshToken")]
-        public async Task<ActionResult<UserTokenAndIdResponseModel>> RefreshToken()
+        public async Task<ActionResult<TokenResponseModel>> RefreshToken([FromBody] RefreshTokenRequestModel refreshToken)
         {
-            var refreshToken = Request.Cookies["RefreshToken"];
-            var response = await _accountService.RefreshToken(refreshToken);
+            // var refreshToken = Request.Cookies["RefreshToken"];
+            var response = await _accountService.RefreshToken(refreshToken.Token);
 
             if (response == null)
                 return Unauthorized(new { message = "Invalid token" });
 
-            var responseUser = _mapper.Map<UserTokenAndIdResponseModel>(response);
+            var responseUser = _mapper.Map<TokenResponseModel>(response);
             SetTokenCookie(responseUser.RefreshToken);
 
             return Ok(responseUser);
         }
 
-        [HttpPost("LogOut")]
-        public async Task<IActionResult> RevokeTokenAsync()
+        [AllowAnonymous]
+        [HttpPost("SignOut")]
+        public async Task<IActionResult> RevokeTokenAsync([FromBody] RefreshTokenRequestModel refreshToken)
         {
             // accept token from request body or cookie
-            var token = Request.Cookies["refreshToken"];
+            // var token = Request.Cookies["refreshToken"];
+            var token = refreshToken.Token;
 
             await _accountService.RevokeTokenAsync(token);
 

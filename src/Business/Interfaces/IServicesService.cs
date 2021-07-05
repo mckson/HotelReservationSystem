@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using HotelReservation.Business.Models;
-using HotelReservation.Data.Entities;
+﻿using HotelReservation.Business.Models;
+using System.Collections.Generic;
 
 namespace HotelReservation.Business.Interfaces
 {
-    public interface IServicesService : IBaseService<ServiceEntity, ServiceModel>
+    public interface IServicesService : IBaseService<ServiceModel>, IUpdateService<ServiceModel>
     {
         IEnumerable<ServiceModel> GetAllServices();
     }

@@ -1,12 +1,14 @@
-﻿namespace HotelReservation.Data.Entities
+﻿using System;
+
+namespace HotelReservation.Data.Entities
 {
     public class ReservationRoomEntity
     {
-        public int ReservationId { get; set; }
+        public Guid ReservationId { get; set; }
 
         public virtual ReservationEntity Reservation { get; set; }
 
-        public int RoomId { get; set; }
+        public Guid RoomId { get; set; }
 
         public virtual RoomEntity Room { get; set; }
     }

@@ -1,13 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using HotelReservation.Business.Models;
+using HotelReservation.Data.Filters;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using HotelReservation.Business.Models;
-using HotelReservation.Data.Entities;
 
 namespace HotelReservation.Business.Interfaces
 {
-    public interface IHotelsService : IBaseService<HotelEntity, HotelModel>
+    public interface IHotelsService : IBaseService<HotelModel>, IUpdateService<HotelModel>
     {
-        public IEnumerable<HotelModel> GetHotels();
+        Task<int> GetCountAsync(HotelsFilter hotelsFilter);
+
+        Task<IEnumerable<HotelModel>> GetAllHotelsAsync();
+
+        Task<IEnumerable<HotelModel>> GetPagedHotelsAsync(PaginationFilter paginationFilter, HotelsFilter hotelsFilter);
 
         public Task<HotelModel> GetHotelByNameAsync(string name);
     }

@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace HotelReservation.Data.Entities
 {
-    public class ReservationEntity
+    public class ReservationEntity : Entity
     {
-        public int Id { get; set; }
-
-        public int HotelId { get; set; }
+        public Guid? HotelId { get; set; }
 
         public virtual HotelEntity Hotel { get; set; }
 
-        public string UserId { get; set; }
+        public string FirstName { get; set; }
 
-        public virtual UserEntity User { get; set; }
+        public string LastName { get; set; }
+
+        public string Email { get; set; }
 
         public virtual IEnumerable<ReservationRoomEntity> ReservationRooms { get; set; }
 
