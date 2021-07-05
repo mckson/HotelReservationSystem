@@ -6,6 +6,8 @@ using HotelReservation.Data.Interfaces;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Business.Services
@@ -29,6 +31,14 @@ namespace HotelReservation.Business.Services
         public async Task<RoomViewModel> CreateAsync(RoomViewModel roomViewModel)
         {
             _logger.Debug($"Room view {roomViewModel.Name} is creating");
+
+            var isNameAvailable = IsNameAvailable(roomViewModel.Name);
+            if (!isNameAvailable)
+            {
+                throw new BusinessException(
+                    $"View with name {roomViewModel.Name} already exists",
+                    ErrorStatus.AlreadyExist);
+            }
 
             var roomViewEntity = _mapper.Map<RoomViewEntity>(roomViewModel);
             var createdRoomViewEntity = await _roomViewRepository.CreateAsync(roomViewEntity);
@@ -74,6 +84,14 @@ namespace HotelReservation.Business.Services
         {
             _logger.Debug($"Room view {id} is updating");
 
+            var isNameAvailable = IsNameAvailable(updatingRoomViewModel.Name);
+            if (!isNameAvailable)
+            {
+                throw new BusinessException(
+                    $"View with name {updatingRoomViewModel.Name} already exists",
+                    ErrorStatus.AlreadyExist);
+            }
+
             var roomViewEntity = await _roomViewRepository.GetAsync(id) ?? throw new BusinessException(
                 "Room view with such id does not exist",
                 ErrorStatus.NotFound);
@@ -108,6 +126,20 @@ namespace HotelReservation.Business.Services
             _logger.Debug("Room views are requested");
 
             return roomViewModels;
+        }
+
+        private bool IsNameAvailable(string roomViewName)
+        {
+            var isNameAvailable = true;
+            var roomViewEntity = _roomViewRepository.Find(view =>
+                view.Name.ToUpper().Equals(roomViewName.ToUpper())).FirstOrDefault();
+
+            if (roomViewEntity != null)
+            {
+                isNameAvailable = false;
+            }
+
+            return isNameAvailable;
         }
     }
 }
