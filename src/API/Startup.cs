@@ -6,6 +6,7 @@ using HotelReservation.Business;
 using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Data;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +66,8 @@ namespace HotelReservation.API
             services.AddDataAndBusiness();
 
             services.AddScoped<DatabaseSeeder>();
+
+            services.AddMediatR(typeof(Startup));
 
             services.AddControllers();
         }

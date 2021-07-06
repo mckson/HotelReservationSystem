@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using HotelReservation.API.Models.ResponseModels;
+using MediatR;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
 
-namespace HotelReservation.API.Models.RequestModels
+namespace HotelReservation.API.Commands
 {
-    public class RoomRequestModel
+    public class CreateRoomCommand : IRequest<RoomResponseModel>
     {
         [Required]
         public string Name { get; set; }

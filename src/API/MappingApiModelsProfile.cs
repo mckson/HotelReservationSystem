@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HotelReservation.API.Commands;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Constants;
@@ -7,6 +8,7 @@ using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
 using System;
 using System.Linq;
+using HotelReservation.Data.Entities;
 
 namespace HotelReservation.API
 {
@@ -53,15 +55,15 @@ namespace HotelReservation.API
             CreateMap<ServiceModel, ServiceResponseModel>();
             CreateMap<ServiceModel, ServiceBriefResponseModel>();
 
-            CreateMap<RoomRequestModel, RoomModel>()
+            CreateMap<CreateRoomCommand, RoomEntity>()
                 .ForMember(
-                    model => model.RoomViews,
+                    entity => entity.RoomViews,
                     options => options.MapFrom(request =>
-                        request.Views.Select(roomView => new RoomRoomViewModel { RoomViewId = Guid.Parse(roomView) })))
+                        request.Views.Select(roomView => new RoomRoomViewEntity() { RoomViewId = Guid.Parse(roomView) })))
                 .ForMember(
                     model => model.Facilities,
                     options => options.MapFrom(request =>
-                        request.Facilities.Select(facility => new RoomFacilityModel { Name = facility })));
+                        request.Facilities.Select(facility => new RoomFacilityEntity() { Name = facility })));
             CreateMap<RoomModel, RoomResponseModel>()
                 .ForMember(
                     response => response.Reservations,
