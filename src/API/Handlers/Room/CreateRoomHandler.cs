@@ -1,18 +1,17 @@
-﻿using AutoMapper;
-using HotelReservation.API.Commands;
+﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
+using HotelReservation.API.Commands.Room;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
 using Serilog;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace HotelReservation.API.Handlers
+namespace HotelReservation.API.Handlers.Room
 {
     public class CreateRoomHandler : IRequestHandler<CreateRoomCommand, RoomResponseModel>
     {
@@ -63,10 +62,9 @@ namespace HotelReservation.API.Handlers
             }
 
             var createdRoomEntity = await _roomRepository.CreateAsync(roomEntity);
-            var createdRoomModel = _mapper.Map<RoomModel>(createdRoomEntity);
-            var createdRoomResponse = _mapper.Map<RoomResponseModel>(createdRoomModel);
+            var createdRoomResponse = _mapper.Map<RoomResponseModel>(createdRoomEntity);
 
-            _logger.Debug($"Room {createdRoomModel.Id} created");
+            _logger.Debug($"Room {createdRoomResponse.Id} created");
 
             return createdRoomResponse;
         }

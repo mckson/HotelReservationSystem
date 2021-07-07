@@ -1,12 +1,16 @@
 ﻿using HotelReservation.API.Models.ResponseModels;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace HotelReservation.API.Commands
+namespace HotelReservation.API.Commands.Room
 {
-    public class CreateRoomCommand : IRequest<RoomResponseModel>
+    public class UpdateRoomCommand : IRequest<RoomResponseModel>
     {
+        [Required]
+        public Guid Id { get; set; }
+
         [Required]
         public string Name { get; set; }
 
@@ -43,6 +47,6 @@ namespace HotelReservation.API.Commands
 
         public IEnumerable<string> Facilities { get; set; }
 
-        public IEnumerable<string> Views { get; set; }
+        public IEnumerable<Guid> Views { get; set; }
     }
 }

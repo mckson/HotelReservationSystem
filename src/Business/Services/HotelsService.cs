@@ -104,7 +104,7 @@ namespace HotelReservation.Business.Services
             hotelEntity.Name = updatingHotelModel.Name;
             hotelEntity.Deposit = updatingHotelModel.Deposit;
             hotelEntity.NumberFloors = updatingHotelModel.NumberFloors;
-            hotelEntity.HotelUsers = _mapper.Map<IEnumerable<HotelUserEntity>>(updatingHotelModel.HotelUsers);
+            hotelEntity.HotelUsers = _mapper.Map<List<HotelUserEntity>>(updatingHotelModel.HotelUsers);
             hotelEntity.Description = updatingHotelModel.Description;
 
             if (!IsLocationEqual(_mapper.Map<LocationModel>(hotelEntity.Location), updatingHotelModel.Location))

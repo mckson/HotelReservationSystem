@@ -2,7 +2,7 @@
 using MediatR;
 using System;
 
-namespace HotelReservation.API.Queries
+namespace HotelReservation.API.Queries.Room
 {
     public class GetRoomByIdQuery : IRequest<RoomResponseModel>
     {

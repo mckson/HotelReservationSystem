@@ -1,14 +1,13 @@
-﻿using AutoMapper;
-using HotelReservation.API.Models.ResponseModels;
-using HotelReservation.API.Queries;
-using HotelReservation.Business.Models;
-using HotelReservation.Data.Interfaces;
-using MediatR;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
+using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.API.Queries.Room;
+using HotelReservation.Data.Interfaces;
+using MediatR;
 
-namespace HotelReservation.API.Handlers
+namespace HotelReservation.API.Handlers.Room
 {
     public class GetAllRoomsHandler : IRequestHandler<GetAllRoomsQuery, IEnumerable<RoomResponseModel>>
     {
@@ -25,9 +24,8 @@ namespace HotelReservation.API.Handlers
 
         public async Task<IEnumerable<RoomResponseModel>> Handle(GetAllRoomsQuery request, CancellationToken cancellationToken)
         {
-            var roomEntities = _roomRepository.GetAll();
-            var roomModels = _mapper.Map<IEnumerable<RoomModel>>(roomEntities);
-            var roomResponses = _mapper.Map<IEnumerable<RoomResponseModel>>(roomModels);
+            var roomEntities = await Task.FromResult(_roomRepository.GetAll());
+            var roomResponses = _mapper.Map<IEnumerable<RoomResponseModel>>(roomEntities);
 
             return roomResponses;
         }

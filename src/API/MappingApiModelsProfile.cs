@@ -1,22 +1,45 @@
 ﻿using AutoMapper;
-using HotelReservation.API.Commands;
+using HotelReservation.API.Commands.Hotel;
+using HotelReservation.API.Commands.Room;
+using HotelReservation.API.Commands.Service;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
 using HotelReservation.Business.Models.UserModels;
+using HotelReservation.Data.Entities;
 using System;
 using System.Linq;
-using HotelReservation.Data.Entities;
 
 namespace HotelReservation.API
 {
     public class MappingApiModelsProfile : Profile
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "StyleCop.CSharp.ReadabilityRules",
+            "SA1123:Do not place regions within elements",
+            Justification = "Need to segregate method groups to increase readability")]
         public MappingApiModelsProfile(IUriService uriService)
         {
+            #region HotelMaps
             CreateMap<HotelRequestModel, HotelModel>();
+            CreateMap<CreateHotelCommand, HotelEntity>();
+            CreateMap<UpdateHotelCommand, HotelEntity>();
+            CreateMap<HotelEntity, HotelResponseModel>()
+                .ForMember(
+                    response => response.Managers,
+                    opt => opt.MapFrom(model =>
+                        model.HotelUsers.Select(hu => hu.User)))
+                .ForMember(
+                    response => response.MainImage,
+                    options => options.MapFrom(model =>
+                        uriService.GetResourceUri(Endpoints.HotelImages, model.Images.FirstOrDefault(image => image.IsMain).Id.ToString())))
+                .ForMember(
+                    response => response.Images,
+                    options => options.MapFrom(model =>
+                        model.Images.Select(image =>
+                            uriService.GetResourceUri(Endpoints.HotelImages, image.Id.ToString()))));
             CreateMap<HotelModel, HotelResponseModel>()
                 .ForMember(
                     response => response.Managers,
@@ -32,6 +55,7 @@ namespace HotelReservation.API
                         model.Images.Select(image =>
                             uriService.GetResourceUri(Endpoints.HotelImages, image.Id.ToString()))));
             CreateMap<HotelModel, HotelBriefResponse>();
+            #endregion
 
             CreateMap<HotelImageRequestModel, HotelImageModel>()
                 .ForMember(
@@ -51,42 +75,67 @@ namespace HotelReservation.API
                     response => response.Image,
                     options => options.MapFrom(model => ConvertBytesToBase64(model.Image, model.Type)));
 
+            #region ServiceMaps
             CreateMap<ServiceRequestModel, ServiceModel>();
+            CreateMap<ServiceRequestModel, ServiceEntity>();
+            CreateMap<CreateServiceCommand, ServiceEntity>();
             CreateMap<ServiceModel, ServiceResponseModel>();
+            CreateMap<ServiceEntity, ServiceResponseModel>();
             CreateMap<ServiceModel, ServiceBriefResponseModel>();
+            CreateMap<ServiceEntity, ServiceBriefResponseModel>();
+            #endregion
 
+            #region RoomMaps
             CreateMap<CreateRoomCommand, RoomEntity>()
                 .ForMember(
                     entity => entity.RoomViews,
                     options => options.MapFrom(request =>
-                        request.Views.Select(roomView => new RoomRoomViewEntity() { RoomViewId = Guid.Parse(roomView) })))
+                        request.Views.Select(roomViewId => new RoomRoomViewEntity() { RoomViewId = roomViewId })))
                 .ForMember(
                     model => model.Facilities,
                     options => options.MapFrom(request =>
                         request.Facilities.Select(facility => new RoomFacilityEntity() { Name = facility })));
-            CreateMap<RoomModel, RoomResponseModel>()
+            CreateMap<UpdateRoomCommand, RoomEntity>()
+                .ForMember(
+                    entity => entity.RoomViews,
+                    options => options.MapFrom(request =>
+                        request.Views.Select(roomViewId => new RoomRoomViewEntity() { RoomViewId = roomViewId })))
+                .ForMember(
+                    model => model.Facilities,
+                    options => options.MapFrom(request =>
+                        request.Facilities.Select(facility => new RoomFacilityEntity() { Name = facility })));
+            CreateMap<RoomEntity, RoomResponseModel>()
                 .ForMember(
                     response => response.Reservations,
-                    opt => opt.MapFrom(model =>
-                        model.ReservationRooms.Select(rr => rr.ReservationId)))
+                    opt => opt.MapFrom(entity =>
+                        entity.ReservationRooms.Select(rr => rr.ReservationId)))
                 .ForMember(
                     response => response.Images,
-                    options => options.MapFrom(model =>
-                        model.Images.Select(image =>
+                    options => options.MapFrom(entity =>
+                        entity.Images.Select(image =>
                             uriService.GetResourceUri(Endpoints.RoomImages, image.Id.ToString()))))
                 .ForMember(
                     response => response.Views,
-                    options => options.MapFrom(model =>
-                        model.RoomViews.Select(rv => rv.RoomView)));
+                    options => options.MapFrom(entity =>
+                        entity.RoomViews.Select(rv => rv.RoomView)));
             CreateMap<RoomModel, RoomBriefResponseModel>();
+            #endregion
 
+            #region  LocationMaps
             CreateMap<LocationModel, LocationResponseModel>();
+            CreateMap<LocationEntity, LocationResponseModel>();
             CreateMap<LocationRequestModel, LocationModel>();
+            CreateMap<LocationRequestModel, LocationEntity>();
+            #endregion
 
-            CreateMap<RoomFacilityModel, RoomFacilityResponseModel>();
+            CreateMap<RoomFacilityEntity, RoomFacilityResponseModel>();
 
+            #region RoomViewMaps
+            CreateMap<RoomViewRequestModel, RoomViewEntity>();
             CreateMap<RoomViewRequestModel, RoomViewModel>();
+            CreateMap<RoomViewEntity, RoomViewResponseModel>();
             CreateMap<RoomViewModel, RoomViewResponseModel>();
+            #endregion
 
             CreateMap<ReservationModel, ReservationResponseModel>()
                 .ForMember(
@@ -111,6 +160,7 @@ namespace HotelReservation.API
                     options => options.MapFrom(model => model.Hotel.Name));
             CreateMap<ReservationRequestModel, ReservationModel>();
 
+            #region UserMaps
             CreateMap<UserRegistrationRequestModel, UserRegistrationModel>()
                 .ReverseMap();
             CreateMap<UserAuthenticationRequestModel, UserAuthenticationModel>()
@@ -131,10 +181,15 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.Hotels,
                     opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
+            CreateMap<UserEntity, UserBriefResponseModel>()
+                .ForMember(
+                    response => response.Hotels,
+                    opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
             CreateMap<UserModel, UserResponseModel>()
                 .ForMember(
-                response => response.Hotels,
-                opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
+                    response => response.Hotels,
+                    opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
+            #endregion
         }
 
         private static byte[] ConvertBase64ToBytes(string image)

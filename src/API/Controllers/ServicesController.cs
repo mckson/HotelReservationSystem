@@ -1,9 +1,9 @@
-﻿using AutoMapper;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Commands.Service;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.API.Queries.Service;
+using HotelReservation.Business;
 using HotelReservation.Business.Constants;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -16,67 +16,61 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class ServicesController : ControllerBase
     {
-        private readonly IServicesService _servicesService;
-        private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public ServicesController(
-            IServicesService servicesService,
-            IMapper mapper)
+        public ServicesController(IMediator mediator)
         {
-            _servicesService = servicesService;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [AllowAnonymous]
         [HttpGet]
-        public ActionResult<IEnumerable<ServiceResponseModel>> GetAllServices()
+        public async Task<ActionResult<IEnumerable<ServiceResponseModel>>> GetAllServices()
         {
-            var serviceModels = _servicesService.GetAllServices();
-            var servicesResponseModels = _mapper.Map<IEnumerable<ServiceResponseModel>>(serviceModels);
-
-            return Ok(servicesResponseModels);
+            var query = new GetAllServicesQuery();
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
         [AllowAnonymous]
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<ServiceResponseModel>> GetServiceAsync(Guid id)
         {
-            var serviceModel = await _servicesService.GetAsync(id);
-            var serviceResponseModel = _mapper.Map<ServiceResponseModel>(serviceModel);
-
-            return Ok(serviceResponseModel);
+            var query = new GetServiceByIdQuery { Id = id };
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPost]
-        public async Task<ActionResult<ServiceResponseModel>> CreateServiceAsync([FromBody] ServiceRequestModel serviceRequestModel)
+        public async Task<ActionResult<ServiceResponseModel>> CreateServiceAsync([FromBody] CreateServiceCommand command)
         {
-            var serviceModel = _mapper.Map<ServiceModel>(serviceRequestModel);
-            var createdServiceModel = await _servicesService.CreateAsync(serviceModel);
-            var createdServiceResponseModel = _mapper.Map<ServiceResponseModel>(createdServiceModel);
-
-            return Ok(createdServiceResponseModel);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult<ServiceResponseModel>> UpdateServiceAsync(Guid id, [FromBody] ServiceRequestModel serviceRequestModel)
+        public async Task<ActionResult<ServiceResponseModel>> UpdateServiceAsync(Guid id, [FromBody] UpdateServiceCommand command)
         {
-            var serviceModel = _mapper.Map<ServiceModel>(serviceRequestModel);
-            var updatedServiceModel = await _servicesService.UpdateAsync(id, serviceModel);
-            var updatedServiceResponseModel = _mapper.Map<ServiceResponseModel>(updatedServiceModel);
+            if (!id.Equals(command.Id))
+            {
+                throw new BusinessException(
+                    "Updating resource id does not match with requested id",
+                    ErrorStatus.IncorrectInput);
+            }
 
-            return Ok(updatedServiceResponseModel);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<ServiceResponseModel>> DeleteServiceAsync(Guid id)
         {
-            var deletedServiceModel = await _servicesService.DeleteAsync(id);
-            var deletedServiceResponseModel = _mapper.Map<ServiceResponseModel>(deletedServiceModel);
-
-            return Ok(deletedServiceResponseModel);
+            var command = new DeleteServiceCommand { Id = id };
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
     }
 }

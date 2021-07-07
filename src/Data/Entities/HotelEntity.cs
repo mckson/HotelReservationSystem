@@ -18,7 +18,7 @@ namespace HotelReservation.Data.Entities
 
         public virtual IEnumerable<RoomEntity> Rooms { get; set; }
 
-        public virtual IEnumerable<HotelUserEntity> HotelUsers { get; set; }
+        public virtual List<HotelUserEntity> HotelUsers { get; set; }
 
         public virtual IEnumerable<ReservationEntity> Reservations { get; set; }
 

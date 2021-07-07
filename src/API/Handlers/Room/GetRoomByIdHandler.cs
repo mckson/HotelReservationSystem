@@ -1,15 +1,14 @@
-﻿using AutoMapper;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
 using HotelReservation.API.Models.ResponseModels;
-using HotelReservation.API.Queries;
+using HotelReservation.API.Queries.Room;
 using HotelReservation.Business;
-using HotelReservation.Business.Models;
 using HotelReservation.Data.Interfaces;
 using MediatR;
 using Serilog;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace HotelReservation.API.Handlers
+namespace HotelReservation.API.Handlers.Room
 {
     public class GetRoomByIdHandler : IRequestHandler<GetRoomByIdQuery, RoomResponseModel>, IRequest<RoomResponseModel>
     {
@@ -31,8 +30,7 @@ namespace HotelReservation.API.Handlers
             var roomEntity = await _roomRepository.GetAsync(request.Id) ??
                              throw new BusinessException("No room with such id", ErrorStatus.NotFound);
 
-            var roomModel = _mapper.Map<RoomModel>(roomEntity);
-            var roomResponse = _mapper.Map<RoomResponseModel>(roomModel);
+            var roomResponse = _mapper.Map<RoomResponseModel>(roomEntity);
 
             _logger.Debug($"Room {request.Id} requested");
 

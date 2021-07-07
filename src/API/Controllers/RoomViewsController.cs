@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.API.Queries.RoomView;
 using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Models;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -18,13 +20,16 @@ namespace HotelReservation.API.Controllers
     {
         private readonly IRoomViewsService _roomViewsService;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
         public RoomViewsController(
             IRoomViewsService roomViewsService,
-            IMapper mapper)
+            IMapper mapper,
+            IMediator mediator)
         {
             _roomViewsService = roomViewsService;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         [AllowAnonymous]
@@ -41,10 +46,12 @@ namespace HotelReservation.API.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<RoomViewResponseModel>> GetRoomViewByIdAsync(Guid id)
         {
-            var roomViewModel = await _roomViewsService.GetAsync(id);
-            var roomViewResponseModel = _mapper.Map<RoomViewResponseModel>(roomViewModel);
-
-            return Ok(roomViewResponseModel);
+            var query = new GetRoomViewByIdQuery
+            {
+                Id = id
+            };
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
         [Authorize(Policy = Policies.AdminPermission)]
