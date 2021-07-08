@@ -1,5 +1,5 @@
 ﻿using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
+using HotelReservation.Data.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -47,7 +47,7 @@ namespace HotelReservation.Business.Services
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        public RefreshTokenModel GenerateRefreshToken()
+        public RefreshTokenEntity GenerateRefreshToken()
         {
             _logger.Debug("Refresh token is generating");
 
@@ -58,7 +58,7 @@ namespace HotelReservation.Business.Services
 
             _logger.Debug("Refresh token is generated");
 
-            return new RefreshTokenModel
+            return new RefreshTokenEntity
             {
                 Token = Convert.ToBase64String(randomBytes),
                 Expires = DateTime.UtcNow.AddHours(5),

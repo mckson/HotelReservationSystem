@@ -1,4 +1,4 @@
-﻿namespace HotelReservation.API.Helpers
+﻿namespace HotelReservation.API.Options
 {
     public class PasswordOptions
     {

@@ -19,8 +19,8 @@ namespace HotelReservation.Business.Services
 
         public RoomImagesService(
             IRoomImageRepository roomImageRepository,
-            IHotelRepository hotelRepository,
-            IManagementPermissionSupervisor supervisor,
+            // IHotelRepository hotelRepository,
+            // IManagementPermissionSupervisor supervisor,
             IMapper mapper,
             ILogger logger)
         {
@@ -68,7 +68,7 @@ namespace HotelReservation.Business.Services
                               throw new BusinessException("No image with such id", ErrorStatus.NotFound);
 
             // await _supervisor.CheckHotelManagementPermissionAsync(imageEntity.HotelId);
-            var deletedImageEntity = await _roomImageRepository.DeleteAsync(id);
+            var deletedImageEntity = await _roomImageRepository.DeleteAsync(imageEntity.Id);
             var deletedImageModel = _mapper.Map<RoomImageModel>(deletedImageEntity);
 
             _logger.Debug($"Image (Room) {id} deleted");

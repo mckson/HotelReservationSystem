@@ -2,6 +2,7 @@
 using HotelReservation.API.Extensions;
 using HotelReservation.API.Helpers;
 using HotelReservation.API.Middleware;
+using HotelReservation.API.Options;
 using HotelReservation.Business;
 using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
@@ -14,7 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using PasswordOptions = HotelReservation.API.Helpers.PasswordOptions;
+using PasswordOptions = HotelReservation.API.Options.PasswordOptions;
 
 namespace HotelReservation.API
 {

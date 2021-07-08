@@ -1,5 +1,5 @@
-﻿using System.Security.Claims;
-using HotelReservation.Business.Models;
+﻿using HotelReservation.Data.Entities;
+using System.Security.Claims;
 
 namespace HotelReservation.Business.Interfaces
 {
@@ -7,6 +7,6 @@ namespace HotelReservation.Business.Interfaces
     {
         string GenerateJwtToken(ClaimsIdentity claims);
 
-        RefreshTokenModel GenerateRefreshToken();
+        RefreshTokenEntity GenerateRefreshToken();
     }
 }

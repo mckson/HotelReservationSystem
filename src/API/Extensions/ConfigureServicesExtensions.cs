@@ -1,4 +1,6 @@
-﻿using HotelReservation.Business;
+﻿using HotelReservation.API.Helpers;
+using HotelReservation.API.Interfaces;
+using HotelReservation.Business;
 using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Business.Services;
@@ -14,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
-using PasswordOptions = HotelReservation.API.Helpers.PasswordOptions;
+using PasswordOptions = HotelReservation.API.Options.PasswordOptions;
 
 namespace HotelReservation.API.Extensions
 {
@@ -33,6 +35,10 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IRoomViewRepository, RoomViewRepository>();
 
             services.AddScoped<IManagementPermissionSupervisor, ManagementPermissionSupervisor>();
+
+            services.AddScoped<IReservationHelper, ReservationHelper>();
+            services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
+            services.AddScoped<IUserHelper, UserHelper>();
 
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAccountService, AccountService>();

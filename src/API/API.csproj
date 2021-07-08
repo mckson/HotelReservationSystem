@@ -12,13 +12,14 @@
 
   <ItemGroup>
     <Compile Remove="Authorization\**" />
-    <Compile Remove="Interfaces\**" />
+    <Compile Remove="I\**" />
     <Content Remove="Authorization\**" />
-    <Content Remove="Interfaces\**" />
+    <Content Remove="I\**" />
     <EmbeddedResource Remove="Authorization\**" />
-    <EmbeddedResource Remove="Interfaces\**" />
+    <EmbeddedResource Remove="I\**" />
+    <EntityDeploy Remove="I\**" />
     <None Remove="Authorization\**" />
-    <None Remove="Interfaces\**" />
+    <None Remove="I\**" />
   </ItemGroup>
 
   <ItemGroup>

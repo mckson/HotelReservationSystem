@@ -1,9 +1,8 @@
-﻿using AutoMapper;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Commands.User;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.API.Queries.User;
 using HotelReservation.Business.Constants;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.UserModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,63 +16,57 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUsersService _usersService;
-        private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public UsersController(
-            IUsersService usersService,
-            IMapper mapper)
+        public UsersController(IMediator mediator)
         {
-            _usersService = usersService;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserResponseModel>>> GetAllUsersAsync()
         {
-            var userModels = await _usersService.GetAllUsersAsync();
-            var userResponseModels =
-                _mapper.Map<IEnumerable<UserResponseModel>>(userModels);
-
-            return Ok(userResponseModels);
+            var query = new GetAllUsersQuery();
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(Guid id)
         {
-            var userModel = await _usersService.GetAsync(id);
+            var query = new GetUserByIdQuery
+            {
+                Id = id
+            };
 
-            return Ok(_mapper.Map<UserResponseModel>(userModel));
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<ActionResult<UserResponseModel>> CreateUserAsync([FromBody] UserAdminCreationRequestModel creatingUser)
+        public async Task<ActionResult<UserResponseModel>> CreateUserAsync([FromBody] CreateUserCommand command)
         {
-            var creatingUserModel = _mapper.Map<UserRegistrationModel>(creatingUser);
-            var addedUser = await _usersService.CreateAsync(creatingUserModel);
-
-            return Ok(_mapper.Map<UserResponseModel>(addedUser));
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(Guid id, [FromBody] UserUpdateRequestModel user)
+        public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(Guid id, [FromBody] UpdateUserCommand command)
         {
-            var currentUserClaims = User.Claims;
-
-            var userUpdateModel = _mapper.Map<UserUpdateModel>(user);
-            var updatedUserModel = await _usersService.UpdateAsync(id, userUpdateModel, currentUserClaims);
-            var updatedUserResponseModel = _mapper.Map<UserResponseModel>(updatedUserModel);
-
-            return Ok(updatedUserResponseModel);
+            // var currentUserClaims = User.Claims;
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(Guid id)
         {
-            var currentUserClaims = User.Claims;
+            var command = new DeleteUserCommand
+            {
+                Id = id
+            };
 
-            await _usersService.DeleteAsync(id, currentUserClaims);
-
+            await _mediator.Send(command);
             return Ok();
         }
     }

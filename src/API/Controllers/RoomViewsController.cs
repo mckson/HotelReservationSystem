@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Commands.RoomView;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.API.Queries.RoomView;
+using HotelReservation.Business;
 using HotelReservation.Business.Constants;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,28 +16,20 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class RoomViewsController : ControllerBase
     {
-        private readonly IRoomViewsService _roomViewsService;
-        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
-        public RoomViewsController(
-            IRoomViewsService roomViewsService,
-            IMapper mapper,
-            IMediator mediator)
+        public RoomViewsController(IMediator mediator)
         {
-            _roomViewsService = roomViewsService;
-            _mapper = mapper;
             _mediator = mediator;
         }
 
         [AllowAnonymous]
         [HttpGet]
-        public ActionResult<IEnumerable<RoomViewResponseModel>> GetAllRoomViews()
+        public async Task<ActionResult<IEnumerable<RoomViewResponseModel>>> GetAllRoomViewsAsync()
         {
-            var roomViewModels = _roomViewsService.GetAllRoomViews();
-            var roomViewResponseModels = _mapper.Map<IEnumerable<RoomViewResponseModel>>(roomViewModels);
-
-            return Ok(roomViewResponseModels);
+            var query = new GetAllRoomViewsQuery();
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
         [AllowAnonymous]
@@ -57,36 +47,41 @@ namespace HotelReservation.API.Controllers
         [Authorize(Policy = Policies.AdminPermission)]
         [HttpPost]
         public async Task<ActionResult<RoomViewResponseModel>> CreateRoomViewModelAsync(
-            [FromBody] RoomViewRequestModel roomViewRequestModel)
+            [FromBody] CreateRoomViewCommand command)
         {
-            var roomViewModel = _mapper.Map<RoomViewModel>(roomViewRequestModel);
-            var createdRoomViewModel = await _roomViewsService.CreateAsync(roomViewModel);
-            var createdRoomViewResponseModel = _mapper.Map<RoomViewResponseModel>(createdRoomViewModel);
-
-            return Ok(createdRoomViewResponseModel);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [Authorize(Policy = Policies.AdminPermission)]
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<RoomViewResponseModel>> UpdateRoomViewAsync(
             Guid id,
-            [FromBody] RoomViewRequestModel roomViewRequestModel)
+            [FromBody] UpdateRoomViewCommand command)
         {
-            var roomViewModel = _mapper.Map<RoomViewModel>(roomViewRequestModel);
-            var updatedRoomViewModel = await _roomViewsService.UpdateAsync(id, roomViewModel);
-            var updatedRoomViewResponseModel = _mapper.Map<RoomViewResponseModel>(updatedRoomViewModel);
+            if (!id.Equals(command.Id))
+            {
+                throw new BusinessException(
+                    "Updating resource id does not match with requested id",
+                    ErrorStatus.IncorrectInput);
+            }
 
-            return Ok(updatedRoomViewResponseModel);
+            var response = await _mediator.Send(command);
+
+            return Ok(response);
         }
 
         [Authorize(Policy = Policies.AdminPermission)]
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<RoomViewResponseModel>> DeleteRoomViewAsync(Guid id)
         {
-            var deletedRoomViewModel = await _roomViewsService.DeleteAsync(id);
-            var deletedRoomViewResponseModel = _mapper.Map<RoomViewResponseModel>(deletedRoomViewModel);
+            var command = new DeleteRoomViewCommand
+            {
+                Id = id
+            };
+            var response = await _mediator.Send(command);
 
-            return Ok(deletedRoomViewResponseModel);
+            return Ok(response);
         }
     }
 }

@@ -1,12 +1,8 @@
-﻿using AutoMapper;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Commands.Account;
 using HotelReservation.API.Models.ResponseModels;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.UserModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -15,77 +11,55 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountService _accountService;
-        private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public AccountController(
-            IAccountService accountService,
-            IMapper mapper)
+        public AccountController(IMediator mediator)
         {
-            _accountService = accountService;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [AllowAnonymous]
         [HttpPost("SignIn")]
-        public async Task<ActionResult<TokenResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
+        public async Task<ActionResult<TokenResponseModel>> Authenticate([FromBody] AuthenticateUserCommand command)
         {
-            var userAuthModel = _mapper.Map<UserAuthenticationModel>(userAuthRequestModel);
-            var loggedUser = await _accountService.AuthenticateAsync(userAuthModel);
-
-            var responseUser = _mapper.Map<TokenResponseModel>(loggedUser);
-            SetTokenCookie(responseUser.RefreshToken);
-
-            return Ok(responseUser);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [AllowAnonymous]
         [HttpPost("SignUp")]
-        public async Task<ActionResult<TokenResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
+        public async Task<ActionResult<TokenResponseModel>> Register([FromBody] RegisterUserCommand command)
         {
-            var userModel = _mapper.Map<UserRegistrationModel>(userRequestModel);
-            var registeredUserAuth = await _accountService.RegisterAsync(userModel);
+            await _mediator.Send(command);
 
-            return await Authenticate(_mapper.Map<UserAuthenticationRequestModel>(registeredUserAuth));
+            var authenticateCommand = new AuthenticateUserCommand
+            {
+                Email = command.Email,
+                Password = command.Password
+            };
+
+            var result = await Authenticate(authenticateCommand);
+            return result;
         }
 
         [AllowAnonymous]
         [HttpPost("RefreshToken")]
-        public async Task<ActionResult<TokenResponseModel>> RefreshToken([FromBody] RefreshTokenRequestModel refreshToken)
+        public async Task<ActionResult<TokenResponseModel>> RefreshToken([FromBody] RefreshTokenCommand command)
         {
-            // var refreshToken = Request.Cookies["RefreshToken"];
-            var response = await _accountService.RefreshToken(refreshToken.Token);
+            var response = await _mediator.Send(command);
 
             if (response == null)
                 return Unauthorized(new { message = "Invalid token" });
-
-            var responseUser = _mapper.Map<TokenResponseModel>(response);
-            SetTokenCookie(responseUser.RefreshToken);
-
-            return Ok(responseUser);
+            return Ok(response);
         }
 
         [AllowAnonymous]
         [HttpPost("SignOut")]
-        public async Task<IActionResult> RevokeTokenAsync([FromBody] RefreshTokenRequestModel refreshToken)
+        public async Task<IActionResult> RevokeTokenAsync([FromBody] RevokeTokenCommand command)
         {
-            // accept token from request body or cookie
-            // var token = Request.Cookies["refreshToken"];
-            var token = refreshToken.Token;
-
-            await _accountService.RevokeTokenAsync(token);
+            await _mediator.Send(command);
 
             return Ok(new { message = "Token revoked" });
-        }
-
-        private void SetTokenCookie(string token)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddHours(4)
-            };
-            Response.Cookies.Append("RefreshToken", token, cookieOptions);
         }
     }
 }

@@ -1,6 +1,10 @@
 ﻿using AutoMapper;
+using HotelReservation.API.Commands.Account;
 using HotelReservation.API.Commands.Hotel;
+using HotelReservation.API.Commands.Image;
+using HotelReservation.API.Commands.Reservation;
 using HotelReservation.API.Commands.Room;
+using HotelReservation.API.Commands.RoomView;
 using HotelReservation.API.Commands.Service;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
@@ -11,6 +15,7 @@ using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
 using System;
 using System.Linq;
+using HotelReservation.API.Commands.User;
 
 namespace HotelReservation.API
 {
@@ -55,9 +60,15 @@ namespace HotelReservation.API
                         model.Images.Select(image =>
                             uriService.GetResourceUri(Endpoints.HotelImages, image.Id.ToString()))));
             CreateMap<HotelModel, HotelBriefResponse>();
+            CreateMap<HotelEntity, HotelBriefResponse>();
             #endregion
 
+            #region ImageMaps
             CreateMap<HotelImageRequestModel, HotelImageModel>()
+                .ForMember(
+                    model => model.Image,
+                    options => options.MapFrom(request => ConvertBase64ToBytes(request.Image)));
+            CreateMap<CreateHotelImageCommand, HotelImageEntity>()
                 .ForMember(
                     model => model.Image,
                     options => options.MapFrom(request => ConvertBase64ToBytes(request.Image)));
@@ -70,10 +81,15 @@ namespace HotelReservation.API
                 .ForMember(
                     model => model.Image,
                     options => options.MapFrom(request => ConvertBase64ToBytes(request.Image)));
+            CreateMap<CreateRoomImageCommand, RoomImageEntity>()
+                .ForMember(
+                    model => model.Image,
+                    options => options.MapFrom(request => ConvertBase64ToBytes(request.Image)));
             CreateMap<RoomImageModel, RoomImageResponseModel>()
                 .ForMember(
                     response => response.Image,
                     options => options.MapFrom(model => ConvertBytesToBase64(model.Image, model.Type)));
+            #endregion
 
             #region ServiceMaps
             CreateMap<ServiceRequestModel, ServiceModel>();
@@ -119,6 +135,7 @@ namespace HotelReservation.API
                     options => options.MapFrom(entity =>
                         entity.RoomViews.Select(rv => rv.RoomView)));
             CreateMap<RoomModel, RoomBriefResponseModel>();
+            CreateMap<RoomEntity, RoomBriefResponseModel>();
             #endregion
 
             #region  LocationMaps
@@ -132,11 +149,14 @@ namespace HotelReservation.API
 
             #region RoomViewMaps
             CreateMap<RoomViewRequestModel, RoomViewEntity>();
+            CreateMap<CreateRoomViewCommand, RoomViewEntity>();
+            CreateMap<UpdateRoomViewCommand, RoomViewEntity>();
             CreateMap<RoomViewRequestModel, RoomViewModel>();
             CreateMap<RoomViewEntity, RoomViewResponseModel>();
             CreateMap<RoomViewModel, RoomViewResponseModel>();
             #endregion
 
+            #region ReservationMaps
             CreateMap<ReservationModel, ReservationResponseModel>()
                 .ForMember(
                     response => response.Rooms,
@@ -149,7 +169,7 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.RoomsPrice,
                     options => options.MapFrom(
-                        model => model.ReservationRooms.Sum(rr => rr.Room.Price)))
+                        model => model.ReservationRooms.Sum(rr => rr.Room.Price) * model.TotalDays))
                 .ForMember(
                     response => response.ServicesPrice,
                     options => options.MapFrom(
@@ -158,7 +178,64 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.HotelName,
                     options => options.MapFrom(model => model.Hotel.Name));
+            CreateMap<ReservationEntity, ReservationBriefResponseModel>()
+                .ForMember(
+                    response => response.HotelName,
+                    options => options.MapFrom(model => model.Hotel.Name))
+                .ForMember(
+                    response => response.TotalDays,
+                    options => options.MapFrom(entity => (entity.DateOut - entity.DateIn).Days))
+                .ForMember(
+                    response => response.TotalPrice,
+                    options => options.MapFrom(entity => entity.Hotel.Deposit +
+                                                         (entity.ReservationRooms.Select(rr => rr.Room.Price).Sum() * (entity.DateOut - entity.DateIn).Days) +
+                                                         entity.ReservationServices.Select(rs => rs.Service.Price).Sum()));
+            CreateMap<ReservationEntity, ReservationResponseModel>()
+                .ForMember(
+                    response => response.Rooms,
+                    opt => opt.MapFrom(
+                        model => model.ReservationRooms.Select(rr => rr.Room)))
+                .ForMember(
+                    response => response.Services,
+                    opt => opt.MapFrom(
+                        model => model.ReservationServices.Select(rs => rs.Service)))
+                .ForMember(
+                    response => response.RoomsPrice,
+                    options => options.MapFrom(
+                        model => model.ReservationRooms.Sum(rr => rr.Room.Price) * (model.DateOut - model.DateIn).Days))
+                .ForMember(
+                    response => response.ServicesPrice,
+                    options => options.MapFrom(
+                        model => model.ReservationServices.Sum(rs => rs.Service.Price)))
+                .ForMember(
+                    response => response.TotalDays,
+                    options => options.MapFrom(entity => (entity.DateOut - entity.DateIn).Days))
+                .ForMember(
+                    response => response.Deposit,
+                    options => options.MapFrom(entity => entity.Hotel.Deposit))
+                .ForMember(
+                    response => response.TotalPrice,
+                    options => options.MapFrom(entity => entity.Hotel.Deposit +
+                                                         (entity.ReservationRooms.Select(rr => rr.Room.Price).Sum() * (entity.DateOut - entity.DateIn).Days) +
+                                                         entity.ReservationServices.Select(rs => rs.Service.Price).Sum()));
             CreateMap<ReservationRequestModel, ReservationModel>();
+            CreateMap<CreateReservationCommand, ReservationEntity>()
+                .ForMember(
+                    entity => entity.ReservationServices,
+                    options => options.MapFrom(request =>
+                        request.Services
+                            .Select(service => new ReservationServiceModel
+                            {
+                                ServiceId = Guid.Parse(service)
+                            }).ToList()))
+                .ForMember(
+                    entity => entity.ReservationRooms,
+                    options => options.MapFrom(request =>
+                        request.Rooms.Select(room => new ReservationRoomModel
+                        {
+                            RoomId = Guid.Parse(room)
+                        }).ToList()));
+            #endregion
 
             #region UserMaps
             CreateMap<UserRegistrationRequestModel, UserRegistrationModel>()
@@ -167,12 +244,18 @@ namespace HotelReservation.API
                 .ReverseMap();
             CreateMap<UserAdminCreationRequestModel, UserRegistrationModel>();
             CreateMap<UserUpdateRequestModel, UserUpdateModel>();
+            CreateMap<RegisterUserCommand, UserEntity>();
+            CreateMap<CreateUserCommand, UserEntity>();
             CreateMap<UserModel, UserPrivateResponseModel>()
                 .ForMember(
                     response => response.RefreshToken,
                     opt => opt.MapFrom(model => model.RefreshToken.Token));
 
             CreateMap<UserModel, TokenResponseModel>()
+                .ForMember(
+                    response => response.RefreshToken,
+                    opt => opt.MapFrom(model => model.RefreshToken.Token));
+            CreateMap<UserEntity, TokenResponseModel>()
                 .ForMember(
                     response => response.RefreshToken,
                     opt => opt.MapFrom(model => model.RefreshToken.Token));
@@ -186,6 +269,10 @@ namespace HotelReservation.API
                     response => response.Hotels,
                     opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
             CreateMap<UserModel, UserResponseModel>()
+                .ForMember(
+                    response => response.Hotels,
+                    opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
+            CreateMap<UserEntity, UserResponseModel>()
                 .ForMember(
                     response => response.Hotels,
                     opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));

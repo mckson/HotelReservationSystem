@@ -57,8 +57,7 @@ namespace HotelReservation.Business.Services
 
             var encodedJwt = _tokenService.GenerateJwtToken(claims);
             var refreshToken = _tokenService.GenerateRefreshToken();
-            var refreshTokenEntity = _mapper.Map<RefreshTokenEntity>(refreshToken);
-            userEntity.RefreshToken = refreshTokenEntity;
+            userEntity.RefreshToken = refreshToken;
             await _userManager.UpdateAsync(userEntity);
 
             var userModel = _mapper.Map<UserModel>(userEntity);

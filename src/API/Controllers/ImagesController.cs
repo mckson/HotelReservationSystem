@@ -1,9 +1,8 @@
-﻿using AutoMapper;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Commands.Image;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.API.Queries.Image;
 using HotelReservation.Business.Constants;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -15,58 +14,50 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class ImagesController : ControllerBase
     {
-        private const string DefaultType = "image/jpeg";
-        private readonly IHotelImagesService _hotelImagesService;
-        private readonly IMapper _mapper;
-        private readonly IRoomImagesService _roomImagesService;
+        private readonly IMediator _mediator;
 
-        public ImagesController(
-            IHotelImagesService hotelImagesService,
-            IRoomImagesService roomImagesService,
-            IMapper mapper)
+        public ImagesController(IMediator mediator)
         {
-            _hotelImagesService = hotelImagesService;
-            _roomImagesService = roomImagesService;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet("Hotel/{id:guid}")]
         public async Task<ActionResult> GetHotelImageAsync(Guid id)
         {
-            var imageModel = await _hotelImagesService.GetAsync(id);
+            var query = new GetHotelImageByIdQuery
+            {
+                Id = id
+            };
 
-            imageModel.Type ??= DefaultType;
-            var image = new FileContentResult(imageModel.Image, imageModel.Type) { FileDownloadName = imageModel.Name };
-            return image;
+            var response = await _mediator.Send(query);
+            return response;
         }
 
         [HttpGet("Room/{id:guid}")]
         public async Task<ActionResult> GetRoomImageAsync(Guid id)
         {
-            var imageModel = await _roomImagesService.GetAsync(id);
+            var query = new GetRoomImageByIdQuery
+            {
+                Id = id
+            };
 
-            imageModel.Type ??= DefaultType;
-            var image = new FileContentResult(imageModel.Image, imageModel.Type) { FileDownloadName = imageModel.Name };
-            return image;
+            var response = await _mediator.Send(query);
+            return response;
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPost("Hotel")]
-        public async Task<ActionResult<HotelImageResponseModel>> AddHotelImageAsync([FromBody] HotelImageRequestModel hotelImageRequest)
+        public async Task<ActionResult> AddHotelImageAsync([FromBody] CreateHotelImageCommand command)
         {
-            var imageModel = _mapper.Map<HotelImageModel>(hotelImageRequest);
-            await _hotelImagesService.CreateAsync(imageModel);
-
+            await _mediator.Send(command);
             return Ok();
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPost("Room")]
-        public async Task<ActionResult<HotelImageResponseModel>> AddRoomImageAsync([FromBody] RoomImageRequestModel roomImageRequest)
+        public async Task<ActionResult<HotelImageResponseModel>> AddRoomImageAsync([FromBody] CreateRoomImageCommand command)
         {
-            var imageModel = _mapper.Map<RoomImageModel>(roomImageRequest);
-            await _roomImagesService.CreateAsync(imageModel);
-
+            await _mediator.Send(command);
             return Ok();
         }
 
@@ -74,8 +65,12 @@ namespace HotelReservation.API.Controllers
         [HttpDelete("Hotel/{id:guid}")]
         public async Task<ActionResult<HotelImageResponseModel>> DeleteHotelImageAsync(Guid id)
         {
-            await _hotelImagesService.DeleteAsync(id);
+            var command = new DeleteHotelImageCommand
+            {
+                Id = id
+            };
 
+            await _mediator.Send(command);
             return Ok();
         }
 
@@ -83,8 +78,12 @@ namespace HotelReservation.API.Controllers
         [HttpDelete("Room/{id:guid}")]
         public async Task<ActionResult<HotelImageResponseModel>> DeleteRoomImageAsync(Guid id)
         {
-            await _roomImagesService.DeleteAsync(id);
+            var command = new DeleteRoomImageCommand
+            {
+                Id = id
+            };
 
+            await _mediator.Send(command);
             return Ok();
         }
 
@@ -92,8 +91,12 @@ namespace HotelReservation.API.Controllers
         [HttpPut("Hotel/{id:guid}")]
         public async Task<ActionResult<HotelImageResponseModel>> UpdateImageToMainAsync(Guid id)
         {
-            await _hotelImagesService.ChangeImageToMainAsync(id);
+            var command = new UpdateHotelImageToMainCommand
+            {
+                Id = id
+            };
 
+            await _mediator.Send(command);
             return Ok();
         }
     }
