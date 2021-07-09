@@ -37,7 +37,7 @@ namespace HotelReservation.API.Handlers.User
             }
 
             // await GetRolesForUserModelAsync(deletedUserModel);
-            var result = await _userRepository.DeleteAsync(request.Id;
+            var result = await _userRepository.DeleteAsync(request.Id);
 
             if (!result)
             {

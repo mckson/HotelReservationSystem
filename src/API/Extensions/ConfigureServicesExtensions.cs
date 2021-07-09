@@ -34,24 +34,12 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRoomViewRepository, RoomViewRepository>();
 
-            services.AddScoped<IManagementPermissionSupervisor, ManagementPermissionSupervisor>();
-
             services.AddScoped<IReservationHelper, ReservationHelper>();
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
             services.AddScoped<IUserHelper, UserHelper>();
 
             services.AddScoped<ITokenService, TokenService>();
-            services.AddScoped<IAccountService, AccountService>();
-            services.AddScoped<IHotelsService, HotelsService>();
-            services.AddScoped<IUsersService, UsersService>();
-            services.AddScoped<IRoomsService, RoomsService>();
-            services.AddScoped<IServicesService, ServicesService>();
-            services.AddScoped<IReservationsService, ReservationsService>();
-            services.AddScoped<IHotelImagesService, HotelImagesService>();
-            services.AddScoped<IRoomImagesService, RoomImagesService>();
-            services.AddScoped<IRoomViewsService, RoomViewsService>();
-
-            services.AddHttpContextAccessor();
+            services.AddScoped<IManagementPermissionSupervisor, ManagementPermissionSupervisor>();
             services.AddSingleton<IUriService, UriService>(options =>
             {
                 var accessor = options.GetRequiredService<IHttpContextAccessor>();
@@ -60,6 +48,8 @@ namespace HotelReservation.API.Extensions
 
                 return new UriService(uri);
             });
+
+            services.AddHttpContextAccessor();
 
             return services;
         }

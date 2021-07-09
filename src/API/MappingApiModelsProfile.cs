@@ -6,6 +6,7 @@ using HotelReservation.API.Commands.Reservation;
 using HotelReservation.API.Commands.Room;
 using HotelReservation.API.Commands.RoomView;
 using HotelReservation.API.Commands.Service;
+using HotelReservation.API.Commands.User;
 using HotelReservation.API.Models.RequestModels;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Constants;
@@ -15,7 +16,6 @@ using HotelReservation.Business.Models.UserModels;
 using HotelReservation.Data.Entities;
 using System;
 using System.Linq;
-using HotelReservation.API.Commands.User;
 
 namespace HotelReservation.API
 {

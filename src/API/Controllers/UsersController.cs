@@ -1,6 +1,7 @@
 ﻿using HotelReservation.API.Commands.User;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.API.Queries.User;
+using HotelReservation.Business;
 using HotelReservation.Business.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -54,6 +55,13 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(Guid id, [FromBody] UpdateUserCommand command)
         {
             // var currentUserClaims = User.Claims;
+            if (!id.Equals(command.Id))
+            {
+                throw new BusinessException(
+                    "Updating resource id does not match with requested id",
+                    ErrorStatus.IncorrectInput);
+            }
+
             var response = await _mediator.Send(command);
             return Ok(response);
         }
