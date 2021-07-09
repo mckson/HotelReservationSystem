@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using HotelReservation.API.Behaviors;
+using HotelReservation.API.Application.Behaviors;
 using HotelReservation.API.Extensions;
 using HotelReservation.API.Helpers;
 using HotelReservation.API.Middleware;

@@ -1,6 +1,6 @@
-﻿using HotelReservation.API.Commands.Image;
+﻿using HotelReservation.API.Application.Commands.Image;
+using HotelReservation.API.Application.Queries.Image;
 using HotelReservation.API.Models.ResponseModels;
-using HotelReservation.API.Queries.Image;
 using HotelReservation.Business.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

@@ -1,6 +1,6 @@
-﻿using HotelReservation.API.Commands.User;
+﻿using HotelReservation.API.Application.Commands.User;
+using HotelReservation.API.Application.Queries.User;
 using HotelReservation.API.Models.ResponseModels;
-using HotelReservation.API.Queries.User;
 using HotelReservation.Business;
 using HotelReservation.Business.Constants;
 using MediatR;

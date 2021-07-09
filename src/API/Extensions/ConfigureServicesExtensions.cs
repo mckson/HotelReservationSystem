@@ -1,5 +1,5 @@
-﻿using HotelReservation.API.Helpers;
-using HotelReservation.API.Interfaces;
+﻿using HotelReservation.API.Application.Helpers;
+using HotelReservation.API.Application.Interfaces;
 using HotelReservation.Business;
 using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;

@@ -1,4 +1,4 @@
-﻿using HotelReservation.API.Commands.Account;
+﻿using HotelReservation.API.Application.Commands.Account;
 using HotelReservation.API.Models.ResponseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
