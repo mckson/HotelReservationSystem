@@ -1,7 +1,10 @@
-﻿using HotelReservation.Business;
+﻿using FluentValidation;
+using HotelReservation.Business;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Serilog;
 using System;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -39,12 +42,25 @@ namespace HotelReservation.API.Middleware
                         ErrorStatus.AccessDenied => (int)HttpStatusCode.Forbidden,
                         _ => (int)HttpStatusCode.BadRequest
                     },
+                    ValidationException exception => (int)HttpStatusCode.Forbidden,
                     _ => (int)HttpStatusCode.InternalServerError
+                };
+
+                response.HttpContext.Features.Get<IHttpResponseFeature>().ReasonPhrase = error switch
+                {
+                    BusinessException exception => exception.Message,
+                    ValidationException exception => "Validation failed",
+                    _ => null
                 };
 
                 logger.Error(error, error.Message);
 
-                var result = JsonSerializer.Serialize(new { message = error.Message });
+                var result = JsonSerializer.Serialize(new
+                {
+                    message = error is ValidationException validationException
+                        ? validationException.Errors.First().ErrorMessage
+                        : error.Message
+                });
                 await response.WriteAsync(result);
             }
         }

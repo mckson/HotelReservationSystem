@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using FluentValidation;
+using HotelReservation.API.Behaviors;
 using HotelReservation.API.Extensions;
 using HotelReservation.API.Helpers;
 using HotelReservation.API.Middleware;
@@ -69,6 +71,9 @@ namespace HotelReservation.API
             services.AddScoped<DatabaseSeeder>();
 
             services.AddMediatR(typeof(Startup));
+            services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
+
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             services.AddControllers();
         }

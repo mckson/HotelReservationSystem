@@ -30,8 +30,8 @@ namespace HotelReservation.API.Helpers
         public bool IsCurrentUser(Guid id)
         {
             var claims = _httpContextAccessor.HttpContext.User.Claims;
-            var currentUserId = claims.FirstOrDefault(claim => claim.Type.Equals(ClaimNames.Id)).Value;
-            var currentUserIdGuid = Guid.Parse(currentUserId);
+            var currentUserId = claims.FirstOrDefault(claim => claim.Type.Equals(ClaimNames.Id))?.Value;
+            var currentUserIdGuid = Guid.Parse(currentUserId ?? string.Empty);
             var isCurrentIdEqualsToId = id.Equals(currentUserIdGuid);
 
             return isCurrentIdEqualsToId;

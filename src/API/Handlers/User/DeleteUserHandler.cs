@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using HotelReservation.API.Commands.User;
+﻿using HotelReservation.API.Commands.User;
 using HotelReservation.API.Interfaces;
 using HotelReservation.Business;
 using HotelReservation.Data.Interfaces;
@@ -15,13 +14,14 @@ namespace HotelReservation.API.Handlers.User
         private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
         private readonly ILogger _logger;
-        private readonly IMapper _mapper;
 
-        public DeleteUserHandler(IUserRepository userRepository, ILogger logger, IMapper mapper, IUserHelper userHelper)
+        public DeleteUserHandler(
+            IUserRepository userRepository,
+            ILogger logger,
+            IUserHelper userHelper)
         {
             _userRepository = userRepository;
             _logger = logger;
-            _mapper = mapper;
             _userHelper = userHelper;
         }
 
