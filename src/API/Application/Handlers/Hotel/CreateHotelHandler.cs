@@ -30,7 +30,6 @@ namespace HotelReservation.API.Application.Handlers.Hotel
 
         public async Task<HotelResponseModel> Handle(CreateHotelCommand request, CancellationToken cancellationToken)
         {
-
             var locationEntity = await _locationRepository.GetAsync(
                 request.Location.Country,
                 request.Location.Region,

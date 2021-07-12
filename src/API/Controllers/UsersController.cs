@@ -3,8 +3,10 @@ using HotelReservation.API.Application.Queries.User;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Business.Constants;
+using HotelReservation.Data.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -24,11 +26,44 @@ namespace HotelReservation.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserResponseModel>>> GetAllUsersAsync()
+        [HttpGet("All")]
+        public async Task<ActionResult<IEnumerable<UserBriefResponseModel>>> GetAllUsersAsync()
         {
             var query = new GetAllUsersQuery();
             var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Method that returns paged and filtered UserResponseModels
+        /// </summary>
+        /// <remarks>Method is allowed for authenticated admin only</remarks>
+        /// <param name="paginationFilter">Pagination filter (pageNumber, pageSize)</param>
+        /// <param name="usersFilter">User filter (email)</param>
+        /// <returns>BasePagedResponseModel with page of filtered UserResponseModels</returns>
+        /// <response code="200">Returns page of UserResponseModels</response>
+        /// <response code="401">When user is unauthenticated</response>
+        /// <response code="403">When user has no permissions to get paged users</response>
+        /// <response code="404">When no users, that satisfy filter parameters, were found</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(BasePagedResponseModel<UserResponseModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<BasePagedResponseModel<UserResponseModel>>> GetPagedAndFilteredUsersAsync(
+            [FromQuery] PaginationFilter paginationFilter, [FromQuery] UsersFilter usersFilter)
+        {
+            var route = Request.Path.Value;
+
+            var query = new GetPagedFilteredUsersQuery
+            {
+                PaginationFilter = paginationFilter,
+                UsersFilter = usersFilter,
+                Route = route
+            };
+
+            var response = await _mediator.Send(query);
+
             return Ok(response);
         }
 

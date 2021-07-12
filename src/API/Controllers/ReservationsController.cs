@@ -22,6 +22,8 @@ namespace HotelReservation.API.Controllers
             _mediator = mediator;
         }
 
+        [Authorize]
+        [HttpGet]
         public async Task<ActionResult<BasePagedResponseModel<ReservationBriefResponseModel>>> GetFilteredReservationsAsync(
             [FromQuery] PaginationFilter paginationFilter,
             [FromQuery] ReservationsFilter reservationsFilter)

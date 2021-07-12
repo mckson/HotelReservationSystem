@@ -6,7 +6,7 @@ namespace HotelReservation.API.Application.Interfaces
 {
     public interface IHotelHelper
     {
-        Task UpdateLocationEntityFieldsAsync(LocationEntity locationToUpdate, LocationRequestModel locationModel);
+        Task TryUpdateLocationEntityFieldsAsync(LocationEntity locationToUpdate, LocationRequestModel locationModel);
 
         bool IsLocationEqual(LocationEntity locationOne, LocationRequestModel locationTwo);
     }

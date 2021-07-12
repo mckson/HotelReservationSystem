@@ -2,12 +2,14 @@
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Queries.Hotel;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Constants;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,6 +42,12 @@ namespace HotelReservation.API.Application.Handlers.Hotel
             var hotelEntities = _hotelRepository.Find(
                 hotelFilterExpression,
                 validPaginationFilter);
+
+            if (!hotelEntities.Any())
+            {
+                throw new BusinessException("No hotels, that are satisfy filter parameters, were created yet", ErrorStatus.NotFound);
+            }
+
             var hotelResponses = _mapper.Map<IEnumerable<HotelResponseModel>>(hotelEntities);
 
             var pagedResponse = PaginationHelper.CreatePagedResponseModel(

@@ -26,7 +26,7 @@ namespace HotelReservation.API.Application.Helpers
                    locationOne.BuildingNumber == locationTwo.BuildingNumber;
         }
 
-        public async Task UpdateLocationEntityFieldsAsync(LocationEntity locationToUpdate, LocationRequestModel locationModel)
+        public async Task TryUpdateLocationEntityFieldsAsync(LocationEntity locationToUpdate, LocationRequestModel locationModel)
         {
             var existingLocation = await _locationRepository.GetAsync(
                 locationModel.Country,

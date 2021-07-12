@@ -19,10 +19,12 @@ namespace HotelReservation.API.Application.Handlers.RoomView
 
         public CreateRoomViewHandler(
             IRoomViewRepository roomViewRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IRoomViewHelper roomViewHelper)
         {
             _roomViewRepository = roomViewRepository;
             _mapper = mapper;
+            _roomViewHelper = roomViewHelper;
         }
 
         public async Task<RoomViewResponseModel> Handle(CreateRoomViewCommand request, CancellationToken cancellationToken)

@@ -39,7 +39,7 @@ namespace HotelReservation.API.Application.Handlers.Image
 
             if (imageEntity.IsMain)
             {
-                await ChangeHotelMainImageAsync(imageEntity.HotelId, imageEntity);
+                await _hotelImageHelper.ChangeHotelMainImageAsync(imageEntity.HotelId, imageEntity);
             }
 
             var createdImageEntity = await _hotelImageRepository.CreateAsync(imageEntity);

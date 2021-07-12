@@ -25,8 +25,14 @@
             PageSize = pageSize;
         }
 
+        /// <summary>
+        /// Number of required page (offset from start of collection of items)
+        /// </summary>
         public int PageNumber { get; set; }
 
+        /// <summary>
+        /// Size of page - limitation in amount of items per one page
+        /// </summary>
         public int? PageSize { get; set; }
     }
 }

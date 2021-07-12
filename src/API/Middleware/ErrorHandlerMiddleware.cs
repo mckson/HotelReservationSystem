@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -55,9 +56,9 @@ namespace HotelReservation.API.Middleware
 
                 logger.Error(error, error.Message);
 
-                var result = JsonSerializer.Serialize(new
+                var result = JsonSerializer.Serialize(new ErrorResponseModel
                 {
-                    message = error is ValidationException validationException
+                    Message = error is ValidationException validationException
                         ? validationException.Errors.First().ErrorMessage
                         : error.Message
                 });

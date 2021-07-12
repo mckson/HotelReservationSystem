@@ -24,7 +24,6 @@ namespace HotelReservation.API.Application.Handlers.Hotel
 
         public async Task<HotelResponseModel> Handle(DeleteHotelCommand request, CancellationToken cancellationToken)
         {
-
             var deletedHotel = await _hotelRepository.DeleteAsync(request.Id) ??
                                throw new BusinessException($"Hotel with id {request.Id} does not exist", ErrorStatus.NotFound);
 

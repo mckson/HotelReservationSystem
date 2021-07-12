@@ -37,5 +37,10 @@ namespace HotelReservation.Data.Constants
             return reservation => reservationsFilter.Email.IsNullOrEmpty() ||
                                   reservation.Email == reservationsFilter.Email;
         }
+
+        public static Expression<Func<UserEntity, bool>> GetUserFilterExpression(UsersFilter usersFilter)
+        {
+            return user => usersFilter.Email.IsNullOrEmpty() || user.Email.StartsWith(usersFilter.Email);
+        }
     }
 }

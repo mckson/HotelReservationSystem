@@ -48,7 +48,7 @@ namespace HotelReservation.API.Application.Handlers.Hotel
 
             if (!_hotelHelper.IsLocationEqual(hotelEntity.Location, request.Location))
             {
-                await _hotelHelper.UpdateLocationEntityFieldsAsync(hotelEntity.Location, request.Location);
+                await _hotelHelper.TryUpdateLocationEntityFieldsAsync(hotelEntity.Location, request.Location);
             }
 
             var updatedHotel = await _hotelRepository.UpdateAsync(hotelEntity);

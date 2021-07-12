@@ -1,4 +1,5 @@
 ﻿using HotelReservation.Data.Entities;
+using HotelReservation.Data.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,10 @@ namespace HotelReservation.Data.Interfaces
         Task<UserEntity> GetByEmailAsync(string email);
 
         Task<IQueryable<UserEntity>> Find(Expression<Func<UserEntity, bool>> predicate);
+
+        Task<IQueryable<UserEntity>> Find(
+            Expression<Func<UserEntity, bool>> predicate,
+            PaginationFilter paginationFilter);
 
         Task<bool> CreateAsync(UserEntity entity);
 
