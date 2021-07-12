@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.Account;
 using HotelReservation.API.Application.Interfaces;
 using HotelReservation.API.Models.ResponseModels;
@@ -11,7 +7,10 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Account
 {
@@ -20,13 +19,15 @@ namespace HotelReservation.API.Application.Handlers.Account
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
         private readonly IAuthenticationHelper _authenticationHelper;
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
-        public RefreshTokenHandler(IUserRepository userRepository, ILogger logger, IMapper mapper, ITokenService tokenService, IAuthenticationHelper authenticationHelper)
+        public RefreshTokenHandler(
+            IUserRepository userRepository,
+            IMapper mapper,
+            ITokenService tokenService,
+            IAuthenticationHelper authenticationHelper)
         {
             _userRepository = userRepository;
-            _logger = logger;
             _mapper = mapper;
             _tokenService = tokenService;
             _authenticationHelper = authenticationHelper;
@@ -34,8 +35,6 @@ namespace HotelReservation.API.Application.Handlers.Account
 
         public async Task<TokenResponseModel> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"New JWT token is requesting by {request.Token} refresh token");
-
             var userEntity = (await _userRepository.Find(u => u.RefreshToken.Token == request.Token)).FirstOrDefault();
 
             if (userEntity == null)
@@ -74,8 +73,6 @@ namespace HotelReservation.API.Application.Handlers.Account
             var jwtToken = _tokenService.GenerateJwtToken(claims);
 
             tokenResponse.JwtToken = jwtToken;
-
-            _logger.Debug("New JWT token requested");
 
             return tokenResponse;
         }

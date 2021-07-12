@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.Room;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
@@ -11,13 +6,16 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Room
 {
     public class UpdateRoomHandler : IRequestHandler<UpdateRoomCommand, RoomResponseModel>
     {
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private readonly IRoomRepository _roomRepository;
         private readonly IHotelRepository _hotelRepository;
@@ -25,14 +23,12 @@ namespace HotelReservation.API.Application.Handlers.Room
         private readonly IManagementPermissionSupervisor _supervisor;
 
         public UpdateRoomHandler(
-            ILogger logger,
             IMapper mapper,
             IRoomRepository roomRepository,
             IManagementPermissionSupervisor supervisor,
             IHotelRepository hotelRepository,
             IRoomViewRepository roomViewRepository)
         {
-            _logger = logger;
             _mapper = mapper;
             _roomRepository = roomRepository;
             _supervisor = supervisor;
@@ -42,8 +38,6 @@ namespace HotelReservation.API.Application.Handlers.Room
 
         public async Task<RoomResponseModel> Handle(UpdateRoomCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Room {request.Id} is updating");
-
             var roomEntity = await _roomRepository.GetAsync(request.Id) ??
                              throw new BusinessException("No room with such id", ErrorStatus.NotFound);
 
@@ -118,8 +112,6 @@ namespace HotelReservation.API.Application.Handlers.Room
             }
 
             var updatedRoomResponse = _mapper.Map<RoomResponseModel>(updatedRoomEntity);
-
-            _logger.Debug($"Room {request.Id} updated");
 
             return updatedRoomResponse;
         }

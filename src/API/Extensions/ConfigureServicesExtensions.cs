@@ -37,6 +37,9 @@ namespace HotelReservation.API.Extensions
             services.AddScoped<IReservationHelper, ReservationHelper>();
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
             services.AddScoped<IUserHelper, UserHelper>();
+            services.AddScoped<IHotelHelper, HotelHelper>();
+            services.AddScoped<IHotelImageHelper, HotelImageHelper>();
+            services.AddScoped<IRoomViewHelper, RoomViewHelper>();
 
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IManagementPermissionSupervisor, ManagementPermissionSupervisor>();

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.User;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
@@ -13,7 +7,12 @@ using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.User
 {
@@ -22,13 +21,15 @@ namespace HotelReservation.API.Application.Handlers.User
         private readonly IUserRepository _userRepository;
         private readonly IHotelRepository _hotelRepository;
         private readonly UserManager<UserEntity> _userManager;
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
-        public UpdateUserHandler(IUserRepository userRepository, ILogger logger, IMapper mapper, IHotelRepository hotelRepository, UserManager<UserEntity> userManager)
+        public UpdateUserHandler(
+            IUserRepository userRepository,
+            IMapper mapper,
+            IHotelRepository hotelRepository,
+            UserManager<UserEntity> userManager)
         {
             _userRepository = userRepository;
-            _logger = logger;
             _mapper = mapper;
             _hotelRepository = hotelRepository;
             _userManager = userManager;
@@ -36,8 +37,6 @@ namespace HotelReservation.API.Application.Handlers.User
 
         public async Task<UserResponseModel> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"User {request.Id} is updating");
-
             if (request == null)
                 throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
@@ -150,8 +149,6 @@ namespace HotelReservation.API.Application.Handlers.User
 
             var updatedUserEntity = await _userRepository.GetByIdAsync(userEntity.Id);
             var addedUserResponse = _mapper.Map<UserResponseModel>(updatedUserEntity);
-
-            _logger.Debug($"User {request.Id} updated");
 
             return addedUserResponse;
         }

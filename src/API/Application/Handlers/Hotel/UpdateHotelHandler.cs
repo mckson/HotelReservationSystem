@@ -1,38 +1,35 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.Hotel;
-using HotelReservation.API.Models.RequestModels;
+using HotelReservation.API.Application.Interfaces;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Hotel
 {
     public class UpdateHotelHandler : IRequestHandler<UpdateHotelCommand, HotelResponseModel>
     {
         private readonly IHotelRepository _hotelRepository;
-        private readonly ILocationRepository _locationRepository;
+        private readonly IHotelHelper _hotelHelper;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger;
 
-        public UpdateHotelHandler(IHotelRepository hotelRepository, ILocationRepository locationRepository, IMapper mapper, ILogger logger)
+        public UpdateHotelHandler(
+            IHotelRepository hotelRepository,
+            IMapper mapper,
+            IHotelHelper hotelHelper)
         {
             _hotelRepository = hotelRepository;
-            _locationRepository = locationRepository;
             _mapper = mapper;
-            _logger = logger;
+            _hotelHelper = hotelHelper;
         }
 
         public async Task<HotelResponseModel> Handle(UpdateHotelCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Hotel with {request.Id} is updating");
-
             var hotelEntity = await _hotelRepository.GetAsync(request.Id) ??
                               throw new BusinessException("Hotel with such id does not exist", ErrorStatus.NotFound);
 
@@ -49,45 +46,15 @@ namespace HotelReservation.API.Application.Handlers.Hotel
 
             hotelEntity.Description = request.Description;
 
-            if (!IsLocationEqual(hotelEntity.Location, request.Location))
+            if (!_hotelHelper.IsLocationEqual(hotelEntity.Location, request.Location))
             {
-                await UpdateLocationEntityFieldsAsync(hotelEntity.Location, request.Location);
+                await _hotelHelper.UpdateLocationEntityFieldsAsync(hotelEntity.Location, request.Location);
             }
 
             var updatedHotel = await _hotelRepository.UpdateAsync(hotelEntity);
             var updatedHotelResponse = _mapper.Map<HotelResponseModel>(updatedHotel);
 
-            _logger.Debug($"Hotel with {request.Id} was updated");
-
             return updatedHotelResponse;
-        }
-
-        private bool IsLocationEqual(LocationEntity locationOne, LocationRequestModel locationTwo)
-        {
-            return locationOne.Country.Equals(locationTwo.Country, StringComparison.InvariantCultureIgnoreCase) &&
-                   locationOne.Region.Equals(locationTwo.Region, StringComparison.InvariantCultureIgnoreCase) &&
-                   locationOne.City.Equals(locationTwo.City, StringComparison.InvariantCultureIgnoreCase) &&
-                   locationOne.Street.Equals(locationTwo.Street, StringComparison.InvariantCultureIgnoreCase) &&
-                   locationOne.BuildingNumber == locationTwo.BuildingNumber;
-        }
-
-        private async Task UpdateLocationEntityFieldsAsync(LocationEntity locationToUpdate, LocationRequestModel locationModel)
-        {
-            var existingLocation = await _locationRepository.GetAsync(
-                locationModel.Country,
-                locationModel.Region,
-                locationModel.City,
-                locationModel.Street,
-                locationModel.BuildingNumber);
-
-            if (existingLocation != null)
-                throw new BusinessException("Such location already owned", ErrorStatus.AlreadyExist);
-
-            locationToUpdate.Country = locationModel.Country;
-            locationToUpdate.Region = locationModel.Region;
-            locationToUpdate.City = locationModel.City;
-            locationToUpdate.Street = locationModel.Street;
-            locationToUpdate.BuildingNumber = locationModel.BuildingNumber;
         }
     }
 }

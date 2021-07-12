@@ -74,6 +74,7 @@ namespace HotelReservation.API
             services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
 
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
             services.AddControllers();
         }

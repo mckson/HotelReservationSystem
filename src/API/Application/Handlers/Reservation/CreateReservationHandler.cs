@@ -1,14 +1,13 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.Reservation;
 using HotelReservation.API.Application.Interfaces;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Reservation
 {
@@ -17,27 +16,22 @@ namespace HotelReservation.API.Application.Handlers.Reservation
         private readonly IReservationRepository _reservationRepository;
         private readonly IReservationHelper _reservationHelper;
         private readonly IUserRepository _userRepository;
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
         public CreateReservationHandler(
             IReservationRepository reservationRepository,
             IReservationHelper reservationHelper,
-            ILogger logger,
             IMapper mapper,
             IUserRepository userRepository)
         {
             _reservationRepository = reservationRepository;
             _reservationHelper = reservationHelper;
-            _logger = logger;
             _mapper = mapper;
             _userRepository = userRepository;
         }
 
         public async Task<ReservationBriefResponseModel> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug("Reservation is creating");
-
             var reservationEntity = _mapper.Map<ReservationEntity>(request);
 
             var userEntity = await _userRepository.GetByEmailAsync(request.Email);
@@ -53,8 +47,6 @@ namespace HotelReservation.API.Application.Handlers.Reservation
 
             var createdReservationEntity = await _reservationRepository.CreateAsync(reservationEntity);
             var createdReservationResponse = _mapper.Map<ReservationBriefResponseModel>(createdReservationEntity);
-
-            _logger.Debug($"Reservation {createdReservationResponse.Id} created");
 
             return createdReservationResponse;
         }

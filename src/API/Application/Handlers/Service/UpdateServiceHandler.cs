@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.Service;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
@@ -10,7 +6,10 @@ using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Service
 {
@@ -18,7 +17,6 @@ namespace HotelReservation.API.Application.Handlers.Service
     {
         private readonly IServiceRepository _serviceRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger;
         private readonly IHotelRepository _hotelRepository;
         private readonly IManagementPermissionSupervisor _supervisor;
 
@@ -26,21 +24,16 @@ namespace HotelReservation.API.Application.Handlers.Service
             IServiceRepository serviceRepository,
             IHotelRepository hotelRepository,
             IManagementPermissionSupervisor supervisor,
-            ILogger logger,
             IMapper mapper)
         {
             _serviceRepository = serviceRepository;
             _hotelRepository = hotelRepository;
             _supervisor = supervisor;
-            _logger = logger;
             _mapper = mapper;
         }
 
         public async Task<ServiceResponseModel> Handle(UpdateServiceCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Service {request.Id} is updating");
-
-            // was as no tracking
             var serviceEntity = await _serviceRepository.GetAsync(request.Id) ??
                              throw new BusinessException("No service with such id", ErrorStatus.NotFound);
 
@@ -83,8 +76,6 @@ namespace HotelReservation.API.Application.Handlers.Service
             }
 
             var updatedServiceResponse = _mapper.Map<ServiceResponseModel>(updatedServiceEntity);
-
-            _logger.Debug($"Service {request.Id} updated");
 
             return updatedServiceResponse;
         }

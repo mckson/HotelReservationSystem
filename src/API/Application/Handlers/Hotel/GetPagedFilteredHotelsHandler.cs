@@ -1,17 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Queries.Hotel;
-using HotelReservation.API.Helpers;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Constants;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Hotel
 {
@@ -20,24 +18,19 @@ namespace HotelReservation.API.Application.Handlers.Hotel
         private readonly IHotelRepository _hotelRepository;
         private readonly IUriService _uriService;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger;
 
         public GetPagedFilteredHotelsHandler(
             IHotelRepository hotelRepository,
             IMapper mapper,
-            ILogger logger,
             IUriService uriService)
         {
             _hotelRepository = hotelRepository;
             _mapper = mapper;
-            _logger = logger;
             _uriService = uriService;
         }
 
         public async Task<BasePagedResponseModel<HotelResponseModel>> Handle(GetPagedFilteredHotelsQuery request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Paged hotels are requesting. Page: {request.PaginationFilter.PageNumber}, Size: {request.PaginationFilter.PageSize}");
-
             var hotelFilterExpression = FilterExpressions.GetHotelFilterExpression(request.HotelsFilter);
             var countOfFilteredHotels = await _hotelRepository.GetCountAsync(hotelFilterExpression);
 
@@ -64,8 +57,6 @@ namespace HotelReservation.API.Application.Handlers.Hotel
             //         await GetRolesForUserModelAsync(hotelUser.User);
             //     }
             // }
-            _logger.Debug($"Paged hotels are requested. Page: {request.PaginationFilter.PageNumber}, Size: {request.PaginationFilter.PageSize}");
-
             return pagedResponse;
         }
     }

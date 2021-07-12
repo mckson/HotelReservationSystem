@@ -1,17 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Queries.Room;
-using HotelReservation.API.Helpers;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Constants;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Room
 {
@@ -20,20 +18,19 @@ namespace HotelReservation.API.Application.Handlers.Room
         private readonly IRoomRepository _roomRepository;
         private readonly IUriService _uriService;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger;
 
-        public GetPagedFilteredRoomsHandler(IRoomRepository roomRepository, IMapper mapper, ILogger logger, IUriService uriService)
+        public GetPagedFilteredRoomsHandler(
+            IRoomRepository roomRepository,
+            IMapper mapper,
+            IUriService uriService)
         {
             _roomRepository = roomRepository;
             _mapper = mapper;
-            _logger = logger;
             _uriService = uriService;
         }
 
         public async Task<BasePagedResponseModel<RoomResponseModel>> Handle(GetPagedFilteredRoomsQuery request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Paged rooms are requesting, page: {request.PaginationFilter.PageNumber}, size: {request.PaginationFilter.PageSize}");
-
             var roomFilterExpression = FilterExpressions.GetRoomFilterExpression(request.RoomsFilter);
             var countOfFilteredRooms = await _roomRepository.GetCountAsync(roomFilterExpression);
 
@@ -49,8 +46,6 @@ namespace HotelReservation.API.Application.Handlers.Room
                 countOfFilteredRooms,
                 _uriService,
                 request.Route);
-
-            _logger.Debug($"Paged rooms are requested, page: {request.PaginationFilter.PageNumber}, size: {request.PaginationFilter.PageSize}");
 
             return pagedRoomsResponse;
         }

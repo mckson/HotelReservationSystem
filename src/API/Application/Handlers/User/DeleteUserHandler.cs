@@ -1,11 +1,10 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using HotelReservation.API.Application.Commands.User;
+﻿using HotelReservation.API.Application.Commands.User;
 using HotelReservation.API.Application.Interfaces;
 using HotelReservation.Business;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.User
 {
@@ -13,22 +12,17 @@ namespace HotelReservation.API.Application.Handlers.User
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
-        private readonly ILogger _logger;
 
         public DeleteUserHandler(
             IUserRepository userRepository,
-            ILogger logger,
             IUserHelper userHelper)
         {
             _userRepository = userRepository;
-            _logger = logger;
             _userHelper = userHelper;
         }
 
         public async Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"User {request.Id} is deleting");
-
             var isCurrentUser = _userHelper.IsCurrentUser(request.Id);
 
             if (isCurrentUser)
@@ -43,8 +37,6 @@ namespace HotelReservation.API.Application.Handlers.User
             {
                 throw new BusinessException("No user with such id", ErrorStatus.NotFound);
             }
-
-            _logger.Debug($"User {request.Id} is deleted");
 
             return Unit.Value;
         }

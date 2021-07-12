@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.User;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
@@ -9,7 +6,9 @@ using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Serilog;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.User
 {
@@ -17,21 +16,20 @@ namespace HotelReservation.API.Application.Handlers.User
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
-        public CreateUserHandler(IUserRepository userRepository, ILogger logger, IMapper mapper, IPasswordHasher<UserEntity> passwordHasher)
+        public CreateUserHandler(
+            IUserRepository userRepository,
+            IMapper mapper,
+            IPasswordHasher<UserEntity> passwordHasher)
         {
             _userRepository = userRepository;
-            _logger = logger;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
         }
 
         public async Task<UserResponseModel> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"User {request.FirstName} {request.LastName} ({request.Email}) is creating");
-
             if (request == null)
                 throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
@@ -70,8 +68,6 @@ namespace HotelReservation.API.Application.Handlers.User
 
             var addedUserEntity = _userRepository.GetByIdAsync(userEntity.Id); // to attract roles on repository level
             var addedUserResponse = _mapper.Map<UserResponseModel>(addedUserEntity);
-
-            _logger.Debug($"User with id {userEntity.Id}, {userEntity.FirstName} {userEntity.LastName} ({userEntity.Email}) is created");
 
             return addedUserResponse;
         }

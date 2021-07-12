@@ -1,17 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Queries.Reservation;
-using HotelReservation.API.Helpers;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Constants;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Reservation
 {
@@ -19,28 +17,20 @@ namespace HotelReservation.API.Application.Handlers.Reservation
     {
         private readonly IReservationRepository _reservationRepository;
         private readonly IUriService _uriService;
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
         public GetPagedFilteredReservationsHandler(
             IReservationRepository reservationRepository,
-            ILogger logger,
             IMapper mapper,
             IUriService uriService)
         {
             _reservationRepository = reservationRepository;
-            _logger = logger;
             _mapper = mapper;
             _uriService = uriService;
         }
 
         public async Task<BasePagedResponseModel<ReservationBriefResponseModel>> Handle(GetPagedFilteredReservationsQuery request, CancellationToken cancellationToken)
         {
-            _logger.Debug(
-                "Paged reservations for user " +
-                $"{request.ReservationsFilter.Email} are requesting. , " +
-                $"page: {request.PaginationFilter.PageNumber}, size: {request.PaginationFilter.PageSize}");
-
             var reservationsFilter = FilterExpressions.GetReservationFilterExpression(request.ReservationsFilter);
             var countOfFilteredReservations = await _reservationRepository.GetCountAsync(reservationsFilter);
 
@@ -58,11 +48,6 @@ namespace HotelReservation.API.Application.Handlers.Reservation
                 countOfFilteredReservations,
                 _uriService,
                 request.Route);
-
-            _logger.Debug(
-                "Paged reservations for user " +
-                $"{request.ReservationsFilter.Email} are requested. , " +
-                $"page: {request.PaginationFilter.PageNumber}, size: {request.PaginationFilter.PageSize}");
 
             return pagedResponse;
         }

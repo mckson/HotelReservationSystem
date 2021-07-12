@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.Hotel;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Serilog;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Hotel
 {
@@ -17,20 +16,20 @@ namespace HotelReservation.API.Application.Handlers.Hotel
     {
         private readonly IHotelRepository _hotelRepository;
         private readonly ILocationRepository _locationRepository;
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
-        public CreateHotelHandler(IHotelRepository hotelRepository, ILogger logger, IMapper mapper, ILocationRepository locationRepository)
+        public CreateHotelHandler(
+            IHotelRepository hotelRepository,
+            IMapper mapper,
+            ILocationRepository locationRepository)
         {
             _hotelRepository = hotelRepository;
-            _logger = logger;
             _mapper = mapper;
             _locationRepository = locationRepository;
         }
 
         public async Task<HotelResponseModel> Handle(CreateHotelCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Hotel {request.Name} is creating");
 
             var locationEntity = await _locationRepository.GetAsync(
                 request.Location.Country,
@@ -57,8 +56,6 @@ namespace HotelReservation.API.Application.Handlers.Hotel
 
             var createdHotelEntity = await _hotelRepository.CreateAsync(hotelEntity);
             var createdHotelResponse = _mapper.Map<HotelResponseModel>(createdHotelEntity);
-
-            _logger.Debug($"Hotel {request.Name} was created");
 
             return createdHotelResponse;
         }

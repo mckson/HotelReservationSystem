@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using HotelReservation.API.Application.Commands.Account;
 using HotelReservation.API.Application.Interfaces;
 using HotelReservation.API.Models.ResponseModels;
@@ -10,13 +8,13 @@ using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Serilog;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Account
 {
     public class AuthenticateUserHandler : IRequestHandler<AuthenticateUserCommand, TokenResponseModel>
     {
-        private readonly ILogger _logger;
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
@@ -24,14 +22,12 @@ namespace HotelReservation.API.Application.Handlers.Account
         private readonly IMapper _mapper;
 
         public AuthenticateUserHandler(
-            ILogger logger,
             IUserRepository userRepository,
             IPasswordHasher<UserEntity> passwordHasher,
             IAuthenticationHelper authenticationHelper,
             ITokenService tokenService,
             IMapper mapper)
         {
-            _logger = logger;
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _authenticationHelper = authenticationHelper;
@@ -41,8 +37,6 @@ namespace HotelReservation.API.Application.Handlers.Account
 
         public async Task<TokenResponseModel> Handle(AuthenticateUserCommand request, CancellationToken cancellationToken)
         {
-            _logger.Debug($"User {request.Email} is signing in");
-
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
                 throw new BusinessException("Password and email cannot be empty", ErrorStatus.EmptyInput);
 
@@ -66,8 +60,6 @@ namespace HotelReservation.API.Application.Handlers.Account
 
             var tokenResponse = _mapper.Map<TokenResponseModel>(userEntity);
             tokenResponse.JwtToken = encodedJwt;
-
-            _logger.Debug($"User {request.Email} signed in");
 
             return tokenResponse;
         }
