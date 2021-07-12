@@ -91,21 +91,21 @@ namespace HotelReservation.API.Controllers
         /// <remarks>Creation of hotel is allowed for authorized admin only</remarks>
         /// <param name="command">Properties' description of the hotel that need to be created</param>
         /// <returns>HotelResponseModel of created hotel</returns>
-        /// <response code="201">Returns a HotelResponseModel with data about created hotel</response>
+        /// <response code="200">Returns a HotelResponseModel with data about created hotel</response>
         /// <response code="401">When user is unauthenticated</response>
         /// <response code="403">When user is authenticated, but has no  permissions to create hotels (when user is not admin). Or, when some validation errors occurred</response>
         /// <response code="409">When there is an attempt to create hotel with location, that already was occupied </response>
         [Authorize(Policy = Policies.AdminPermission)]
         [HttpPost]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(HotelResponseModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(HotelResponseModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<HotelResponseModel>> CreateHotelAsync([FromBody] CreateHotelCommand command)
         {
             var response = await _mediator.Send(command);
-            return CreatedAtRoute(nameof(GetHotelByIdAsync), new { id = response.Id }, response);
+            return Ok(response);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace HotelReservation.API.Controllers
         /// <param name="id">Value of required hotel's identifier</param>
         /// <param name="command">Description of updated properties for the hotel</param>
         /// <returns>HotelResponseModel with info about updated hotel</returns>
-        /// <response code="201">Returns a HotelResponseModel with data about updated hotel</response>
+        /// <response code="200">Returns a HotelResponseModel with data about updated hotel</response>
         /// <response code="401">When user is unauthenticated</response>
         /// <response code="403">When user is authenticated, but has no  permissions to update hotels (when user is not admin). Or, when some validation errors occurred</response>
         /// <response code="404">When hotel with provided id does not exist</response>
@@ -124,7 +124,7 @@ namespace HotelReservation.API.Controllers
         [Authorize(Policy = Policies.AdminPermission)]
         [HttpPut("{id:guid}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(HotelResponseModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(HotelResponseModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
@@ -141,7 +141,7 @@ namespace HotelReservation.API.Controllers
 
             var response = await _mediator.Send(command);
 
-            return CreatedAtRoute(nameof(GetHotelByIdAsync), new { id = response.Id }, response);
+            return Ok(response);
         }
 
         /// <summary>
