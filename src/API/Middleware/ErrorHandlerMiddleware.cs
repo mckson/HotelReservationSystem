@@ -3,12 +3,15 @@ using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Serilog;
 using System;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace HotelReservation.API.Middleware
 {
@@ -56,13 +59,17 @@ namespace HotelReservation.API.Middleware
 
                 logger.Error(error, error.Message);
 
-                var result = JsonSerializer.Serialize(new ErrorResponseModel
+                var result = new ErrorResponseModel
                 {
                     Message = error is ValidationException validationException
                         ? validationException.Errors.First().ErrorMessage
                         : error.Message
-                });
-                await response.WriteAsync(result);
+                };
+
+                await response.WriteAsync(JsonConvert.SerializeObject(result, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }));
             }
         }
     }

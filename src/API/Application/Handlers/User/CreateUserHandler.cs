@@ -7,6 +7,8 @@ using HotelReservation.Data.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,6 +45,15 @@ namespace HotelReservation.API.Application.Handlers.User
             userEntity.UserName ??= request.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
             userEntity.PasswordHash = _passwordHasher.HashPassword(userEntity, request.Password);
 
+            if (request.Hotels != null && request.Hotels.Any())
+            {
+                userEntity.HotelUsers = new List<HotelUserEntity>();
+                userEntity.HotelUsers.AddRange(request.Hotels.Select(hotelId => new HotelUserEntity
+                {
+                    HotelId = hotelId
+                }));
+            }
+
             var result = await _userRepository.CreateAsync(userEntity);
             if (result)
             {
@@ -66,7 +77,7 @@ namespace HotelReservation.API.Application.Handlers.User
                     ErrorStatus.IncorrectInput);
             }
 
-            var addedUserEntity = _userRepository.GetByIdAsync(userEntity.Id); // to attract roles on repository level
+            var addedUserEntity = await _userRepository.GetByIdAsync(userEntity.Id); // to attract roles on repository level
             var addedUserResponse = _mapper.Map<UserResponseModel>(addedUserEntity);
 
             return addedUserResponse;

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Castle.Core.Internal;
 using HotelReservation.API.Application.Commands.User;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
@@ -69,14 +70,14 @@ namespace HotelReservation.API.Application.Handlers.User
                     var unused = await _hotelRepository.GetAsync(hotel) ??
                                  throw new BusinessException("There is no hotel with such id", ErrorStatus.NotFound);
 
-                    hotelUsers.Add(new HotelUserEntity() { HotelId = Guid.Parse(hotel) });
+                    hotelUsers.Add(new HotelUserEntity() { HotelId = hotel });
                 }
             }
 
             if (request.Email != null)
                 userEntity.UserName ??= request.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
 
-            if (request.NewPassword != null)
+            if (!request.NewPassword.IsNullOrEmpty())
             {
                 var changePasswordResult = await _userManager.ChangePasswordAsync(
                     userEntity,

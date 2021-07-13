@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -169,6 +170,23 @@ namespace HotelReservation.API.Controllers
             };
 
             var response = await _mediator.Send(command);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Method that allow to retrieve all hotel names and identifiers (for example, for search or select fields)
+        /// </summary>
+        /// <returns>Collection of HotelBriefResponse models</returns>
+        /// <response code="200">Returns collection of HotelBriefResponse models</response>
+        /// <response code="404">When no hotels were created yet</response>
+        [AllowAnonymous]
+        [HttpGet("All")]
+        [ProducesResponseType(typeof(IEnumerable<HotelBriefResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<HotelBriefResponse>>> GetAllHotelsNameAndIdAsync()
+        {
+            var query = new GetAllHotelsNameAndIdQuery();
+            var response = await _mediator.Send(query);
             return Ok(response);
         }
     }

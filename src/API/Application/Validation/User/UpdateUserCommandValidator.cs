@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Castle.Core.Internal;
 using FluentValidation;
 using HotelReservation.API.Application.Commands.User;
 
@@ -20,14 +21,14 @@ namespace HotelReservation.API.Application.Validation.User
                .EmailAddress().WithMessage("Input value {PropertyValue} must be email ({PropertyName})");
 
             RuleFor(x => x.OldPassword)
-                .NotNull().When(x => x.NewPassword != null).WithMessage("Old password is required to create new one ({PropertyName})")
-                .NotEmpty().When(x => x.NewPassword != null).WithMessage("Old password is required to create new one ({PropertyName})");
+                .NotNull().When(x => !x.NewPassword.IsNullOrEmpty()).WithMessage("Old password is required to create new one ({PropertyName})")
+                .NotEmpty().When(x => !x.NewPassword.IsNullOrEmpty()).WithMessage("Old password is required to create new one ({PropertyName})");
 
             RuleFor(x => x.NewPassword);
 
             RuleFor(x => x.PasswordConfirm)
-                .NotNull().When(x => x.NewPassword != null).WithMessage("Password confirmation is required ({PropertyName})")
-                .NotEmpty().When(x => x.NewPassword != null).WithMessage("Password confirmation is required ({PropertyName})")
+                .NotNull().When(x => !x.NewPassword.IsNullOrEmpty()).WithMessage("Password confirmation is required ({PropertyName})")
+                .NotEmpty().When(x => !x.NewPassword.IsNullOrEmpty()).WithMessage("Password confirmation is required ({PropertyName})")
                 .Equal(x => x.NewPassword).When(x => x.NewPassword != null).WithMessage("Password mismatch ({PropertyName})");
 
             RuleFor(x => x.PhoneNumber)

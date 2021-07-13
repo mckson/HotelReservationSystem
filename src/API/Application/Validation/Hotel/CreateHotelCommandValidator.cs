@@ -15,7 +15,7 @@ namespace HotelReservation.API.Application.Validation.Hotel
             RuleFor(x => x.NumberFloors)
                 .NotNull().WithMessage("Number floors must be not null ({PropertyName})")
                 .NotEmpty().WithMessage("Number floors must be not empty ({PropertyName})")
-                .Must(number => number > 1 && number < 500)
+                .Must(number => number >= 1 && number <= 500)
                 .WithMessage("Number floors must be 1 or more, but less or equal 500 ({PropertyName})");
 
             RuleFor(x => x.Deposit)

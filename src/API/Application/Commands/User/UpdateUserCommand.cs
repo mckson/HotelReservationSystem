@@ -29,6 +29,6 @@ namespace HotelReservation.API.Application.Commands.User
 
         public List<string> Roles { get; set; }
 
-        public IEnumerable<string> Hotels { get; set; }
+        public IEnumerable<Guid> Hotels { get; set; }
     }
 }
