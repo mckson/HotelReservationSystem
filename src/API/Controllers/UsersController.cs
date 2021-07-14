@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize(Policy = Policies.AdminPermission)]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -26,6 +25,7 @@ namespace HotelReservation.API.Controllers
             _mediator = mediator;
         }
 
+        [Authorize]
         [HttpGet("All")]
         public async Task<ActionResult<IEnumerable<UserBriefResponseModel>>> GetAllUsersAsync()
         {
@@ -45,6 +45,7 @@ namespace HotelReservation.API.Controllers
         /// <response code="401">When user is unauthenticated</response>
         /// <response code="403">When user has no permissions to get paged users</response>
         /// <response code="404">When no users, that satisfy filter parameters, were found</response>
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpGet]
         [ProducesResponseType(typeof(BasePagedResponseModel<UserResponseModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -67,6 +68,7 @@ namespace HotelReservation.API.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(Guid id)
         {
@@ -79,6 +81,7 @@ namespace HotelReservation.API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpPost]
         public async Task<ActionResult<UserResponseModel>> CreateUserAsync([FromBody] CreateUserCommand command)
         {
@@ -86,6 +89,7 @@ namespace HotelReservation.API.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(Guid id, [FromBody] UpdateUserCommand command)
         {
@@ -101,6 +105,7 @@ namespace HotelReservation.API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(Guid id)
         {

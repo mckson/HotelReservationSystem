@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Castle.Core.Internal;
 using HotelReservation.API.Application.Commands.User;
+using HotelReservation.API.Application.Interfaces;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Data.Constants;
@@ -23,17 +24,20 @@ namespace HotelReservation.API.Application.Handlers.User
         private readonly IHotelRepository _hotelRepository;
         private readonly UserManager<UserEntity> _userManager;
         private readonly IMapper _mapper;
+        private readonly IAuthenticationHelper _authenticationHelper;
 
         public UpdateUserHandler(
             IUserRepository userRepository,
             IMapper mapper,
             IHotelRepository hotelRepository,
-            UserManager<UserEntity> userManager)
+            UserManager<UserEntity> userManager,
+            IAuthenticationHelper authenticationHelper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _hotelRepository = hotelRepository;
             _userManager = userManager;
+            _authenticationHelper = authenticationHelper;
         }
 
         public async Task<UserResponseModel> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -41,10 +45,32 @@ namespace HotelReservation.API.Application.Handlers.User
             if (request == null)
                 throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
+            var accessAllowed = _authenticationHelper.CheckGetUserPermission(request.Id);
+
+            if (!accessAllowed)
+            {
+                throw new BusinessException(
+                    "You cannot access data about that user. You can access data only about yourself",
+                    ErrorStatus.AccessDenied);
+            }
+
             var userEntity = await _userRepository.GetByIdAsync(request.Id);
 
             if (request.Email != null)
-                userEntity.Email = request.Email;
+            {
+                var existentUserEntity = await _userRepository.GetByEmailAsync(request.Email);
+
+                if (existentUserEntity == null || existentUserEntity.Id.Equals(request.Id))
+                {
+                    userEntity.Email = request.Email;
+                }
+                else
+                {
+                    throw new BusinessException(
+                        $"User with email {request.Email} already exists",
+                        ErrorStatus.AlreadyExist);
+                }
+            }
 
             if (request.PhoneNumber != null)
                 userEntity.PhoneNumber = request.PhoneNumber;
@@ -58,7 +84,20 @@ namespace HotelReservation.API.Application.Handlers.User
                 userEntity.LastName = request.LastName;
 
             if (request.UserName != null)
-                userEntity.UserName = request.UserName;
+            {
+                var existentUserEntity = await _userRepository.GetByNameAsync(request.UserName);
+
+                if (existentUserEntity == null || existentUserEntity.Id.Equals(request.Id))
+                {
+                    userEntity.UserName = request.UserName;
+                }
+                else
+                {
+                    throw new BusinessException(
+                        $"User with name {request.UserName} already exists",
+                        ErrorStatus.AlreadyExist);
+                }
+            }
 
             var hotelUsers = new List<HotelUserEntity>();
             userEntity.HotelUsers.RemoveAll(hu => hu.UserId == userEntity.Id);

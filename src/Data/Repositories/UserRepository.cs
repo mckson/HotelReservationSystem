@@ -61,6 +61,17 @@ namespace HotelReservation.Data.Repositories
             return user;
         }
 
+        public async Task<UserEntity> GetByNameAsync(string name)
+        {
+            var user = await _userManager.FindByNameAsync(name);
+            if (user != null)
+            {
+                await GetRolesForUserAsync(user);
+            }
+
+            return user;
+        }
+
         public async Task<IQueryable<UserEntity>> Find(Expression<Func<UserEntity, bool>> predicate)
         {
             var users = _userManager.Users.Where(predicate);

@@ -18,6 +18,8 @@ namespace HotelReservation.Data.Interfaces
 
         Task<UserEntity> GetByEmailAsync(string email);
 
+        Task<UserEntity> GetByNameAsync(string name);
+
         Task<IQueryable<UserEntity>> Find(Expression<Func<UserEntity, bool>> predicate);
 
         Task<IQueryable<UserEntity>> Find(
