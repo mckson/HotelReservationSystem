@@ -75,7 +75,10 @@ namespace HotelReservation.API.Application.Handlers.User
             if (request.PhoneNumber != null)
                 userEntity.PhoneNumber = request.PhoneNumber;
 
-            userEntity.DateOfBirth = request.DateOfBirth;
+            if (request.DateOfBirth != null)
+            {
+                userEntity.DateOfBirth = request.DateOfBirth.Value;
+            }
 
             if (request.FirstName != null)
                 userEntity.FirstName = request.FirstName;
