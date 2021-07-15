@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Castle.Core.Internal;
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Queries.Hotel;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Constants;
+using HotelReservation.Data.Entities;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
@@ -43,12 +45,17 @@ namespace HotelReservation.API.Application.Handlers.Hotel
                 hotelFilterExpression,
                 validPaginationFilter);
 
-            if (!hotelEntities.Any())
+            var hotelEntitiesFilteredOverServices = hotelEntities.AsEnumerable().Where(hotel =>
+                (request.HotelsFilter.Services.IsNullOrEmpty() || request.HotelsFilter.Services.All(serviceName =>
+                    hotel.Services.Any(service =>
+                        serviceName.IsNullOrEmpty() || service.Name.StartsWith(serviceName)))));
+
+            if (!hotelEntitiesFilteredOverServices.Any())
             {
                 throw new BusinessException("No hotels, that are satisfy filter parameters, were created yet", ErrorStatus.NotFound);
             }
 
-            var hotelResponses = _mapper.Map<IEnumerable<HotelResponseModel>>(hotelEntities);
+            var hotelResponses = _mapper.Map<IEnumerable<HotelResponseModel>>(hotelEntitiesFilteredOverServices);
 
             var pagedResponse = PaginationHelper.CreatePagedResponseModel(
                 hotelResponses,

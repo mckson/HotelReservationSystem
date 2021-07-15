@@ -27,9 +27,7 @@ namespace HotelReservation.Data.Constants
                         (rr.Reservation.DateOut > filter.DateIn && rr.Reservation.DateOut <= filter.DateOut)))) &&
                 (!filter.ManagerId.HasValue || hotel.HotelUsers.Any(hu => hu.UserId == filter.ManagerId.Value)) &&
                 (filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name)) &&
-                (filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City)) &&
-                (filter.Services.IsNullOrEmpty() || hotel.Services.Any(service =>
-                    filter.Services.First().IsNullOrEmpty() || service.Name.StartsWith(filter.Services.First())));
+                (filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City));
         }
 
         public static Expression<Func<ReservationEntity, bool>> GetReservationFilterExpression(ReservationsFilter reservationsFilter)
@@ -40,7 +38,10 @@ namespace HotelReservation.Data.Constants
 
         public static Expression<Func<UserEntity, bool>> GetUserFilterExpression(UsersFilter usersFilter)
         {
-            return user => usersFilter.Email.IsNullOrEmpty() || user.Email.StartsWith(usersFilter.Email);
+            return user => (usersFilter.Email.IsNullOrEmpty() || user.Email.StartsWith(usersFilter.Email)) &&
+                           (usersFilter.FirstName.IsNullOrEmpty() ||
+                            user.FirstName.StartsWith(usersFilter.FirstName)) &&
+                           (usersFilter.LastName.IsNullOrEmpty() || user.LastName.StartsWith(usersFilter.LastName));
         }
     }
 }
