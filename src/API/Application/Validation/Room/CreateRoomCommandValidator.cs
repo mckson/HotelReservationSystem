@@ -41,14 +41,6 @@ namespace HotelReservation.API.Application.Validation.Room
                 .GreaterThan(0).WithMessage("Price must be greater than 0 ({PropertyName})")
                 .LessThanOrEqualTo(double.MaxValue).WithMessage($"Price must be less than or equal to {double.MaxValue} ({{PropertyName}})");
 
-            RuleFor(x => x.Smoking)
-                .NotNull().WithMessage("Smoking must be not null ({PropertyName})")
-                .NotEmpty().WithMessage("Smoking must be not null ({PropertyName})");
-
-            RuleFor(x => x.Parking)
-                .NotNull().WithMessage("Smoking must be not null ({PropertyName})")
-                .NotEmpty().WithMessage("Smoking must be not null ({PropertyName})");
-
             RuleFor(x => x.HotelId)
                 .NotNull().WithMessage("Smoking must be not null ({PropertyName})")
                 .NotEmpty().WithMessage("Smoking must be not null ({PropertyName})");
