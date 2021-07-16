@@ -9,5 +9,7 @@ namespace HotelReservation.API.Application.Interfaces
         Task<ClaimsIdentity> GetIdentityAsync(string email);
 
         bool CheckGetUserPermission(Guid userId);
+
+        Guid? GetCurrentUserId();
     }
 }

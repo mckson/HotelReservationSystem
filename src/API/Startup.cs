@@ -45,6 +45,7 @@ namespace HotelReservation.API
             // used in token service
             services.Configure<AuthenticationOptions>(Configuration.GetSection(AuthenticationOptions.Authentication));
             services.Configure<AdminOptions>(Configuration.GetSection(AdminOptions.AdminCredentials));
+            services.Configure<LockRoomOptions>(Configuration.GetSection(LockRoomOptions.LockRoomSetting));
 
             services.AddAndConfigureIdentity(Configuration.GetSection(PasswordOptions.PasswordSettings).Get<PasswordOptions>());
 

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HotelReservation.API.Application.Helpers;
+using HotelReservation.API.Application.Interfaces;
 using HotelReservation.API.Application.Queries.Room;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Interfaces;
@@ -18,19 +19,24 @@ namespace HotelReservation.API.Application.Handlers.Room
         private readonly IRoomRepository _roomRepository;
         private readonly IUriService _uriService;
         private readonly IMapper _mapper;
+        private readonly IAuthenticationHelper _authenticationHelper;
 
         public GetPagedFilteredRoomsHandler(
             IRoomRepository roomRepository,
             IMapper mapper,
-            IUriService uriService)
+            IUriService uriService,
+            IAuthenticationHelper authenticationHelper)
         {
             _roomRepository = roomRepository;
             _mapper = mapper;
             _uriService = uriService;
+            _authenticationHelper = authenticationHelper;
         }
 
         public async Task<BasePagedResponseModel<RoomResponseModel>> Handle(GetPagedFilteredRoomsQuery request, CancellationToken cancellationToken)
         {
+            request.RoomsFilter.UserId = _authenticationHelper.GetCurrentUserId();
+
             var roomFilterExpression = FilterExpressions.GetRoomFilterExpression(request.RoomsFilter);
             var countOfFilteredRooms = await _roomRepository.GetCountAsync(roomFilterExpression);
 

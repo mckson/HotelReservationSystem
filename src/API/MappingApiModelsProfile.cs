@@ -133,7 +133,11 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.Views,
                     options => options.MapFrom(entity =>
-                        entity.RoomViews.Select(rv => rv.RoomView)));
+                        entity.RoomViews.Select(rv => rv.RoomView)))
+                .ForMember(
+                    response => response.IsLocked,
+                    options => options.MapFrom(entity =>
+                        entity.UnlockTime.HasValue && DateTime.UtcNow < entity.UnlockTime));
             CreateMap<RoomModel, RoomBriefResponseModel>();
             CreateMap<RoomEntity, RoomBriefResponseModel>();
             #endregion

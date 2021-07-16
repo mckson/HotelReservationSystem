@@ -21,6 +21,10 @@ namespace HotelReservation.Data.Entities
 
         public bool Smoking { get; set; }
 
+        public DateTime? UnlockTime { get; set; }
+
+        public Guid? LockedByUserId { get; set; }
+
         public bool Parking { get; set; }
 
         public Guid? HotelId { get; set; }

@@ -13,6 +13,8 @@ namespace HotelReservation.Data.Entities
 
         public string LastName { get; set; }
 
+        public string PassportNumber { get; set; }
+
         public DateTime DateOfBirth { get; set; }
 
         public Guid? RoomId { get; set; }
