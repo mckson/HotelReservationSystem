@@ -7,6 +7,10 @@ namespace HotelReservation.Data.Entities
     {
         public Guid? HotelId { get; set; }
 
+        public Guid? UserId { get; set; }
+
+        public virtual UserEntity User { get; set; }
+
         public virtual HotelEntity Hotel { get; set; }
 
         public string FirstName { get; set; }

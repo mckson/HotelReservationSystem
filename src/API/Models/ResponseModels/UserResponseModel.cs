@@ -21,7 +21,7 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public IEnumerable<string> Roles { get; set; }
 
-        public IEnumerable<ReservationResponseModel> Reservations { get; set; }
+        public IEnumerable<ReservationBriefResponseModel> Reservations { get; set; }
 
         public IEnumerable<Guid> Hotels { get; set; }
     }

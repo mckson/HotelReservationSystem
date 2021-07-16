@@ -1,5 +1,6 @@
 ﻿using HotelReservation.Data.Constants;
 using HotelReservation.Data.Entities;
+using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -60,9 +61,34 @@ namespace HotelReservation.Data.Repositories
             return user;
         }
 
+        public async Task<UserEntity> GetByNameAsync(string name)
+        {
+            var user = await _userManager.FindByNameAsync(name);
+            if (user != null)
+            {
+                await GetRolesForUserAsync(user);
+            }
+
+            return user;
+        }
+
         public async Task<IQueryable<UserEntity>> Find(Expression<Func<UserEntity, bool>> predicate)
         {
             var users = _userManager.Users.Where(predicate);
+
+            foreach (var user in users)
+            {
+                await GetRolesForUserAsync(user);
+            }
+
+            return users;
+        }
+
+        public async Task<IQueryable<UserEntity>> Find(Expression<Func<UserEntity, bool>> predicate, PaginationFilter paginationFilter)
+        {
+            var users = _userManager.Users.Where(predicate)
+                .Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize.Value)
+                .Take(paginationFilter.PageSize.Value);
 
             foreach (var user in users)
             {

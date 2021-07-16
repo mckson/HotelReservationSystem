@@ -70,5 +70,27 @@ namespace HotelReservation.Business.Services
 
             _logger.Debug($"Permissions for managing hotel with hotelId {hotelId} checked");
         }
+
+        public void CheckReservationManagementPermission(string reservationEmail)
+        {
+            _logger.Debug("Permissions is checking");
+
+            var userClaims = _httpContextAccessor.HttpContext.User.Claims;
+
+            var claims = userClaims.ToList();
+            if (claims.Where(claim => claim.Type.Equals(ClaimTypes.Role)).Any(role => role.Value.ToUpper() == "ADMIN"))
+                return;
+
+            var userClaimEmail = claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Email))?.Value;
+
+            if (!reservationEmail.Equals(userClaimEmail))
+            {
+                throw new BusinessException(
+                    "You have no permissions to manage this reservation",
+                    ErrorStatus.AccessDenied);
+            }
+
+            _logger.Debug("Permissions checked");
+        }
     }
 }

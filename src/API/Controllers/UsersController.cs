@@ -1,10 +1,12 @@
-﻿using AutoMapper;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Application.Commands.User;
+using HotelReservation.API.Application.Queries.User;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business;
 using HotelReservation.Business.Constants;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.UserModels;
+using HotelReservation.Data.Filters;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,68 +14,107 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
 {
-    [Authorize(Policy = Policies.AdminPermission)]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUsersService _usersService;
-        private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public UsersController(
-            IUsersService usersService,
-            IMapper mapper)
+        public UsersController(IMediator mediator)
         {
-            _usersService = usersService;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
+        [Authorize]
+        [HttpGet("All")]
+        public async Task<ActionResult<IEnumerable<UserBriefResponseModel>>> GetAllUsersAsync()
+        {
+            var query = new GetAllUsersQuery();
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Method that returns paged and filtered UserResponseModels
+        /// </summary>
+        /// <remarks>Method is allowed for authenticated admin only</remarks>
+        /// <param name="paginationFilter">Pagination filter (pageNumber, pageSize)</param>
+        /// <param name="usersFilter">User filter (email)</param>
+        /// <returns>BasePagedResponseModel with page of filtered UserResponseModels</returns>
+        /// <response code="200">Returns page of UserResponseModels</response>
+        /// <response code="401">When user is unauthenticated</response>
+        /// <response code="403">When user has no permissions to get paged users</response>
+        /// <response code="404">When no users, that satisfy filter parameters, were found</response>
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserResponseModel>>> GetAllUsersAsync()
+        [ProducesResponseType(typeof(BasePagedResponseModel<UserResponseModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<BasePagedResponseModel<UserResponseModel>>> GetPagedAndFilteredUsersAsync(
+            [FromQuery] PaginationFilter paginationFilter, [FromQuery] UsersFilter usersFilter)
         {
-            var userModels = await _usersService.GetAllUsersAsync();
-            var userResponseModels =
-                _mapper.Map<IEnumerable<UserResponseModel>>(userModels);
+            var route = Request.Path.Value;
 
-            return Ok(userResponseModels);
+            var query = new GetPagedFilteredUsersQuery
+            {
+                PaginationFilter = paginationFilter,
+                UsersFilter = usersFilter,
+                Route = route
+            };
+
+            var response = await _mediator.Send(query);
+
+            return Ok(response);
         }
 
+        [Authorize]
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(Guid id)
         {
-            var userModel = await _usersService.GetAsync(id);
+            var query = new GetUserByIdQuery
+            {
+                Id = id
+            };
 
-            return Ok(_mapper.Map<UserResponseModel>(userModel));
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpPost]
-        public async Task<ActionResult<UserResponseModel>> CreateUserAsync([FromBody] UserAdminCreationRequestModel creatingUser)
+        public async Task<ActionResult<UserResponseModel>> CreateUserAsync([FromBody] CreateUserCommand command)
         {
-            var creatingUserModel = _mapper.Map<UserRegistrationModel>(creatingUser);
-            var addedUser = await _usersService.CreateAsync(creatingUserModel);
-
-            return Ok(_mapper.Map<UserResponseModel>(addedUser));
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(Guid id, [FromBody] UserUpdateRequestModel user)
+        public async Task<ActionResult<UserResponseModel>> UpdateUserAsync(Guid id, [FromBody] UpdateUserCommand command)
         {
-            var currentUserClaims = User.Claims;
+            // var currentUserClaims = User.Claims;
+            if (!id.Equals(command.Id))
+            {
+                throw new BusinessException(
+                    "Updating resource id does not match with requested id",
+                    ErrorStatus.IncorrectInput);
+            }
 
-            var userUpdateModel = _mapper.Map<UserUpdateModel>(user);
-            var updatedUserModel = await _usersService.UpdateAsync(id, userUpdateModel, currentUserClaims);
-            var updatedUserResponseModel = _mapper.Map<UserResponseModel>(updatedUserModel);
-
-            return Ok(updatedUserResponseModel);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
+        [Authorize(Policy = Policies.AdminPermission)]
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<UserResponseModel>> DeleteUserByIdAsync(Guid id)
         {
-            var currentUserClaims = User.Claims;
+            var command = new DeleteUserCommand
+            {
+                Id = id
+            };
 
-            await _usersService.DeleteAsync(id, currentUserClaims);
-
+            await _mediator.Send(command);
             return Ok();
         }
     }

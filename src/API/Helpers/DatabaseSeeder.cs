@@ -1,4 +1,5 @@
-﻿using HotelReservation.Data;
+﻿using HotelReservation.API.Options;
+using HotelReservation.Data;
 using HotelReservation.Data.Constants;
 using HotelReservation.Data.Entities;
 using Microsoft.AspNetCore.Identity;

@@ -1,0 +1,23 @@
+﻿using FluentValidation;
+using HotelReservation.API.Application.Commands.Service;
+
+namespace HotelReservation.API.Application.Validation.Services
+{
+    public class CreateServiceCommandValidator : AbstractValidator<CreateServiceCommand>
+    {
+        public CreateServiceCommandValidator()
+        {
+            RuleFor(x => x.Name)
+                .NotNull().WithMessage("Name must be not null ({PropertyName})")
+                .NotEmpty().WithMessage("Name must be not empty ({PropertyName})");
+
+            RuleFor(x => x.Price)
+                .GreaterThan(0).WithMessage("Price must be greater than 0 ({PropertyName})")
+                .LessThanOrEqualTo(double.MaxValue).WithMessage($"Price must be less than or equal to {double.MaxValue} ({{PropertyName}})");
+
+            RuleFor(x => x.HotelId)
+                .NotNull().WithMessage("Hotel id must be not null ({PropertyName})")
+                .NotEmpty().WithMessage("Hotel id must be not null ({PropertyName})");
+        }
+    }
+}

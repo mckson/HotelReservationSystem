@@ -1,12 +1,9 @@
-﻿using AutoMapper;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Application.Commands.Account;
 using HotelReservation.API.Models.ResponseModels;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models.UserModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -15,77 +12,105 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountService _accountService;
-        private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public AccountController(
-            IAccountService accountService,
-            IMapper mapper)
+        public AccountController(IMediator mediator)
         {
-            _accountService = accountService;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
+        /// <summary>
+        /// Method that is responsible for returning JWT and Refresh tokens for valid user credentials
+        /// </summary>
+        /// <param name="command">User's credentials (email and password)</param>
+        /// <returns>TokenResponseModel that contains JWT and Refresh tokens</returns>
+        /// <response code="200">Returns TokenResponseModel that contains JWT and Refresh tokens</response>
+        /// <response code="404">When user with such email does not exist</response>
+        /// <response code="415">Returns ErrorResponseModel when email or password are null or empty</response>
+        /// <response code="422">When password is incorrect</response>
         [AllowAnonymous]
         [HttpPost("SignIn")]
-        public async Task<ActionResult<TokenResponseModel>> Authenticate([FromBody] UserAuthenticationRequestModel userAuthRequestModel)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(TokenResponseModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status415UnsupportedMediaType)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status422UnprocessableEntity)]
+        public async Task<ActionResult<TokenResponseModel>> Authenticate([FromBody] AuthenticateUserCommand command)
         {
-            var userAuthModel = _mapper.Map<UserAuthenticationModel>(userAuthRequestModel);
-            var loggedUser = await _accountService.AuthenticateAsync(userAuthModel);
-
-            var responseUser = _mapper.Map<TokenResponseModel>(loggedUser);
-            SetTokenCookie(responseUser.RefreshToken);
-
-            return Ok(responseUser);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
+        /// <summary>
+        /// Method that is responsible for registration of new user, and invoking Authenticate method
+        /// </summary>
+        /// <param name="command">Information about user</param>
+        /// <returns>TokenResponseModel that contains JWT and Refresh tokens</returns>
+        /// <response code="200">Returns TokenResponseModel that contains JWT and Refresh tokens for created user</response>
+        /// <response code="404">When user with such email does not exist</response>
+        /// <response code="409">When user with such email or username already exists</response>
+        /// <response code="415">Returns ErrorResponseModel when email or password are null or empty</response>
+        /// <response code="422">When password is incorrect</response>
         [AllowAnonymous]
         [HttpPost("SignUp")]
-        public async Task<ActionResult<TokenResponseModel>> Register(UserRegistrationRequestModel userRequestModel)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(TokenResponseModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status415UnsupportedMediaType)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status422UnprocessableEntity)]
+        public async Task<ActionResult<TokenResponseModel>> Register([FromBody] RegisterUserCommand command)
         {
-            var userModel = _mapper.Map<UserRegistrationModel>(userRequestModel);
-            var registeredUserAuth = await _accountService.RegisterAsync(userModel);
+            await _mediator.Send(command);
 
-            return await Authenticate(_mapper.Map<UserAuthenticationRequestModel>(registeredUserAuth));
+            var authenticateCommand = new AuthenticateUserCommand
+            {
+                Email = command.Email,
+                Password = command.Password
+            };
+
+            var result = await Authenticate(authenticateCommand);
+            return result;
         }
 
+        /// <summary>
+        /// Method that is responsible for refreshing JWT token by Refresh token
+        /// </summary>
+        /// <param name="command">Refresh token</param>
+        /// <returns>TokenResponseModel that contains JWT and Refresh tokens</returns>
+        /// <response code="200">Returns TokenResponseModel that contains JWT and Refresh tokens for created user</response>
+        /// <response code="404">When user for current Refresh token does not exist, or Refresh token for user does not exist, or Refresh token is expired</response>
         [AllowAnonymous]
         [HttpPost("RefreshToken")]
-        public async Task<ActionResult<TokenResponseModel>> RefreshToken([FromBody] RefreshTokenRequestModel refreshToken)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(TokenResponseModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TokenResponseModel>> RefreshToken([FromBody] RefreshTokenCommand command)
         {
-            // var refreshToken = Request.Cookies["RefreshToken"];
-            var response = await _accountService.RefreshToken(refreshToken.Token);
+            var response = await _mediator.Send(command);
 
-            if (response == null)
-                return Unauthorized(new { message = "Invalid token" });
-
-            var responseUser = _mapper.Map<TokenResponseModel>(response);
-            SetTokenCookie(responseUser.RefreshToken);
-
-            return Ok(responseUser);
+            return Ok(response);
         }
 
+        /// <summary>
+        /// Method that marks refresh token as revoked
+        /// </summary>
+        /// <param name="command">Refresh token</param>
+        /// <returns>No content</returns>
+        /// <response code="204">When Refresh token is successfully revoked</response>
+        /// <response code="404">When user for current Refresh token does not exist, or Refresh token is expired</response>
+        /// <response code="422">When Refresh token is null or empty</response>
         [AllowAnonymous]
         [HttpPost("SignOut")]
-        public async Task<IActionResult> RevokeTokenAsync([FromBody] RefreshTokenRequestModel refreshToken)
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status422UnprocessableEntity)]
+        public async Task<IActionResult> RevokeTokenAsync([FromBody] RevokeTokenCommand command)
         {
-            // accept token from request body or cookie
-            // var token = Request.Cookies["refreshToken"];
-            var token = refreshToken.Token;
+            await _mediator.Send(command);
 
-            await _accountService.RevokeTokenAsync(token);
-
-            return Ok(new { message = "Token revoked" });
-        }
-
-        private void SetTokenCookie(string token)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddHours(4)
-            };
-            Response.Cookies.Append("RefreshToken", token, cookieOptions);
+            return NoContent();
         }
     }
 }

@@ -1,16 +1,12 @@
-﻿using AutoMapper;
-using HotelReservation.API.Helpers;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Application.Commands.Reservation;
+using HotelReservation.API.Application.Queries.Reservation;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business.Constants;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
 using HotelReservation.Data.Filters;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -19,78 +15,64 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class ReservationsController : ControllerBase
     {
-        private readonly IReservationsService _reservationsService;
-        private readonly IMapper _mapper;
-        private readonly IUriService _uriService;
+        private readonly IMediator _mediator;
 
-        public ReservationsController(
-            IReservationsService reservationsService,
-            IUriService uriService,
-            IMapper mapper)
+        public ReservationsController(IMediator mediator)
         {
-            _reservationsService = reservationsService;
-            _uriService = uriService;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
+        [Authorize]
+        [HttpGet]
         public async Task<ActionResult<BasePagedResponseModel<ReservationBriefResponseModel>>> GetFilteredReservationsAsync(
             [FromQuery] PaginationFilter paginationFilter,
             [FromQuery] ReservationsFilter reservationsFilter)
         {
             var route = Request.Path.Value;
 
-            var totalReservations = await _reservationsService.GetReservationsCountAsync(reservationsFilter);
+            var query = new GetPagedFilteredReservationsQuery
+            {
+                PaginationFilter = paginationFilter,
+                ReservationsFilter = reservationsFilter,
+                Route = route
+            };
 
-            paginationFilter.PageSize ??= totalReservations;
-
-            var validFilter = new PaginationFilter(paginationFilter.PageNumber, paginationFilter.PageSize.Value);
-            var reservationModels = _reservationsService.GetPagedReservations(validFilter, reservationsFilter);
-
-            var reservationResponses = _mapper.Map<IEnumerable<ReservationBriefResponseModel>>(reservationModels);
-            var pagedReservationResponses = PaginationHelper.CreatePagedResponseModel(
-                reservationResponses,
-                validFilter,
-                totalReservations,
-                _uriService,
-                route);
-
-            return Ok(pagedReservationResponses);
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
         [Authorize]
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<ReservationResponseModel>> GetReservationByIdAsync(Guid id)
         {
-            var reservationModel = await _reservationsService.GetAsync(id);
-            var reservationResponseModel = _mapper.Map<ReservationResponseModel>(reservationModel);
+            var query = new GetReservationByIdQuery
+            {
+                Id = id
+            };
 
-            return Ok(reservationResponseModel);
+            var response = await _mediator.Send(query);
+            return Ok(response);
         }
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<ActionResult<ReservationResponseModel>> CreateReservationAsync([FromBody] ReservationRequestModel reservationRequestModel)
+        public async Task<ActionResult<ReservationBriefResponseModel>> CreateReservationAsync([FromBody] CreateReservationCommand command)
         {
-            var reservationModel = _mapper.Map<ReservationModel>(reservationRequestModel);
-
-            reservationModel.ReservationServices = reservationRequestModel.Services.Select(service => new ReservationServiceModel { ServiceId = Guid.Parse(service) }).ToList();
-
-            reservationModel.ReservationRooms = reservationRequestModel.Rooms.Select(room => new ReservationRoomModel { RoomId = Guid.Parse(room) }).ToList();
-
-            var createdReservationModel = await _reservationsService.CreateAsync(reservationModel);
-            var createdReservationResponseModel = _mapper.Map<ReservationResponseModel>(createdReservationModel);
-
-            return Ok(createdReservationResponseModel);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [Authorize(Policy = Policies.AdminPermission)]
         [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<ReservationResponseModel>> DeleteReservation(Guid id)
+        public async Task<ActionResult<ReservationBriefResponseModel>> DeleteReservation(Guid id)
         {
-            var deletedReservationModel = await _reservationsService.DeleteAsync(id);
-            var deletedReservationResponseModel = _mapper.Map<ReservationResponseModel>(deletedReservationModel);
+            var command = new DeleteReservationCommand
+            {
+                Id = id
+            };
 
-            return Ok(deletedReservationResponseModel);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
     }
 }

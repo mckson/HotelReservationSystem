@@ -1,15 +1,13 @@
-﻿using AutoMapper;
-using HotelReservation.API.Helpers;
-using HotelReservation.API.Models.RequestModels;
+﻿using HotelReservation.API.Application.Commands.Room;
+using HotelReservation.API.Application.Queries.Room;
 using HotelReservation.API.Models.ResponseModels;
+using HotelReservation.Business;
 using HotelReservation.Business.Constants;
-using HotelReservation.Business.Interfaces;
-using HotelReservation.Business.Models;
 using HotelReservation.Data.Filters;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -18,18 +16,20 @@ namespace HotelReservation.API.Controllers
     [ApiController]
     public class RoomsController : ControllerBase
     {
-        private readonly IMapper _mapper;
-        private readonly IRoomsService _roomsService;
-        private readonly IUriService _uriService;
+        private readonly IMediator _mediator;
 
-        public RoomsController(
-            IRoomsService roomsService,
-            IMapper mapper,
-            IUriService uriService)
+        public RoomsController(IMediator mediator)
         {
-            _roomsService = roomsService;
-            _mapper = mapper;
-            _uriService = uriService;
+            _mediator = mediator;
+        }
+
+        [AllowAnonymous]
+        [HttpGet("All")]
+        public async Task<IActionResult> GetAllRooms()
+        {
+            var query = new GetAllRoomsQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
         [AllowAnonymous]
@@ -39,61 +39,58 @@ namespace HotelReservation.API.Controllers
         {
             var route = Request.Path.Value;
 
-            var totalRooms = await _roomsService.GetCountAsync(roomsFilter);
+            var query = new GetPagedFilteredRoomsQuery
+                {
+                    PaginationFilter = paginationFilter,
+                    RoomsFilter = roomsFilter,
+                    Route = route
+                };
 
-            paginationFilter.PageSize ??= totalRooms;
+            var response = await _mediator.Send(query);
 
-            var validFilter = new PaginationFilter(paginationFilter.PageNumber, paginationFilter.PageSize.Value);
-            var roomModels = _roomsService.GetPagedRooms(validFilter, roomsFilter);
-
-            var roomsResponse = _mapper.Map<IEnumerable<RoomResponseModel>>(roomModels);
-
-            var pagedRoomsResponse =
-                PaginationHelper.CreatePagedResponseModel(roomsResponse, validFilter, totalRooms, _uriService, route);
-
-            return Ok(pagedRoomsResponse);
+            return Ok(response);
         }
 
         [AllowAnonymous]
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<RoomResponseModel>> GetRoomByIdAsync(Guid id)
         {
-            var roomModel = await _roomsService.GetAsync(id);
-            var roomResponseModel = _mapper.Map<RoomResponseModel>(roomModel);
+            var query = new GetRoomByIdQuery(id);
+            var result = await _mediator.Send(query);
 
-            return Ok(roomResponseModel);
+            return Ok(result);
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPost]
-        public async Task<ActionResult<RoomResponseModel>> CreateRoomAsync([FromBody] RoomRequestModel roomRequestModel)
+        public async Task<ActionResult<RoomResponseModel>> CreateRoomAsync([FromBody] CreateRoomCommand command)
         {
-            var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
-            var createdRoom = await _roomsService.CreateAsync(roomModel);
-            var createdRoomResponseModel = _mapper.Map<RoomResponseModel>(createdRoom);
-
-            return Ok(createdRoomResponseModel);
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult<RoomResponseModel>> UpdateRoomAsync(Guid id, [FromBody] RoomRequestModel roomRequestModel)
+        public async Task<ActionResult<RoomResponseModel>> UpdateRoomAsync(Guid id, [FromBody] UpdateRoomCommand command)
         {
-            var roomModel = _mapper.Map<RoomModel>(roomRequestModel);
-            var createdRoom = await _roomsService.UpdateAsync(id, roomModel);
-            var createdRoomResponseModel = _mapper.Map<RoomResponseModel>(createdRoom);
+            if (!id.Equals(command.Id))
+            {
+                throw new BusinessException(
+                    "Updating resource id does not match with requested id",
+                    ErrorStatus.IncorrectInput);
+            }
 
-            return Ok(createdRoomResponseModel);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [Authorize(Policy = Policies.AdminManagerPermission)]
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<RoomResponseModel>> DeleteRoomAsync(Guid id)
         {
-            var deletedRoomModel = await _roomsService.DeleteAsync(id);
-            var deletedRoomResponseModel = _mapper.Map<RoomResponseModel>(deletedRoomModel);
-
-            return Ok(deletedRoomResponseModel);
+            var command = new DeleteRoomCommand { Id = id };
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
     }
 }
