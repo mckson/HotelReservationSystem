@@ -19,6 +19,10 @@ namespace HotelReservation.Data.Entities
 
         public string Email { get; set; }
 
+        public string PhoneNumber { get; set; }
+
+        public string PassportNumber { get; set; }
+
         public virtual IEnumerable<ReservationRoomEntity> ReservationRooms { get; set; }
 
         public virtual IEnumerable<ReservationServiceEntity> ReservationServices { get; set; }

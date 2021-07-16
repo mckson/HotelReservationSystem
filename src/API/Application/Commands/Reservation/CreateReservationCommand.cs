@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using HotelReservation.API.Models.ResponseModels;
+﻿using HotelReservation.API.Models.ResponseModels;
 using MediatR;
+using System;
+using System.Collections.Generic;
 
 namespace HotelReservation.API.Application.Commands.Reservation
 {
@@ -22,5 +22,9 @@ namespace HotelReservation.API.Application.Commands.Reservation
         public string LastName { get; set; }
 
         public string Email { get; set; }
+
+        public string PhoneNumber { get; set; }
+
+        public string PassportNumber { get; set; }
     }
 }

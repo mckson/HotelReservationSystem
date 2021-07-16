@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using Castle.Core.Internal;
 using HotelReservation.API.Application.Interfaces;
 using HotelReservation.Business;
 using HotelReservation.Business.Constants;
 using HotelReservation.Data.Constants;
 using HotelReservation.Data.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Helpers
 {
@@ -76,6 +77,17 @@ namespace HotelReservation.API.Application.Helpers
             var currentUserId = Guid.Parse(currentUserIdString);
 
             return currentUserId.Equals(userId);
+        }
+
+        public Guid? GetCurrentUserId()
+        {
+            var userClaims = _httpContextAccessor.HttpContext.User.Claims.ToList();
+
+            var currentUserIdString = userClaims.Find(claim => claim.Type.Equals(ClaimNames.Id))?.Value;
+
+            var currentUserId = currentUserIdString.IsNullOrEmpty() ? (Guid?)null : Guid.Parse(currentUserIdString);
+
+            return currentUserId;
         }
     }
 }

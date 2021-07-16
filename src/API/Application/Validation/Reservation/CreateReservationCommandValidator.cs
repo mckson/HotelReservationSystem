@@ -1,6 +1,7 @@
-﻿using System;
-using FluentValidation;
+﻿using FluentValidation;
 using HotelReservation.API.Application.Commands.Reservation;
+using System;
+using System.Text.RegularExpressions;
 
 namespace HotelReservation.API.Application.Validation.Reservation
 {
@@ -36,6 +37,22 @@ namespace HotelReservation.API.Application.Validation.Reservation
                 .NotNull().WithMessage("Email must be not null ({PropertyName})")
                 .NotEmpty().WithMessage("Email must be not empty ({PropertyName})")
                 .EmailAddress().WithMessage("Input value {PropertyValue} must be valid email address {PropertyName}");
+
+            RuleFor(x => x.PassportNumber)
+                .NotNull().WithMessage(
+                    "Passport number is required, because your order will be identified by passport number ({PropertyName})")
+                .NotEmpty().WithMessage(
+                    "Passport number is required, because your order will be identified by passport number  ({PropertyName})");
+
+            RuleFor(x => x.PhoneNumber)
+                .NotNull().WithMessage(
+                    "Phone number is required, because managers may need way to connect with you ({PropertyName})")
+                .NotEmpty().WithMessage(
+                    "Phone number is required, because managers may need way to connect with you ({PropertyName})")
+                .Must(number => number != null && Regex.IsMatch(
+                    number,
+                    @"^\+?\(?([0-9]{3})\)?[-.●]?([0-9]{3})[-.●]?([0-9]{4})[0-9]?[0-9]?[0-9]?[0-9]?[0-9]?$"))
+                .WithMessage("Input value {PropertyValue} must be phone number ({PropertyName})");
         }
     }
 }

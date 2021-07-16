@@ -9,5 +9,7 @@ namespace HotelReservation.Data.Filters
         public DateTime? DateIn { get; set; }
 
         public DateTime? DateOut { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 }

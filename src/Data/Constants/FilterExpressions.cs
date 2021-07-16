@@ -12,7 +12,13 @@ namespace HotelReservation.Data.Constants
         public static Expression<Func<RoomEntity, bool>> GetRoomFilterExpression(RoomsFilter filter)
         {
             return room =>
-                room.HotelId.Value.Equals(filter.HotelId) &&
+                room.HotelId.Value.Equals(filter.HotelId) && (!room.UnlockTime.HasValue ||
+                                                              room.UnlockTime.Value <= DateTime.UtcNow ||
+                                                              (room.UnlockTime.Value > DateTime.UtcNow &&
+                                                               (room.LockedByUserId.HasValue &&
+                                                                filter.UserId.HasValue &&
+                                                                room.LockedByUserId.Value
+                                                                    .Equals(filter.UserId.Value)))) &&
                 ((!filter.DateIn.HasValue || !filter.DateOut.HasValue) || !room.ReservationRooms.Any(rr =>
                     (rr.Reservation.DateIn >= filter.DateIn && rr.Reservation.DateIn < filter.DateOut) ||
                     (rr.Reservation.DateOut > filter.DateIn && rr.Reservation.DateOut <= filter.DateOut)));
