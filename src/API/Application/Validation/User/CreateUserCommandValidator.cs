@@ -31,8 +31,6 @@ namespace HotelReservation.API.Application.Validation.User
                 .WithMessage("Input value {PropertyValue} must be phone number ({PropertyName})");
 
             RuleFor(x => x.DateOfBirth)
-                .NotNull().WithMessage("Date of Birth is required ({PropertyName})")
-                .NotEmpty().WithMessage("Date of Birth is required ({PropertyName})")
                 .Must(dateOfBirth => dateOfBirth < DateTime.Now)
                 .WithMessage("Birth date can not be after current date ({PropertyName})");
 

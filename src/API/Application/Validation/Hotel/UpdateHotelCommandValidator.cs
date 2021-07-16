@@ -25,7 +25,7 @@ namespace HotelReservation.API.Application.Validation.Hotel
             RuleFor(x => x.Deposit)
                 .NotNull().WithMessage("Deposit must be not null ({PropertyName})")
                 .NotEmpty().WithMessage("Deposit must be not empty ({PropertyName})")
-                .Must(deposit => deposit > 0 && deposit < double.MaxValue)
+                .Must(deposit => deposit >= 0 && deposit <= double.MaxValue)
                 .WithMessage("Deposit must be 0 or more ({PropertyName})");
 
             RuleFor(x => x.Description)
@@ -61,9 +61,7 @@ namespace HotelReservation.API.Application.Validation.Hotel
                 .When(x => x.Location != null);
 
             RuleFor(x => x.Location.BuildingNumber)
-                .NotNull().WithMessage("Building number must be not null ({PropertyName})")
-                .NotEmpty().WithMessage("Building number must be not empty ({PropertyName})")
-                .Must(number => number > 1 && number < 1000)
+                .Must(number => number >= 1 && number <= 1000)
                 .WithMessage("Building number must be 1000 or less, but more than 0 ({PropertyName})")
                 .When(x => x.Location != null);
         }

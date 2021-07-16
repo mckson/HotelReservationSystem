@@ -15,7 +15,7 @@ namespace HotelReservation.API.Application.Commands.Account
 
         public string PhoneNumber { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         public string FirstName { get; set; }
 

@@ -19,13 +19,9 @@ namespace HotelReservation.API.Application.Validation.Reservation
                 .NotNull().WithMessage("Services must be not null ({PropertyName})");
 
             RuleFor(x => x.DateIn)
-                .NotNull().WithMessage("Date in must be not null ({PropertyName})")
-                .NotEmpty().WithMessage("Date in must be not empty ({PropertyName})")
                 .Must(dateIn => dateIn >= DateTime.Now).WithMessage("Date in must be today or later ({PropertyName})");
 
             RuleFor(x => x.DateOut)
-                .NotNull().WithMessage("Date out must be not null ({PropertyName})")
-                .NotEmpty().WithMessage("Date out must be not empty ({PropertyName})")
                 .GreaterThan(x => x.DateIn).WithMessage("Date out must be later than date in ({PropertyName})");
 
             RuleFor(x => x.FirstName)
