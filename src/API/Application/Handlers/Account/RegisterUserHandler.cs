@@ -1,12 +1,13 @@
-﻿using AutoMapper;
-using Castle.Core.Internal;
-using HotelReservation.API.Application.Commands.Account;
+﻿using HotelReservation.API.Application.Commands.Account;
+using HotelReservation.API.Application.Commands.User;
+using HotelReservation.API.Options;
 using HotelReservation.Business;
-using HotelReservation.Data.Entities;
+using HotelReservation.Data.Constants;
 using HotelReservation.Data.Interfaces;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,17 +16,17 @@ namespace HotelReservation.API.Application.Handlers.Account
     public class RegisterUserHandler : IRequestHandler<RegisterUserCommand>
     {
         private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
-        private readonly IPasswordHasher<UserEntity> _passwordHasher;
+        private readonly UnregisteredUserOptions _unregisteredUserOptions;
+        private readonly IMediator _mediator;
 
         public RegisterUserHandler(
             IUserRepository userRepository,
-            IMapper mapper,
-            IPasswordHasher<UserEntity> passwordHasher)
+            IOptions<UnregisteredUserOptions> unregisteredUserOptions,
+            IMediator mediator)
         {
             _userRepository = userRepository;
-            _mapper = mapper;
-            _passwordHasher = passwordHasher;
+            _mediator = mediator;
+            _unregisteredUserOptions = unregisteredUserOptions.Value;
         }
 
         public async Task<Unit> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -35,29 +36,56 @@ namespace HotelReservation.API.Application.Handlers.Account
 
             var existingUserEntity = await _userRepository.GetByEmailAsync(request.Email);
 
-            if (existingUserEntity != null)
-                throw new BusinessException("User with such email already exists", ErrorStatus.AlreadyExist);
-
-            var userEntity = _mapper.Map<UserEntity>(request);
-
-            userEntity.UserName ??= request.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0];
-            userEntity.PasswordHash = _passwordHasher.HashPassword(userEntity, request.Password);
-
-            var result = await _userRepository.CreateAsync(userEntity);
-
-            if (result)
+            if (existingUserEntity is { IsRegistered: true })
             {
-                var addedUserEntity = await _userRepository.GetByEmailAsync(request.Email);
-                var addedUserRoles = addedUserEntity.Roles;
+                throw new BusinessException("User with such email already exists", ErrorStatus.AlreadyExist);
+            }
 
-                if (addedUserRoles.IsNullOrEmpty())
+            if (existingUserEntity != null)
+            {
+                var updateUserCommand = new UpdateUserCommand
                 {
-                    await _userRepository.AddToRoleAsync(addedUserEntity, "User");
-                }
+                    DateOfBirth = request.DateOfBirth,
+                    Email = request.Email,
+                    FirstName = request.FirstName,
+                    Hotels = null,
+                    IsRegistered = true,
+                    Id = existingUserEntity.Id,
+                    NewPassword = request.Password,
+                    LastName = request.LastName,
+                    OldPassword = _unregisteredUserOptions.Password,
+                    PasswordConfirm = request.PasswordConfirm,
+                    PhoneNumber = request.PhoneNumber,
+                    Roles = new List<string>
+                    {
+                        Roles.User
+                    },
+                    UserName = request.UserName ?? request.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0]
+                };
+
+                await _mediator.Send(updateUserCommand, cancellationToken);
             }
             else
             {
-                throw new BusinessException("Unable to register user with such parameters", ErrorStatus.AlreadyExist);
+                var createUserCommand = new CreateUserCommand
+                {
+                    DateOfBirth = request.DateOfBirth ?? DateTime.MinValue,
+                    Email = request.Email,
+                    FirstName = request.FirstName,
+                    Hotels = null,
+                    IsRegistered = true,
+                    Password = request.Password,
+                    LastName = request.LastName,
+                    PasswordConfirm = request.PasswordConfirm,
+                    PhoneNumber = request.PhoneNumber,
+                    Roles = new List<string>
+                    {
+                        Roles.User
+                    },
+                    UserName = request.UserName ?? request.Email.Split('@', StringSplitOptions.RemoveEmptyEntries)[0]
+                };
+
+                await _mediator.Send(createUserCommand, cancellationToken);
             }
 
             return Unit.Value;

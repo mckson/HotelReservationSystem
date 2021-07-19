@@ -19,6 +19,8 @@ namespace HotelReservation.Data.Entities
 
         public Guid? RoomId { get; set; }
 
+        public bool IsRegistered { get; set; }
+
         public virtual RoomEntity Room { get; set; }
 
         public virtual List<HotelUserEntity> HotelUsers { get; set; }

@@ -46,6 +46,8 @@ namespace HotelReservation.API
             services.Configure<AuthenticationOptions>(Configuration.GetSection(AuthenticationOptions.Authentication));
             services.Configure<AdminOptions>(Configuration.GetSection(AdminOptions.AdminCredentials));
             services.Configure<LockRoomOptions>(Configuration.GetSection(LockRoomOptions.LockRoomSetting));
+            services.Configure<UnregisteredUserOptions>(
+                Configuration.GetSection(UnregisteredUserOptions.UnregisteredUserSettings));
 
             services.AddAndConfigureIdentity(Configuration.GetSection(PasswordOptions.PasswordSettings).Get<PasswordOptions>());
 

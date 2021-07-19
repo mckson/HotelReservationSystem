@@ -46,15 +46,17 @@ namespace HotelReservation.API.Application.Handlers.User
                 throw new BusinessException("User cannot be empty", ErrorStatus.EmptyInput);
 
             var accessAllowed = _authenticationHelper.CheckGetUserPermission(request.Id);
+            var userEntity = await _userRepository.GetByIdAsync(request.Id) ??
+                             throw new BusinessException(
+                                 $"User with such id {request.Id} does not exist",
+                                 ErrorStatus.NotFound);
 
-            if (!accessAllowed)
+            if (!accessAllowed && userEntity.IsRegistered)
             {
                 throw new BusinessException(
                     "You cannot access data about that user. You can access data only about yourself",
                     ErrorStatus.AccessDenied);
             }
-
-            var userEntity = await _userRepository.GetByIdAsync(request.Id);
 
             if (request.Email != null)
             {
@@ -142,6 +144,8 @@ namespace HotelReservation.API.Application.Handlers.User
             {
                 userEntity.HotelUsers = hotelUsers;
             }
+
+            userEntity.IsRegistered = request.IsRegistered;
 
             var result = await _userRepository.UpdateAsync(userEntity);
 

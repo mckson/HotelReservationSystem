@@ -71,10 +71,15 @@ namespace HotelReservation.API.Application.Helpers
                 return true;
             }
 
-            var currentUserIdString = claims.Find(claim => claim.Type.Equals(ClaimNames.Id))?.Value ??
-                                      throw new BusinessException("User is unauthorized", ErrorStatus.AccessDenied);
+            var currentUserIdString = claims.Find(claim => claim.Type.Equals(ClaimNames.Id))?.Value;
 
-            var currentUserId = Guid.Parse(currentUserIdString);
+            if (currentUserIdString.IsNullOrEmpty())
+            {
+                return false;
+            }
+
+            // throw new BusinessException("User is unauthorized", ErrorStatus.AccessDenied);
+            var currentUserId = Guid.Parse(currentUserIdString ?? string.Empty);
 
             return currentUserId.Equals(userId);
         }
