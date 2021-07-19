@@ -43,6 +43,11 @@ namespace HotelReservation.API.Application.Handlers.Account
             var userEntity = await _userRepository.GetByEmailAsync(request.Email) ??
                              throw new BusinessException("User with such email does not exist", ErrorStatus.NotFound);
 
+            if (!userEntity.IsRegistered)
+            {
+                throw new BusinessException("You cannot sign in with unregistered account", ErrorStatus.IncorrectInput);
+            }
+
             if (_passwordHasher.VerifyHashedPassword(
                     userEntity,
                     userEntity.PasswordHash,

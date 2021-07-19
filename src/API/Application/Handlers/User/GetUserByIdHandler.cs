@@ -13,19 +13,19 @@ namespace HotelReservation.API.Application.Handlers.User
     public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, UserResponseModel>
     {
         private readonly IUserRepository _userRepository;
-        private readonly IUserHelper _userHelper;
+        // private readonly IUserHelper _userHelper;
         private readonly IMapper _mapper;
         private readonly IAuthenticationHelper _authenticationHelper;
 
         public GetUserByIdHandler(
             IUserRepository userRepository,
             IMapper mapper,
-            IUserHelper userHelper,
+            // IUserHelper userHelper,
             IAuthenticationHelper authenticationHelper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
-            _userHelper = userHelper;
+            // _userHelper = userHelper;
             _authenticationHelper = authenticationHelper;
         }
 
@@ -43,8 +43,7 @@ namespace HotelReservation.API.Application.Handlers.User
             var userEntity = await _userRepository.GetByIdAsync(request.Id) ??
                              throw new BusinessException($"User with id {request.Id} does not exist", ErrorStatus.NotFound);
 
-            userEntity.Reservations = _userHelper.GetUserReservations(userEntity.Email);
-
+            // userEntity.Reservations = _userHelper.GetUserReservations(userEntity.Email);
             var userResponse = _mapper.Map<UserResponseModel>(userEntity);
 
             return userResponse;

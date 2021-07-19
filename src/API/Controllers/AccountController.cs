@@ -27,7 +27,7 @@ namespace HotelReservation.API.Controllers
         /// <response code="200">Returns TokenResponseModel that contains JWT and Refresh tokens</response>
         /// <response code="404">When user with such email does not exist</response>
         /// <response code="415">Returns ErrorResponseModel when email or password are null or empty</response>
-        /// <response code="422">When password is incorrect</response>
+        /// <response code="422">When password is incorrect, or you try to sign in with unregistered user</response>
         [AllowAnonymous]
         [HttpPost("SignIn")]
         [Produces("application/json")]
@@ -50,7 +50,7 @@ namespace HotelReservation.API.Controllers
         /// <response code="404">When user with such email does not exist</response>
         /// <response code="409">When user with such email or username already exists</response>
         /// <response code="415">Returns ErrorResponseModel when email or password are null or empty</response>
-        /// <response code="422">When password is incorrect</response>
+        /// <response code="422">When password is incorrect, or you try to sign in with unregistered user</response>
         [AllowAnonymous]
         [HttpPost("SignUp")]
         [Produces("application/json")]

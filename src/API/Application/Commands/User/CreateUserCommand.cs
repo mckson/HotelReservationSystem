@@ -23,6 +23,8 @@ namespace HotelReservation.API.Application.Commands.User
 
         public string LastName { get; set; }
 
+        public bool IsRegistered { get; set; } = true;
+
         public IEnumerable<string> Roles { get; set; }
 
         public IEnumerable<Guid> Hotels { get; set; }

@@ -8,21 +8,24 @@ namespace HotelReservation.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<UserEntity> builder)
         {
-            builder.HasMany(g => g.Reservations)
+            builder.HasAlternateKey(user => user.Email);
+
+            builder.HasMany(user => user.Reservations)
                 .WithOne(r => r.User)
-                .HasForeignKey(r => r.UserId)
+                .HasForeignKey(r => r.Email)
+                .HasPrincipalKey(u => u.Email)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(g => g.FirstName)
+            builder.Property(user => user.FirstName)
                 .HasMaxLength(100)
                 .IsRequired();
 
-            builder.Property(g => g.LastName)
+            builder.Property(user => user.LastName)
                 .HasMaxLength(100)
                 .IsRequired();
 
-            builder.Property(g => g.DateOfBirth)
+            builder.Property(user => user.DateOfBirth)
                 .IsRequired();
 
             builder.Ignore(user => user.Roles);
