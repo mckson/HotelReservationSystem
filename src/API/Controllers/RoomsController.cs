@@ -34,6 +34,39 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("Names")]
+        public async Task<IActionResult> GetAllRoomUniqueNames()
+        {
+            var query = new GetAllRoomUniqueNamesQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Names/{hotelId:guid}")]
+        public async Task<IActionResult> GetAllRoomUniqueNames(Guid hotelId)
+        {
+            var query = new GetHotelRoomsUniqueNamesQuery
+            {
+                HotelId = hotelId
+            };
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Numbers/{hotelId:guid}")]
+        public async Task<IActionResult> GetAllRoomUniqueNumbers(Guid hotelId)
+        {
+            var query = new GetHotelRoomsUniqueNumbersQuery()
+            {
+                HotelId = hotelId
+            };
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<BasePagedResponseModel<RoomResponseModel>>> GetRoomsAsync(
             [FromQuery] PaginationFilter paginationFilter, [FromQuery] RoomsFilter roomsFilter)

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Castle.Core.Internal;
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Interfaces;
 using HotelReservation.API.Application.Queries.Room;
@@ -9,6 +10,7 @@ using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -44,7 +46,16 @@ namespace HotelReservation.API.Application.Handlers.Room
             var validPaginationFilter = new PaginationFilter(request.PaginationFilter.PageNumber, request.PaginationFilter.PageSize.Value);
 
             var roomEntities = _roomRepository.Find(roomFilterExpression, request.PaginationFilter);
-            var roomResponses = _mapper.Map<IEnumerable<RoomResponseModel>>(roomEntities);
+
+            var roomEntitiesFilteredOverFacilitiesAndRoomViews = roomEntities.AsEnumerable().Where(room =>
+                (request.RoomsFilter.Facilities.IsNullOrEmpty() || request.RoomsFilter.Facilities.All(facilityName =>
+                    room.Facilities.Any(facility =>
+                        facilityName.IsNullOrEmpty() || facility.Name.StartsWith(facilityName)))) &&
+                (request.RoomsFilter.RoomViews.IsNullOrEmpty() || request.RoomsFilter.RoomViews.All(roomViewName =>
+                    room.RoomViews.Any(roomView =>
+                        roomViewName.IsNullOrEmpty() || roomView.RoomView.Name.StartsWith(roomViewName)))));
+
+            var roomResponses = _mapper.Map<IEnumerable<RoomResponseModel>>(roomEntitiesFilteredOverFacilitiesAndRoomViews);
 
             var pagedRoomsResponse = PaginationHelper.CreatePagedResponseModel(
                 roomResponses,

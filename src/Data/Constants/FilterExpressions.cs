@@ -21,7 +21,17 @@ namespace HotelReservation.Data.Constants
                                                                     .Equals(filter.UserId.Value)))) &&
                 ((!filter.DateIn.HasValue || !filter.DateOut.HasValue) || !room.ReservationRooms.Any(rr =>
                     (rr.Reservation.DateIn >= filter.DateIn && rr.Reservation.DateIn < filter.DateOut) ||
-                    (rr.Reservation.DateOut > filter.DateIn && rr.Reservation.DateOut <= filter.DateOut)));
+                    (rr.Reservation.DateOut > filter.DateIn && rr.Reservation.DateOut <= filter.DateOut))) &&
+                (filter.Name.IsNullOrEmpty() || room.Name.StartsWith(filter.Name)) &&
+                (!filter.Number.HasValue || room.RoomNumber.ToString().StartsWith(filter.Number.Value.ToString())) &&
+                (!filter.MinFloorNumber.HasValue || room.FloorNumber >= filter.MinFloorNumber.Value) &&
+                (!filter.MaxFloorNumber.HasValue || room.FloorNumber <= filter.MaxFloorNumber.Value) &&
+                (!filter.MinCapacity.HasValue || room.Capacity >= filter.MinCapacity.Value) &&
+                (!filter.MaxCapacity.HasValue || room.Capacity <= filter.MaxCapacity.Value) &&
+                (!filter.MinArea.HasValue || room.Area >= filter.MinArea.Value) &&
+                (!filter.MaxArea.HasValue || room.Area <= filter.MaxArea.Value) &&
+                (!filter.MinPrice.HasValue || room.Price >= filter.MinPrice.Value) &&
+                (!filter.MaxPrice.HasValue || room.Price <= filter.MaxPrice.Value);
         }
 
         public static Expression<Func<HotelEntity, bool>> GetHotelFilterExpression(HotelsFilter filter)
