@@ -9,6 +9,7 @@ using HotelReservation.Data.Constants;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -50,10 +51,10 @@ namespace HotelReservation.API.Application.Handlers.Room
             var roomEntitiesFilteredOverFacilitiesAndRoomViews = roomEntities.AsEnumerable().Where(room =>
                 (request.RoomsFilter.Facilities.IsNullOrEmpty() || request.RoomsFilter.Facilities.All(facilityName =>
                     room.Facilities.Any(facility =>
-                        facilityName.IsNullOrEmpty() || facility.Name.StartsWith(facilityName)))) &&
+                        facilityName.IsNullOrEmpty() || facility.Name.StartsWith(facilityName, StringComparison.InvariantCultureIgnoreCase)))) &&
                 (request.RoomsFilter.RoomViews.IsNullOrEmpty() || request.RoomsFilter.RoomViews.All(roomViewName =>
                     room.RoomViews.Any(roomView =>
-                        roomViewName.IsNullOrEmpty() || roomView.RoomView.Name.StartsWith(roomViewName)))));
+                        roomViewName.IsNullOrEmpty() || roomView.RoomView.Name.StartsWith(roomViewName, StringComparison.InvariantCultureIgnoreCase)))));
 
             var roomResponses = _mapper.Map<IEnumerable<RoomResponseModel>>(roomEntitiesFilteredOverFacilitiesAndRoomViews);
 

@@ -32,13 +32,14 @@ namespace HotelReservation.API.Application.Validation.User
                 .Equal(x => x.NewPassword).When(x => x.NewPassword != null).WithMessage("Password mismatch ({PropertyName})");
 
             RuleFor(x => x.PhoneNumber)
-                .NotNull().WithMessage("Phone is required ({PropertyName})")
-                .NotEmpty().WithMessage("Phone is required ({PropertyName})")
-                .Must(number => number != null && Regex.IsMatch(number, @"^\+?\(?([0-9]{3})\)?[-.●]?([0-9]{3})[-.●]?([0-9]{4})[0-9]?[0-9]?[0-9]?[0-9]?[0-9]?$"))
+                .Must(number => number != null && Regex.IsMatch(
+                    number,
+                    @"^\+?\(?([0-9]{3})\)?[-.●]?([0-9]{3})[-.●]?([0-9]{4})[0-9]?[0-9]?[0-9]?[0-9]?[0-9]?$"))
+                .When(x => x.PhoneNumber != null)
                 .WithMessage("Input value {PropertyValue} must be phone number ({PropertyName})");
 
             RuleFor(x => x.DateOfBirth)
-                .Must(dateOfBirth => dateOfBirth < DateTime.Now)
+                .Must(dateOfBirth => dateOfBirth < DateTime.Now).When(x => x.DateOfBirth.HasValue)
                 .WithMessage("Birth date can not be after current date ({PropertyName})");
 
             RuleFor(x => x.FirstName)
@@ -49,9 +50,9 @@ namespace HotelReservation.API.Application.Validation.User
                 .NotNull().WithMessage("Name must be specified ({PropertyName})")
                 .NotEmpty().WithMessage("Name must be specified ({PropertyName})");
 
-            RuleFor(x => x.Roles)
-                .NotNull().WithMessage("One or more role is required ({PropertyName})")
-                .Must(roles => roles != null && roles.Any()).WithMessage("One or more role is required ({PropertyName})");
+            // RuleFor(x => x.Roles)
+            //     .NotNull().WithMessage("One or more role is required ({PropertyName})")
+            //     .Must(roles => roles != null && roles.Any()).WithMessage("One or more role is required ({PropertyName})");
         }
     }
 }

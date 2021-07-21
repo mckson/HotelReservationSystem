@@ -33,6 +33,10 @@ namespace HotelReservation.Data.Filters
 
         public double? MaxPrice { get; set; }
 
+        public bool Smoking { get; set; } = false;
+
+        public bool Parking { get; set; } = false;
+
         public IEnumerable<string> Facilities { get; set; }
 
         public IEnumerable<string> RoomViews { get; set; }

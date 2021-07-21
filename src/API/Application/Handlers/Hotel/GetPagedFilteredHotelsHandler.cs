@@ -6,10 +6,10 @@ using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Constants;
-using HotelReservation.Data.Entities;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -48,7 +48,7 @@ namespace HotelReservation.API.Application.Handlers.Hotel
             var hotelEntitiesFilteredOverServices = hotelEntities.AsEnumerable().Where(hotel =>
                 (request.HotelsFilter.Services.IsNullOrEmpty() || request.HotelsFilter.Services.All(serviceName =>
                     hotel.Services.Any(service =>
-                        serviceName.IsNullOrEmpty() || service.Name.StartsWith(serviceName)))));
+                        serviceName.IsNullOrEmpty() || service.Name.StartsWith(serviceName, StringComparison.InvariantCultureIgnoreCase)))));
 
             if (!hotelEntitiesFilteredOverServices.Any())
             {

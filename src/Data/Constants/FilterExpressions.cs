@@ -31,7 +31,8 @@ namespace HotelReservation.Data.Constants
                 (!filter.MinArea.HasValue || room.Area >= filter.MinArea.Value) &&
                 (!filter.MaxArea.HasValue || room.Area <= filter.MaxArea.Value) &&
                 (!filter.MinPrice.HasValue || room.Price >= filter.MinPrice.Value) &&
-                (!filter.MaxPrice.HasValue || room.Price <= filter.MaxPrice.Value);
+                (!filter.MaxPrice.HasValue || room.Price <= filter.MaxPrice.Value) &&
+                (!filter.Smoking || room.Smoking) && (!filter.Parking || room.Parking);
         }
 
         public static Expression<Func<HotelEntity, bool>> GetHotelFilterExpression(HotelsFilter filter)
