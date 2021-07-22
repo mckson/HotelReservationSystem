@@ -189,5 +189,20 @@ namespace HotelReservation.API.Controllers
             var response = await _mediator.Send(query);
             return Ok(response);
         }
+
+        /// <summary>
+        /// Method that allow to retrieve all hotel unique names
+        /// </summary>
+        /// <returns>Collection of names</returns>
+        /// <response code="200">Returns collection of names</response>
+        [AllowAnonymous]
+        [HttpGet("Names")]
+        [ProducesResponseType(typeof(IEnumerable<HotelBriefResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<HotelBriefResponse>>> GetAllHotelUniqueNames()
+        {
+            var query = new GetAllHotelUniqueNamesQuery();
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
     }
 }

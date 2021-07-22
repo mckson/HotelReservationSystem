@@ -1,4 +1,6 @@
-﻿namespace HotelReservation.Data.Filters
+﻿using System.Collections.Generic;
+
+namespace HotelReservation.Data.Filters
 {
     public class UsersFilter
     {
@@ -7,5 +9,7 @@
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
+
+        public IEnumerable<string> Roles { get; set; }
     }
 }

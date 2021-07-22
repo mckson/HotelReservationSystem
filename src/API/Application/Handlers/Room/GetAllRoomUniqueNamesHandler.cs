@@ -18,7 +18,7 @@ namespace HotelReservation.API.Application.Handlers.Room
 
         public async Task<IEnumerable<string>> Handle(GetAllRoomUniqueNamesQuery request, CancellationToken cancellationToken)
         {
-            var names = await Task.FromResult(_roomRepository.GetAllRoomsGetAllUniqueNames());
+            var names = await Task.FromResult(_roomRepository.GetAllRoomsUniqueNames());
             return names;
         }
     }

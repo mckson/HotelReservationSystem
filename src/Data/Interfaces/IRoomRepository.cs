@@ -6,7 +6,7 @@ namespace HotelReservation.Data.Interfaces
 {
     public interface IRoomRepository : IRepository<RoomEntity>
     {
-        IEnumerable<string> GetAllRoomsGetAllUniqueNames();
+        IEnumerable<string> GetAllRoomsUniqueNames();
 
         IEnumerable<string> GetHotelRoomsUniqueNames(Guid hotelId);
 

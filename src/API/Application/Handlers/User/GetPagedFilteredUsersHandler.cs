@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Castle.Core.Internal;
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Queries.User;
 using HotelReservation.API.Models.ResponseModels;
@@ -8,6 +9,7 @@ using HotelReservation.Data.Constants;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -42,14 +44,19 @@ namespace HotelReservation.API.Application.Handlers.User
 
             var userEntities = await _userRepository.Find(usersFilterExpression, validPaginationFilter);
 
-            if (!userEntities.Any())
+            var filteredOverRolesUserEntities = userEntities.AsEnumerable().Where(user =>
+                (request.UsersFilter.Roles.IsNullOrEmpty() || request.UsersFilter.Roles.All(roleName =>
+                    user.Roles.Any(role =>
+                        roleName.IsNullOrEmpty() || role.StartsWith(roleName, StringComparison.InvariantCultureIgnoreCase)))));
+
+            if (!filteredOverRolesUserEntities.Any())
             {
                 throw new BusinessException(
                     "No users, that are satisfy filter parameters, were created yet",
                     ErrorStatus.NotFound);
             }
 
-            var userResponses = _mapper.Map<IEnumerable<UserResponseModel>>(userEntities);
+            var userResponses = _mapper.Map<IEnumerable<UserResponseModel>>(filteredOverRolesUserEntities);
 
             var pagedResponse = PaginationHelper.CreatePagedResponseModel(
                 userResponses,

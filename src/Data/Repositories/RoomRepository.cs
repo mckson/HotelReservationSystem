@@ -13,7 +13,7 @@ namespace HotelReservation.Data.Repositories
         {
         }
 
-        public IEnumerable<string> GetAllRoomsGetAllUniqueNames()
+        public IEnumerable<string> GetAllRoomsUniqueNames()
         {
             var names = DbSet.Where(room => room.Name != null && room.Name != string.Empty).Select(room => room.Name).Distinct();
             return names;
