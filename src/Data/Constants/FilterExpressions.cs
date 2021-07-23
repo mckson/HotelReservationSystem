@@ -64,5 +64,18 @@ namespace HotelReservation.Data.Constants
                             user.FirstName.StartsWith(usersFilter.FirstName)) &&
                            (usersFilter.LastName.IsNullOrEmpty() || user.LastName.StartsWith(usersFilter.LastName));
         }
+
+        public static Expression<Func<ServiceEntity, bool>> GetServiceFilterExpression(ServicesFilter servicesFilter)
+        {
+            return service => service.HotelId.Value.Equals(servicesFilter.HotelId);
+        }
+
+        public static Expression<Func<RoomViewEntity, bool>> GetRoomViewEntityFilterExpression(
+            RoomViewsFilter roomViewsFilter)
+        {
+            return roomView => roomViewsFilter.Name.IsNullOrEmpty() ||
+                               roomView.Name.StartsWith(
+                                   roomViewsFilter.Name);
+        }
     }
 }

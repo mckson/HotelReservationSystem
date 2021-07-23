@@ -71,13 +71,10 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<BasePagedResponseModel<RoomResponseModel>>> GetRoomsAsync(
             [FromQuery] PaginationFilter paginationFilter, [FromQuery] RoomsFilter roomsFilter)
         {
-            var route = Request.Path.Value;
-
             var query = new GetPagedFilteredRoomsQuery
                 {
                     PaginationFilter = paginationFilter,
                     RoomsFilter = roomsFilter,
-                    Route = route
                 };
 
             var response = await _mediator.Send(query);

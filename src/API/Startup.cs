@@ -70,7 +70,6 @@ namespace HotelReservation.API
             services.AddSingleton(provider => new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new MappingApiModelsProfile(provider.GetService<IUriService>()));
-                cfg.AddProfile(new ModelEntityMapperProfile());
             }).CreateMapper());
             // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddDataAndBusiness();

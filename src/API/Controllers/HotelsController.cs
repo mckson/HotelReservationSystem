@@ -53,13 +53,10 @@ namespace HotelReservation.API.Controllers
         [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
         public async Task<BasePagedResponseModel<HotelResponseModel>> GetHotelsAsync([FromQuery] PaginationFilter paginationFilter, [FromQuery] HotelsFilter hotelsFilter)
         {
-            var route = Request.Path.Value;
-
             var query = new GetPagedFilteredHotelsQuery
             {
                 PaginationFilter = paginationFilter,
                 HotelsFilter = hotelsFilter,
-                Route = route
             };
 
             var response = await _mediator.Send(query);
@@ -197,10 +194,25 @@ namespace HotelReservation.API.Controllers
         /// <response code="200">Returns collection of names</response>
         [AllowAnonymous]
         [HttpGet("Names")]
-        [ProducesResponseType(typeof(IEnumerable<HotelBriefResponse>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<HotelBriefResponse>>> GetAllHotelUniqueNames()
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<string>>> GetAllHotelUniqueNames()
         {
             var query = new GetAllHotelUniqueNamesQuery();
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Method that allow to retrieve all unique cities where hotels are located
+        /// </summary>
+        /// <returns>Collection of city names</returns>
+        /// <response code="200">Returns collection of cities</response>
+        [AllowAnonymous]
+        [HttpGet("Cities")]
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<string>>> GetAllHotelUniqueCities()
+        {
+            var query = new GetAllHotelUniqueCitiesQuery();
             var response = await _mediator.Send(query);
             return Ok(response);
         }

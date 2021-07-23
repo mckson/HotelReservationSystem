@@ -9,5 +9,7 @@ namespace HotelReservation.Data.Interfaces
         Task<HotelEntity> GetAsync(string name);
 
         IEnumerable<string> GetAllHotelsUniqueNames();
+
+        IEnumerable<string> GetAllHotelsUniqueCities();
     }
 }

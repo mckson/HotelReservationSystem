@@ -87,8 +87,8 @@ namespace HotelReservation.Data.Repositories
         public async Task<IQueryable<UserEntity>> Find(Expression<Func<UserEntity, bool>> predicate, PaginationFilter paginationFilter)
         {
             var users = _userManager.Users.Where(predicate)
-                .Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize.Value)
-                .Take(paginationFilter.PageSize.Value);
+                .Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize)
+                .Take(paginationFilter.PageSize);
 
             foreach (var user in users)
             {

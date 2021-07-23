@@ -21,8 +21,16 @@ namespace HotelReservation.Data.Repositories
 
         public IEnumerable<string> GetAllHotelsUniqueNames()
         {
-            var names = DbSet.Where(hotel => hotel.Name != null && hotel.Name != string.Empty).Select(hotel => hotel.Name).Distinct();
+            var names = DbSet.Where(hotel => hotel.Name != null && hotel.Name != string.Empty)
+                .Select(hotel => hotel.Name).Distinct();
             return names;
+        }
+
+        public IEnumerable<string> GetAllHotelsUniqueCities()
+        {
+            var cities = DbSet.Where(hotel => hotel.Location.City != null && hotel.Location.City != string.Empty)
+                .Select(hotel => hotel.Location.City);
+            return cities;
         }
     }
 }

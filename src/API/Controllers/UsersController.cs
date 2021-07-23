@@ -54,13 +54,10 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<BasePagedResponseModel<UserResponseModel>>> GetPagedAndFilteredUsersAsync(
             [FromQuery] PaginationFilter paginationFilter, [FromQuery] UsersFilter usersFilter)
         {
-            var route = Request.Path.Value;
-
             var query = new GetPagedFilteredUsersQuery
             {
                 PaginationFilter = paginationFilter,
                 UsersFilter = usersFilter,
-                Route = route
             };
 
             var response = await _mediator.Send(query);
