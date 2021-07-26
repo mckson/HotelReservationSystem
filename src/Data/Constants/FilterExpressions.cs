@@ -44,6 +44,7 @@ namespace HotelReservation.Data.Constants
                         (rr.Reservation.DateOut > filter.DateIn && rr.Reservation.DateOut <= filter.DateOut)))) &&
                 (!filter.ManagerId.HasValue || hotel.HotelUsers.Any(hu => hu.UserId == filter.ManagerId.Value)) &&
                 (filter.Name.IsNullOrEmpty() || hotel.Name.StartsWith(filter.Name)) &&
+                (filter.Country.IsNullOrEmpty() || hotel.Location.Country.StartsWith(filter.Country)) &&
                 (filter.City.IsNullOrEmpty() || hotel.Location.City.StartsWith(filter.City)) &&
                 (!filter.MinDeposit.HasValue || hotel.Deposit >= filter.MinDeposit.Value) &&
                 (!filter.MaxDeposit.HasValue || hotel.Deposit <= filter.MaxDeposit.Value) &&

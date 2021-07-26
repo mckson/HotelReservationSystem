@@ -15,6 +15,8 @@ namespace HotelReservation.Data.Filters
 
         public string City { get; set; }
 
+        public string Country { get; set; }
+
         public double? MinDeposit { get; set; }
 
         public double? MaxDeposit { get; set; }

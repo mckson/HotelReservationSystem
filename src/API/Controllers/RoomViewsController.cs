@@ -41,6 +41,20 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<RoomViewFilterResponseModel>>> GetSearchRoomViewsAsync(
+            [FromQuery] RoomViewsFilter roomViewsFilter)
+        {
+            var query = new GetRoomViewSearchVariantsQuery
+            {
+                RoomViewsFilter = roomViewsFilter
+            };
+
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<RoomViewResponseModel>> GetRoomViewByIdAsync(Guid id)
         {

@@ -42,6 +42,15 @@ namespace HotelReservation.API
                     options => options.MapFrom(model =>
                         model.Images.Select(image =>
                             uriService.GetResourceUri(Endpoints.HotelImages, image.Id.ToString()))));
+            CreateMap<HotelEntity, HotelFilterResponseModel>()
+                .ForMember(
+                    response => response.City,
+                    opt => opt.MapFrom(model =>
+                        model.Location.City))
+                .ForMember(
+                    response => response.Country,
+                    options => options.MapFrom(model =>
+                        model.Location.Country));
             CreateMap<HotelEntity, HotelBriefResponse>();
             #endregion
 
@@ -116,6 +125,7 @@ namespace HotelReservation.API
             CreateMap<CreateRoomViewCommand, RoomViewEntity>();
             CreateMap<UpdateRoomViewCommand, RoomViewEntity>();
             CreateMap<RoomViewEntity, RoomViewResponseModel>();
+            CreateMap<RoomViewEntity, RoomViewFilterResponseModel>();
             #endregion
 
             #region ReservationMaps

@@ -187,32 +187,17 @@ namespace HotelReservation.API.Controllers
             return Ok(response);
         }
 
-        /// <summary>
-        /// Method that allow to retrieve all hotel unique names
-        /// </summary>
-        /// <returns>Collection of names</returns>
-        /// <response code="200">Returns collection of names</response>
         [AllowAnonymous]
-        [HttpGet("Names")]
-        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<string>>> GetAllHotelUniqueNames()
+        [HttpGet("Search")]
+        [ProducesResponseType(typeof(IEnumerable<HotelBriefResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<HotelFilterResponseModel>>> GetSearchHotelsAsync([FromQuery] HotelsFilter hotelsFilter)
         {
-            var query = new GetAllHotelUniqueNamesQuery();
-            var response = await _mediator.Send(query);
-            return Ok(response);
-        }
+            var query = new GetHotelSearchVariantsQuery
+            {
+                HotelsFilter = hotelsFilter
+            };
 
-        /// <summary>
-        /// Method that allow to retrieve all unique cities where hotels are located
-        /// </summary>
-        /// <returns>Collection of city names</returns>
-        /// <response code="200">Returns collection of cities</response>
-        [AllowAnonymous]
-        [HttpGet("Cities")]
-        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<string>>> GetAllHotelUniqueCities()
-        {
-            var query = new GetAllHotelUniqueCitiesQuery();
             var response = await _mediator.Send(query);
             return Ok(response);
         }
