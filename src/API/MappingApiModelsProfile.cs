@@ -42,7 +42,7 @@ namespace HotelReservation.API
                     options => options.MapFrom(model =>
                         model.Images.Select(image =>
                             uriService.GetResourceUri(Endpoints.HotelImages, image.Id.ToString()))));
-            CreateMap<HotelEntity, HotelFilterResponseModel>()
+            CreateMap<HotelEntity, HotelPromptResponseModel>()
                 .ForMember(
                     response => response.City,
                     opt => opt.MapFrom(model =>
@@ -71,6 +71,7 @@ namespace HotelReservation.API
             CreateMap<CreateServiceCommand, ServiceEntity>();
             CreateMap<ServiceEntity, ServiceResponseModel>();
             CreateMap<ServiceEntity, ServiceBriefResponseModel>();
+            CreateMap<ServiceEntity, ServicePromptResponseModel>();
             #endregion
 
             #region RoomMaps
@@ -105,11 +106,12 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.Views,
                     options => options.MapFrom(entity =>
-                        entity.RoomViews.Select(rv => rv.RoomView)))
+                        entity.RoomViews.Select(rv => rv.RoomView)));
+
+            CreateMap<RoomEntity, RoomPromptResponseModel>()
                 .ForMember(
-                    response => response.IsLocked,
-                    options => options.MapFrom(entity =>
-                        entity.UnlockTime.HasValue && DateTime.UtcNow < entity.UnlockTime));
+                    response => response.Number,
+                    options => options.MapFrom(entity => entity.RoomNumber));
             CreateMap<RoomEntity, RoomBriefResponseModel>();
             #endregion
 
@@ -125,7 +127,7 @@ namespace HotelReservation.API
             CreateMap<CreateRoomViewCommand, RoomViewEntity>();
             CreateMap<UpdateRoomViewCommand, RoomViewEntity>();
             CreateMap<RoomViewEntity, RoomViewResponseModel>();
-            CreateMap<RoomViewEntity, RoomViewFilterResponseModel>();
+            CreateMap<RoomViewEntity, RoomViewPromptResponseModel>();
             #endregion
 
             #region ReservationMaps
@@ -203,6 +205,7 @@ namespace HotelReservation.API
                 .ForMember(
                     response => response.Hotels,
                     opt => opt.MapFrom(model => model.HotelUsers.Select(hu => hu.HotelId)));
+            CreateMap<UserEntity, UserPromptResponseModel>();
             #endregion
         }
 

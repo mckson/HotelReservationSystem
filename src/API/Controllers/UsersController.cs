@@ -65,6 +65,21 @@ namespace HotelReservation.API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Policy = Policies.AdminPermission)]
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<UserPromptResponseModel>>> GetUserSearchVariantsAsync(
+            [FromQuery] UsersFilter usersFilter)
+        {
+            var query = new GetUserSearchVariantsQuery
+            {
+                UsersFilter = usersFilter
+            };
+
+            var response = await _mediator.Send(query);
+
+            return Ok(response);
+        }
+
         [Authorize]
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<UserResponseModel>> GetUserByIdAsync(Guid id)

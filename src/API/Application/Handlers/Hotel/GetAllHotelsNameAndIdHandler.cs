@@ -12,8 +12,8 @@ namespace HotelReservation.API.Application.Handlers.Hotel
 {
     public class GetAllHotelsNameAndIdHandler : IRequestHandler<GetAllHotelsNameAndIdQuery, IEnumerable<HotelBriefResponse>>
     {
-        private IHotelRepository _hotelRepository;
-        private IMapper _mapper;
+        private readonly IHotelRepository _hotelRepository;
+        private readonly IMapper _mapper;
 
         public GetAllHotelsNameAndIdHandler(IHotelRepository hotelRepository, IMapper mapper)
         {

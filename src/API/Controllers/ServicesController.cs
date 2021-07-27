@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -40,6 +41,20 @@ namespace HotelReservation.API.Controllers
                 PaginationFilter = paginationFilter,
                 ServicesFilter = servicesFilter
             };
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<ServicePromptResponseModel>>> GetServiceSearchVariantsAsync(
+            [FromQuery] ServicesFilter servicesFilter)
+        {
+            var query = new GetServiceSearchVariantsQuery
+            {
+                ServicesFilter = servicesFilter
+            };
+
             var response = await _mediator.Send(query);
             return Ok(response);
         }

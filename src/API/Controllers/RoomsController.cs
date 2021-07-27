@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -34,39 +35,6 @@ namespace HotelReservation.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("Names")]
-        public async Task<IActionResult> GetAllRoomUniqueNames()
-        {
-            var query = new GetAllRoomUniqueNamesQuery();
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("Names/{hotelId:guid}")]
-        public async Task<IActionResult> GetAllRoomUniqueNames(Guid hotelId)
-        {
-            var query = new GetHotelRoomsUniqueNamesQuery
-            {
-                HotelId = hotelId
-            };
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("Numbers/{hotelId:guid}")]
-        public async Task<IActionResult> GetAllRoomUniqueNumbers(Guid hotelId)
-        {
-            var query = new GetHotelRoomsUniqueNumbersQuery()
-            {
-                HotelId = hotelId
-            };
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
-
-        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<BasePagedResponseModel<RoomResponseModel>>> GetRoomsAsync(
             [FromQuery] PaginationFilter paginationFilter, [FromQuery] RoomsFilter roomsFilter)
@@ -79,6 +47,21 @@ namespace HotelReservation.API.Controllers
 
             var response = await _mediator.Send(query);
 
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Search")]
+        [ProducesResponseType(typeof(IEnumerable<RoomPromptResponseModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<RoomPromptResponseModel>>> GetSearchRoomsAsync([FromQuery] RoomsFilter roomsFilter)
+        {
+            var query = new GetRoomSearchVariantsQuery
+            {
+                RoomsFilter = roomsFilter
+            };
+
+            var response = await _mediator.Send(query);
             return Ok(response);
         }
 

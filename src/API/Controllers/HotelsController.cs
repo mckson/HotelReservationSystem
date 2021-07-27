@@ -189,9 +189,9 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("Search")]
-        [ProducesResponseType(typeof(IEnumerable<HotelBriefResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<HotelPromptResponseModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<HotelFilterResponseModel>>> GetSearchHotelsAsync([FromQuery] HotelsFilter hotelsFilter)
+        public async Task<ActionResult<IEnumerable<HotelPromptResponseModel>>> GetSearchHotelsAsync([FromQuery] HotelsFilter hotelsFilter)
         {
             var query = new GetHotelSearchVariantsQuery
             {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace HotelReservation.API.Application.Queries.Hotel
 {
-    public class GetHotelSearchVariantsQuery : IRequest<IEnumerable<HotelFilterResponseModel>>
+    public class GetHotelSearchVariantsQuery : IRequest<IEnumerable<HotelPromptResponseModel>>
     {
         public HotelsFilter HotelsFilter { get; set; }
     }

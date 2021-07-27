@@ -68,7 +68,9 @@ namespace HotelReservation.Data.Constants
 
         public static Expression<Func<ServiceEntity, bool>> GetServiceFilterExpression(ServicesFilter servicesFilter)
         {
-            return service => service.HotelId.Value.Equals(servicesFilter.HotelId);
+            return service =>
+                service.HotelId.Value.Equals(servicesFilter.HotelId) &&
+                (servicesFilter.Name.IsNullOrEmpty() || service.Name.StartsWith(servicesFilter.Name));
         }
 
         public static Expression<Func<RoomViewEntity, bool>> GetRoomViewEntityFilterExpression(

@@ -42,7 +42,7 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("Search")]
-        public async Task<ActionResult<IEnumerable<RoomViewFilterResponseModel>>> GetSearchRoomViewsAsync(
+        public async Task<ActionResult<IEnumerable<RoomViewPromptResponseModel>>> GetSearchRoomViewsAsync(
             [FromQuery] RoomViewsFilter roomViewsFilter)
         {
             var query = new GetRoomViewSearchVariantsQuery

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace HotelReservation.API.Application.Handlers.Hotel
 {
-    public class GetHotelSearchVariantsHandler : IRequestHandler<GetHotelSearchVariantsQuery, IEnumerable<HotelFilterResponseModel>>
+    public class GetHotelSearchVariantsHandler : IRequestHandler<GetHotelSearchVariantsQuery, IEnumerable<HotelPromptResponseModel>>
     {
         private readonly IHotelRepository _hotelRepository;
         private readonly IMapper _mapper;
@@ -25,7 +25,7 @@ namespace HotelReservation.API.Application.Handlers.Hotel
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<HotelFilterResponseModel>> Handle(GetHotelSearchVariantsQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<HotelPromptResponseModel>> Handle(GetHotelSearchVariantsQuery request, CancellationToken cancellationToken)
         {
             var paginationFilter = new PaginationFilter(
                 PaginationValuesForSearchVariants.PageNumber,
@@ -37,7 +37,7 @@ namespace HotelReservation.API.Application.Handlers.Hotel
             var searchVariants =
                 await Task.FromResult(_hotelRepository.Find(hotelFilterExpression, paginationFilter));
 
-            var searchVariantsResponses = _mapper.Map<IEnumerable<HotelFilterResponseModel>>(searchVariants);
+            var searchVariantsResponses = _mapper.Map<IEnumerable<HotelPromptResponseModel>>(searchVariants);
 
             return searchVariantsResponses;
         }
