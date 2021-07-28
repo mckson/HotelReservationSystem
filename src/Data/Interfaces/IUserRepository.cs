@@ -24,7 +24,9 @@ namespace HotelReservation.Data.Interfaces
 
         Task<IQueryable<UserEntity>> Find(
             Expression<Func<UserEntity, bool>> predicate,
-            PaginationFilter paginationFilter);
+            PaginationFilter paginationFilter,
+            string orderByPropertyName = null,
+            bool? isDescending = null);
 
         Task<bool> CreateAsync(UserEntity entity);
 

@@ -37,21 +37,20 @@ namespace HotelReservation.API.Application.Handlers.User
             var validPaginationFilter =
                 new PaginationFilter(request.PaginationFilter.PageNumber, request.PaginationFilter.PageSize);
 
-            var userEntities = await _userRepository.Find(usersFilterExpression, validPaginationFilter);
+            var userEntities = await _userRepository.Find(
+                usersFilterExpression,
+                validPaginationFilter,
+                request.UsersFilter.PropertyName,
+                request.UsersFilter.IsDescending);
 
-            var filteredOverRolesUserEntities = userEntities.AsEnumerable().Where(user =>
-                (request.UsersFilter.Roles.IsNullOrEmpty() || request.UsersFilter.Roles.All(roleName =>
-                    user.Roles.Any(role =>
-                        roleName.IsNullOrEmpty() || role.StartsWith(roleName, StringComparison.InvariantCultureIgnoreCase)))));
-
-            if (!filteredOverRolesUserEntities.Any())
+            if (!userEntities.Any())
             {
                 throw new BusinessException(
                     "No users, that are satisfy filter parameters, were created yet",
                     ErrorStatus.NotFound);
             }
 
-            var userResponses = _mapper.Map<IEnumerable<UserResponseModel>>(filteredOverRolesUserEntities);
+            var userResponses = _mapper.Map<IEnumerable<UserResponseModel>>(userEntities);
 
             var pagedResponse = PaginationHelper.CreatePagedResponseModel(
                 userResponses,

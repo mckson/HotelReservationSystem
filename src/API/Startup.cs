@@ -9,6 +9,8 @@ using HotelReservation.Business;
 using HotelReservation.Business.Constants;
 using HotelReservation.Business.Interfaces;
 using HotelReservation.Data;
+using HotelReservation.Data.Helpers;
+using HotelReservation.Data.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +38,8 @@ namespace HotelReservation.API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped(typeof(ISortHelper<>), typeof(SortHelper<>));
+
             services.AddDbContext<HotelContext>(opt =>
             {
                 opt.UseLazyLoadingProxies();

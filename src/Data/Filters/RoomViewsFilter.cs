@@ -1,6 +1,6 @@
 ﻿namespace HotelReservation.Data.Filters
 {
-    public class RoomViewsFilter
+    public class RoomViewsFilter : OrderByFilter
     {
         public string Name { get; set; }
     }

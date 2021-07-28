@@ -32,7 +32,11 @@ namespace HotelReservation.API.Application.Handlers.Service
             var validPaginationFilter =
                 new PaginationFilter(request.PaginationFilter.PageNumber, request.PaginationFilter.PageSize);
 
-            var serviceEntities = _serviceRepository.Find(servicesFilterExpression, validPaginationFilter);
+            var serviceEntities = _serviceRepository.Find(
+                servicesFilterExpression,
+                validPaginationFilter,
+                request.ServicesFilter.PropertyName,
+                request.ServicesFilter.IsDescending);
 
             var serviceResponses = _mapper.Map<IEnumerable<ServiceResponseModel>>(serviceEntities);
 

@@ -5,8 +5,8 @@ namespace HotelReservation.Data.Repositories
 {
     public class RoomViewRepository : BaseRepository<RoomViewEntity>, IRoomViewRepository
     {
-        public RoomViewRepository(HotelContext context)
-            : base(context)
+        public RoomViewRepository(HotelContext context, ISortHelper<RoomViewEntity> sortHelper)
+            : base(context, sortHelper)
         {
         }
     }

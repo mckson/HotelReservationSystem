@@ -1,4 +1,5 @@
-﻿using HotelReservation.Data.Entities;
+﻿using Castle.Core.Internal;
+using HotelReservation.Data.Entities;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ namespace HotelReservation.Data.Repositories
         where TEntity : Entity
     {
         private readonly HotelContext _db;
+        private readonly ISortHelper<TEntity> _sortHelper;
 
-        protected BaseRepository(HotelContext context)
+        protected BaseRepository(HotelContext context, ISortHelper<TEntity> sortHelper)
         {
             _db = context;
             DbSet = context.Set<TEntity>();
+            _sortHelper = sortHelper;
         }
 
         protected DbSet<TEntity> DbSet { get; }
@@ -43,10 +46,20 @@ namespace HotelReservation.Data.Repositories
             return DbSet.Where(predicate);
         }
 
-        public IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, PaginationFilter paginationFilter)
+        public IQueryable<TEntity> Find(
+            Expression<Func<TEntity, bool>> predicate,
+            PaginationFilter paginationFilter,
+            string orderByPropertyName = null,
+            bool? isDescending = null)
         {
-            return DbSet.Where(predicate).Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize)
+            var filteredEntities = DbSet.Where(predicate);
+            var orderedEntities = orderByPropertyName != null
+                ? _sortHelper.ApplySort(filteredEntities, orderByPropertyName, isDescending ?? false)
+                : filteredEntities;
+            var pagedEntities = orderedEntities.Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize)
                 .Take(paginationFilter.PageSize);
+
+            return pagedEntities;
         }
 
         public async Task<TEntity> CreateAsync(TEntity entity)

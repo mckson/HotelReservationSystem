@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HotelReservation.Data.Filters
 {
-    public class HotelsFilter
+    public class HotelsFilter : OrderByFilter
     {
         public Guid? ManagerId { get; set; }
 

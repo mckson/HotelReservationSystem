@@ -1,17 +1,14 @@
 ﻿using HotelReservation.Data.Entities;
 using HotelReservation.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace HotelReservation.Data.Repositories
 {
     public class LocationRepository : BaseRepository<LocationEntity>, ILocationRepository
     {
-        public LocationRepository(HotelContext context)
-            : base(context)
+        public LocationRepository(HotelContext context, ISortHelper<LocationEntity> sortHelper)
+            : base(context, sortHelper)
         {
         }
 

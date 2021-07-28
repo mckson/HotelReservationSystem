@@ -32,7 +32,11 @@ namespace HotelReservation.API.Application.Handlers.RoomView
             var validPaginationFilter =
                 new PaginationFilter(request.PaginationFilter.PageNumber, request.PaginationFilter.PageSize);
 
-            var roomViewEntities = _roomViewRepository.Find(roomViewFilterExpression, validPaginationFilter);
+            var roomViewEntities = _roomViewRepository.Find(
+                roomViewFilterExpression,
+                validPaginationFilter,
+                request.RoomViewsFilter.PropertyName,
+                request.RoomViewsFilter.IsDescending);
 
             var roomViewResponses = _mapper.Map<IEnumerable<RoomViewResponseModel>>(roomViewEntities);
 

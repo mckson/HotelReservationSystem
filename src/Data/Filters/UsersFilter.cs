@@ -2,7 +2,7 @@
 
 namespace HotelReservation.Data.Filters
 {
-    public class UsersFilter
+    public class UsersFilter : OrderByFilter
     {
         public string Email { get; set; }
 
@@ -10,6 +10,6 @@ namespace HotelReservation.Data.Filters
 
         public string LastName { get; set; }
 
-        public IEnumerable<string> Roles { get; set; }
+        public string Role { get; set; }
     }
 }

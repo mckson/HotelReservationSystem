@@ -2,7 +2,7 @@
 
 namespace HotelReservation.Data.Filters
 {
-    public class ServicesFilter
+    public class ServicesFilter : OrderByFilter
     {
         public Guid HotelId { get; set; }
 

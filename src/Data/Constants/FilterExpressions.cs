@@ -2,8 +2,11 @@
 using HotelReservation.Data.Entities;
 using HotelReservation.Data.Filters;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelReservation.Data.Constants
 {
@@ -32,7 +35,15 @@ namespace HotelReservation.Data.Constants
                 (!filter.MaxArea.HasValue || room.Area <= filter.MaxArea.Value) &&
                 (!filter.MinPrice.HasValue || room.Price >= filter.MinPrice.Value) &&
                 (!filter.MaxPrice.HasValue || room.Price <= filter.MaxPrice.Value) &&
-                (!filter.Smoking || room.Smoking) && (!filter.Parking || room.Parking);
+                (!filter.Smoking || room.Smoking) && (!filter.Parking || room.Parking) &&
+                (filter.RoomViews.IsNullOrEmpty() ||
+                 room.RoomViews.Select(roomView => roomView.RoomView.Name)
+                     .Where(viewName => filter.RoomViews.Contains(viewName)).Distinct().Count() ==
+                 filter.RoomViews.Distinct().Count()) &&
+                (filter.Facilities.IsNullOrEmpty() ||
+                 room.Facilities.Select(facility => facility.Name)
+                     .Where(facilityName => filter.Facilities.Contains(facilityName)).Distinct().Count() ==
+                 filter.Facilities.Count());
         }
 
         public static Expression<Func<HotelEntity, bool>> GetHotelFilterExpression(HotelsFilter filter)
@@ -49,10 +60,15 @@ namespace HotelReservation.Data.Constants
                 (!filter.MinDeposit.HasValue || hotel.Deposit >= filter.MinDeposit.Value) &&
                 (!filter.MaxDeposit.HasValue || hotel.Deposit <= filter.MaxDeposit.Value) &&
                 (!filter.MinFloors.HasValue || hotel.NumberFloors >= filter.MinFloors.Value) &&
-                (!filter.MaxFloors.HasValue || hotel.NumberFloors <= filter.MaxFloors.Value);
+                (!filter.MaxFloors.HasValue || hotel.NumberFloors <= filter.MaxFloors.Value) &&
+                (filter.Services.IsNullOrEmpty() ||
+                 hotel.Services.Select(service => service.Name)
+                     .Where(serviceName => filter.Services.Contains(serviceName)).Distinct().Count() ==
+                 filter.Services.Distinct().Count());
         }
 
-        public static Expression<Func<ReservationEntity, bool>> GetReservationFilterExpression(ReservationsFilter reservationsFilter)
+        public static Expression<Func<ReservationEntity, bool>> GetReservationFilterExpression(
+            ReservationsFilter reservationsFilter)
         {
             return reservation => reservationsFilter.Email.IsNullOrEmpty() ||
                                   reservation.Email == reservationsFilter.Email;
