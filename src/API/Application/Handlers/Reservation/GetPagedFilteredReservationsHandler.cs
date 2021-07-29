@@ -2,7 +2,6 @@
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Queries.Reservation;
 using HotelReservation.API.Models.ResponseModels;
-using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Constants;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
@@ -16,17 +15,14 @@ namespace HotelReservation.API.Application.Handlers.Reservation
     public class GetPagedFilteredReservationsHandler : IRequestHandler<GetPagedFilteredReservationsQuery, BasePagedResponseModel<ReservationBriefResponseModel>>
     {
         private readonly IReservationRepository _reservationRepository;
-        private readonly IUriService _uriService;
         private readonly IMapper _mapper;
 
         public GetPagedFilteredReservationsHandler(
             IReservationRepository reservationRepository,
-            IMapper mapper,
-            IUriService uriService)
+            IMapper mapper)
         {
             _reservationRepository = reservationRepository;
             _mapper = mapper;
-            _uriService = uriService;
         }
 
         public async Task<BasePagedResponseModel<ReservationBriefResponseModel>> Handle(GetPagedFilteredReservationsQuery request, CancellationToken cancellationToken)
@@ -34,20 +30,21 @@ namespace HotelReservation.API.Application.Handlers.Reservation
             var reservationsFilter = FilterExpressions.GetReservationFilterExpression(request.ReservationsFilter);
             var countOfFilteredReservations = await _reservationRepository.GetCountAsync(reservationsFilter);
 
-            request.PaginationFilter.PageSize ??= countOfFilteredReservations;
-            var validPaginationFilter = new PaginationFilter(request.PaginationFilter.PageNumber, request.PaginationFilter.PageSize.Value);
+            var validPaginationFilter = new PaginationFilter(request.PaginationFilter.PageNumber, request.PaginationFilter.PageSize);
 
             var reservationEntities =
-                _reservationRepository.Find(reservationsFilter, validPaginationFilter);
+                _reservationRepository.Find(
+                    reservationsFilter,
+                    validPaginationFilter,
+                    request.ReservationsFilter.PropertyName,
+                    request.ReservationsFilter.IsDescending);
 
             var reservationResponses = _mapper.Map<IEnumerable<ReservationBriefResponseModel>>(reservationEntities);
 
             var pagedResponse = PaginationHelper.CreatePagedResponseModel(
                 reservationResponses,
                 validPaginationFilter,
-                countOfFilteredReservations,
-                _uriService,
-                request.Route);
+                countOfFilteredReservations);
 
             return pagedResponse;
         }

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HotelReservation.API.Controllers
@@ -38,17 +39,29 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<BasePagedResponseModel<RoomResponseModel>>> GetRoomsAsync(
             [FromQuery] PaginationFilter paginationFilter, [FromQuery] RoomsFilter roomsFilter)
         {
-            var route = Request.Path.Value;
-
             var query = new GetPagedFilteredRoomsQuery
                 {
                     PaginationFilter = paginationFilter,
                     RoomsFilter = roomsFilter,
-                    Route = route
                 };
 
             var response = await _mediator.Send(query);
 
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Search")]
+        [ProducesResponseType(typeof(IEnumerable<RoomPromptResponseModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<RoomPromptResponseModel>>> GetSearchRoomsAsync([FromQuery] RoomsFilter roomsFilter)
+        {
+            var query = new GetRoomSearchVariantsQuery
+            {
+                RoomsFilter = roomsFilter
+            };
+
+            var response = await _mediator.Send(query);
             return Ok(response);
         }
 

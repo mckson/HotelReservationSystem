@@ -25,10 +25,6 @@ namespace HotelReservation.API.Models.ResponseModels
 
         public bool Parking { get; set; }
 
-        public bool IsLocked { get; set; }
-
-        public Guid? LockedByUserId { get; set; }
-
         public Guid HotelId { get; set; }
 
         public IEnumerable<Guid> Reservations { get; set; }

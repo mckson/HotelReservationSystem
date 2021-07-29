@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
+using Castle.Core.Internal;
 using HotelReservation.API.Application.Helpers;
 using HotelReservation.API.Application.Queries.User;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
-using HotelReservation.Business.Interfaces;
 using HotelReservation.Data.Constants;
 using HotelReservation.Data.Filters;
 using HotelReservation.Data.Interfaces;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -19,16 +20,13 @@ namespace HotelReservation.API.Application.Handlers.User
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-        private readonly IUriService _uriService;
 
         public GetPagedFilteredUsersHandler(
             IUserRepository userRepository,
-            IMapper mapper,
-            IUriService uriService)
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
-            _uriService = uriService;
         }
 
         public async Task<BasePagedResponseModel<UserResponseModel>> Handle(GetPagedFilteredUsersQuery request, CancellationToken cancellationToken)
@@ -36,11 +34,14 @@ namespace HotelReservation.API.Application.Handlers.User
             var usersFilterExpression = FilterExpressions.GetUserFilterExpression(request.UsersFilter);
             var countOfFilteredUsers = await _userRepository.GetCountAsync(usersFilterExpression);
 
-            request.PaginationFilter.PageSize ??= countOfFilteredUsers;
             var validPaginationFilter =
-                new PaginationFilter(request.PaginationFilter.PageNumber, request.PaginationFilter.PageSize.Value);
+                new PaginationFilter(request.PaginationFilter.PageNumber, request.PaginationFilter.PageSize);
 
-            var userEntities = await _userRepository.Find(usersFilterExpression, validPaginationFilter);
+            var userEntities = await _userRepository.Find(
+                usersFilterExpression,
+                validPaginationFilter,
+                request.UsersFilter.PropertyName,
+                request.UsersFilter.IsDescending);
 
             if (!userEntities.Any())
             {
@@ -54,9 +55,7 @@ namespace HotelReservation.API.Application.Handlers.User
             var pagedResponse = PaginationHelper.CreatePagedResponseModel(
                 userResponses,
                 validPaginationFilter,
-                countOfFilteredUsers,
-                _uriService,
-                request.Route);
+                countOfFilteredUsers);
 
             return pagedResponse;
         }

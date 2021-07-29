@@ -3,6 +3,7 @@ using HotelReservation.API.Application.Queries.Service;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Business.Constants;
+using HotelReservation.Data.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,11 +24,37 @@ namespace HotelReservation.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Method that allow retrieve a page of service models
+        /// </summary>
+        /// <param name="paginationFilter">Filter for pages (page's number, page's size)</param>
+        /// <param name="servicesFilter">Filter over services (hotel's id, service's name etc)</param>
+        /// <returns>BasePagedResponseModel with ServiceResponseModels as content</returns>
         [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServiceResponseModel>>> GetAllServices()
+        public async Task<ActionResult<BasePagedResponseModel<ServiceResponseModel>>> GetPagedFilteredServicesAsync(
+            [FromQuery] PaginationFilter paginationFilter,
+            [FromQuery] ServicesFilter servicesFilter)
         {
-            var query = new GetAllServicesQuery();
+            var query = new GetPagedFilteredServicesQuery
+            {
+                PaginationFilter = paginationFilter,
+                ServicesFilter = servicesFilter
+            };
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<ServicePromptResponseModel>>> GetServiceSearchVariantsAsync(
+            [FromQuery] ServicesFilter servicesFilter)
+        {
+            var query = new GetServiceSearchVariantsQuery
+            {
+                ServicesFilter = servicesFilter
+            };
+
             var response = await _mediator.Send(query);
             return Ok(response);
         }

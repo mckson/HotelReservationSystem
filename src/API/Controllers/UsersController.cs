@@ -54,13 +54,25 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<BasePagedResponseModel<UserResponseModel>>> GetPagedAndFilteredUsersAsync(
             [FromQuery] PaginationFilter paginationFilter, [FromQuery] UsersFilter usersFilter)
         {
-            var route = Request.Path.Value;
-
             var query = new GetPagedFilteredUsersQuery
             {
                 PaginationFilter = paginationFilter,
                 UsersFilter = usersFilter,
-                Route = route
+            };
+
+            var response = await _mediator.Send(query);
+
+            return Ok(response);
+        }
+
+        [Authorize(Policy = Policies.AdminPermission)]
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<UserPromptResponseModel>>> GetUserSearchVariantsAsync(
+            [FromQuery] UsersFilter usersFilter)
+        {
+            var query = new GetUserSearchVariantsQuery
+            {
+                UsersFilter = usersFilter
             };
 
             var response = await _mediator.Send(query);

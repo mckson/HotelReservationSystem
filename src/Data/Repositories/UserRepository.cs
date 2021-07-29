@@ -15,10 +15,12 @@ namespace HotelReservation.Data.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly UserManager<UserEntity> _userManager;
+        private readonly ISortHelper<UserEntity> _sortHelper;
 
-        public UserRepository(UserManager<UserEntity> userManager)
+        public UserRepository(UserManager<UserEntity> userManager, ISortHelper<UserEntity> sortHelper)
         {
             _userManager = userManager;
+            _sortHelper = sortHelper;
         }
 
         public async Task<int> GetCountAsync(Expression<Func<UserEntity, bool>> predicate)
@@ -84,18 +86,25 @@ namespace HotelReservation.Data.Repositories
             return users;
         }
 
-        public async Task<IQueryable<UserEntity>> Find(Expression<Func<UserEntity, bool>> predicate, PaginationFilter paginationFilter)
+        public async Task<IQueryable<UserEntity>> Find(
+            Expression<Func<UserEntity, bool>> predicate,
+            PaginationFilter paginationFilter,
+            string orderByPropertyName = null,
+            bool? isDescending = null)
         {
-            var users = _userManager.Users.Where(predicate)
-                .Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize.Value)
-                .Take(paginationFilter.PageSize.Value);
+            var filteredUsers = _userManager.Users.Where(predicate);
+            var orderedUsers = orderByPropertyName != null
+                ? _sortHelper.ApplySort(filteredUsers, orderByPropertyName, isDescending ?? false)
+                : filteredUsers;
+            var pagedUsers = orderedUsers.Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize)
+                .Take(paginationFilter.PageSize);
 
-            foreach (var user in users)
+            foreach (var user in pagedUsers)
             {
                 await GetRolesForUserAsync(user);
             }
 
-            return users;
+            return pagedUsers;
         }
 
         public async Task<bool> CreateAsync(UserEntity user)

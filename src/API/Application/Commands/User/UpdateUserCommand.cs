@@ -27,7 +27,7 @@ namespace HotelReservation.API.Application.Commands.User
 
         public string LastName { get; set; }
 
-        public bool IsRegistered { get; set; }
+        public bool IsRegistered { get; set; } = true;
 
         public List<string> Roles { get; set; }
 

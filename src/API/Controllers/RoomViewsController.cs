@@ -3,6 +3,7 @@ using HotelReservation.API.Application.Queries.RoomView;
 using HotelReservation.API.Models.ResponseModels;
 using HotelReservation.Business;
 using HotelReservation.Business.Constants;
+using HotelReservation.Data.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,9 +26,30 @@ namespace HotelReservation.API.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoomViewResponseModel>>> GetAllRoomViewsAsync()
+        public async Task<ActionResult<IEnumerable<RoomViewResponseModel>>> GetPagedFilteredRoomViewsAsync(
+            [FromQuery] PaginationFilter paginationFilter,
+            [FromQuery] RoomViewsFilter roomViewsFilter)
         {
-            var query = new GetAllRoomViewsQuery();
+            var query = new GetPagedFilteredRoomViewsQuery
+            {
+                PaginationFilter = paginationFilter,
+                RoomViewsFilter = roomViewsFilter
+            };
+
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<RoomViewPromptResponseModel>>> GetSearchRoomViewsAsync(
+            [FromQuery] RoomViewsFilter roomViewsFilter)
+        {
+            var query = new GetRoomViewSearchVariantsQuery
+            {
+                RoomViewsFilter = roomViewsFilter
+            };
+
             var response = await _mediator.Send(query);
             return Ok(response);
         }

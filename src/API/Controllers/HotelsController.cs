@@ -53,13 +53,10 @@ namespace HotelReservation.API.Controllers
         [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
         public async Task<BasePagedResponseModel<HotelResponseModel>> GetHotelsAsync([FromQuery] PaginationFilter paginationFilter, [FromQuery] HotelsFilter hotelsFilter)
         {
-            var route = Request.Path.Value;
-
             var query = new GetPagedFilteredHotelsQuery
             {
                 PaginationFilter = paginationFilter,
                 HotelsFilter = hotelsFilter,
-                Route = route
             };
 
             var response = await _mediator.Send(query);
@@ -186,6 +183,21 @@ namespace HotelReservation.API.Controllers
         public async Task<ActionResult<IEnumerable<HotelBriefResponse>>> GetAllHotelsNameAndIdAsync()
         {
             var query = new GetAllHotelsNameAndIdQuery();
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Search")]
+        [ProducesResponseType(typeof(IEnumerable<HotelPromptResponseModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<HotelPromptResponseModel>>> GetSearchHotelsAsync([FromQuery] HotelsFilter hotelsFilter)
+        {
+            var query = new GetHotelSearchVariantsQuery
+            {
+                HotelsFilter = hotelsFilter
+            };
+
             var response = await _mediator.Send(query);
             return Ok(response);
         }

@@ -5,8 +5,8 @@ namespace HotelReservation.Data.Repositories
 {
     public class ServiceRepository : BaseRepository<ServiceEntity>, IServiceRepository
     {
-        public ServiceRepository(HotelContext context)
-            : base(context)
+        public ServiceRepository(HotelContext context, ISortHelper<ServiceEntity> sortHelper)
+            : base(context, sortHelper)
         {
         }
     }

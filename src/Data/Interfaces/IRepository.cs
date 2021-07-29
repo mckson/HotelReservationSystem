@@ -18,7 +18,11 @@ namespace HotelReservation.Data.Interfaces
 
         IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
 
-        IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, PaginationFilter paginationFilter);
+        IQueryable<TEntity> Find(
+            Expression<Func<TEntity, bool>> predicate,
+            PaginationFilter paginationFilter,
+            string orderByPropertyName = null,
+            bool? isDescending = null);
 
         Task<TEntity> CreateAsync(TEntity entity);
 

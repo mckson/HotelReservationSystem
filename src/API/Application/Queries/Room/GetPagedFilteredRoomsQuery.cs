@@ -9,7 +9,5 @@ namespace HotelReservation.API.Application.Queries.Room
         public PaginationFilter PaginationFilter { get; set; }
 
         public RoomsFilter RoomsFilter { get; set; }
-
-        public string Route { get; set; }
     }
 }
